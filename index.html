@@ -60,12 +60,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .hdr-lvl{font-family:var(--fd);font-size:9px;color:var(--cy);letter-spacing:2px}
 .pb{font-size:7px;padding:2px 5px;border-radius:3px;letter-spacing:1px;font-family:var(--fm)}
 .pb.s{border:1px solid var(--gd);color:var(--g)}.pb.d{border:1px solid var(--y);color:var(--y)}.pb.u{border:1px solid var(--o);color:var(--o)}.pb.x{border:1px solid var(--r);color:var(--r);animation:bl .8s infinite}
-.hdr-timer{font-family:var(--fd);font-size:12px;color:var(--g);letter-spacing:2px}
-
-.goals{display:flex;gap:2px;padding:2px 8px;background:var(--c);border-bottom:1px solid var(--b);flex-shrink:0;font-size:7px}
-.gl{flex:1;text-align:center;padding:2px;border-radius:2px;color:var(--td);border:1px solid transparent}
-.gl.ok{color:var(--g);border-color:rgba(0,255,136,.15)}.gl.bad{color:var(--r);border-color:rgba(255,51,68,.15);animation:bl 1.5s infinite}
-.gl b{font-family:var(--fd);font-size:9px;font-weight:700;display:block}
+.hdr-timer{font-family:var(--fd);font-size:12px;color:var(--g);letter-spacing:2px;min-width:44px;text-align:right}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pfab{width:26px;height:26px;border-radius:50%;border:1px solid var(--b);background:var(--c);color:var(--tm);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;-webkit-user-select:none;user-select:none}
+.pfab:active{transform:scale(.92);border-color:var(--cy);color:var(--cy)}
 
 .prob{padding:3px 10px;background:var(--c);border-bottom:1px solid var(--b);flex-shrink:0;display:flex;align-items:center;gap:5px;font-size:8px}
 .ptag{padding:2px 7px;border-radius:3px;font-family:var(--fd);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
@@ -82,17 +80,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .vc.hl{background:var(--c)}
 @keyframes pb{0%,100%{opacity:1}50%{opacity:.25}}
 .vl{font-size:7px;letter-spacing:2px;color:var(--td);text-transform:uppercase}
+.vg{font-size:6px;opacity:.7;letter-spacing:1px;text-transform:none}
 .vv{font-family:var(--fd);font-size:32px;font-weight:900;color:var(--g);line-height:1;transition:color .4s}
 .vc.w .vv{color:var(--y)}.vc.cr .vv{color:var(--r)}
 .vs .vc .vv{opacity:1}
 .vu{font-size:7px;color:var(--td);margin-left:2px}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b);border-bottom:1px solid var(--b);flex-shrink:0}
 .vs .vc{padding:3px 10px}.vs .vv{font-size:18px;font-weight:700}.vs .vl{font-size:6px}
-
-.lac-strip{display:none}
-.lac-strip-lbl{font-size:6px;letter-spacing:1px;color:var(--td);width:26px;line-height:1.3;flex-shrink:0;text-transform:uppercase}
-#lac-canvas{flex:1;height:26px;display:block;min-width:0}
-.lac-strip-val{font-family:var(--fd);font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;transition:color .4s}
 
 #wave{width:100%;height:24px;display:block;background:var(--bg);border-bottom:1px solid var(--b);flex-shrink:0}
 
@@ -170,26 +164,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .pause-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.06)}
 .pause-btn.quit{color:var(--r);border-color:var(--r)}
 .pause-btn.quit:hover{color:var(--r);background:rgba(255,80,100,.06)}
-.pfab{position:absolute;top:4px;right:8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--b);background:var(--c);color:var(--tm);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:30}
-
-.modal{position:fixed;background:var(--c);border:1px solid var(--cy);padding:8px;border-radius:6px;z-index:50;width:180px;box-shadow:0 4px 12px rgba(0,0,0,.5);display:none}
-.modal.v{display:flex;flex-direction:column}
-.modal.fio2.v,.modal.peep.v{display:block}
-.modal.diag{bottom:110px;left:50%;transform:translateX(-50%)}
-.modal.fio2{bottom:110px;left:10px}
-.modal.peep{bottom:110px;right:10px}
-.modal.fio2,.modal.peep{width:160px}
-.modal button{margin:4px 2px;padding:6px 8px;font-size:10px;cursor:pointer;background:var(--b);border:1px solid var(--cy);color:var(--cy);border-radius:4px;font-family:var(--fm);-webkit-user-select:none;user-select:none}
-.modal.fio2>button:not(.modal-x),.modal.peep>button:not(.modal-x){display:inline-block;width:calc(50% - 4px);margin:2px;padding:6px 4px}
-.modal button:active{background:rgba(0,255,136,.1)}
-.modal-title{font-family:var(--fd);font-size:8px;letter-spacing:2px;color:var(--cy);text-align:center;margin-bottom:4px;text-transform:uppercase}
-.modal-val{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--g);text-align:center;margin:2px 0 4px}
-.modal button.wide{width:calc(100% - 4px);margin-top:2px}
-.modal-x{align-self:flex-end;padding:2px 6px;margin:-2px -2px 2px 0;font-size:10px;line-height:1;background:transparent;border:1px solid var(--b);color:var(--td);border-radius:4px;cursor:pointer;width:auto!important;display:block!important}
-@media (max-width:480px){
-.modal{width:140px;left:50%!important;right:auto!important;transform:translateX(-50%)!important;bottom:100px!important}
-.modal.fio2,.modal.peep{left:50%!important;right:auto!important;transform:translateX(-50%)!important}
-}
+.modal-backdrop{display:none;position:fixed;left:0;right:0;top:0;z-index:49;background:rgba(3,6,8,.35)}
+.modal-backdrop.v{display:block}
+.modal{position:fixed;background:var(--c);border:1px solid var(--cy);padding:10px 12px;border-radius:8px;z-index:50;width:152px;box-shadow:0 4px 16px rgba(0,0,0,.55);display:none;gap:2px}
+.modal.v{display:flex;flex-direction:column;align-items:stretch}
+.modal.diag{width:180px}
+.modal button{margin:0;padding:8px 6px;font-size:10px;cursor:pointer;background:var(--b);border:1px solid var(--cy);color:var(--cy);border-radius:5px;font-family:var(--fd);font-weight:700;-webkit-user-select:none;user-select:none;transition:background .12s,border-color .12s}
+.modal button:active{background:rgba(0,255,136,.12);border-color:var(--g);color:var(--g)}
+.modal-title{font-family:var(--fd);font-size:8px;letter-spacing:2px;color:var(--cy);text-align:center;margin-bottom:2px;text-transform:uppercase}
+.modal-val{font-family:var(--fd);font-size:26px;font-weight:900;color:var(--g);text-align:center;line-height:1;margin:2px 0 6px}
+.modal-row{display:flex;gap:6px}
+.modal-row button{flex:1;min-width:0;padding:10px 4px}
+.modal button.wide{width:100%;margin-top:2px;font-family:var(--fm);font-weight:400;font-size:10px;padding:8px 6px}
 </style>
 </head>
 <body>
@@ -224,32 +210,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <div class="screen gs" id="scr-gs">
   <div class="hdr">
     <div class="hdr-left"><div class="hdr-lvl" id="hdr-lvl">LVL 1</div><div class="pb s" id="hdr-phase">STABLE</div></div>
-    <div class="hdr-timer" id="hdr-timer">00:00</div>
-  </div>
-  <div class="goals">
-    <div class="gl ok" id="gl-map"><b id="gv-map">MAP</b>&gt;65</div>
-    <div class="gl ok" id="gl-spo2"><b id="gv-spo2">SpO₂</b>&gt;90</div>
-    <div class="gl" id="gl-lac"><b id="gv-lac">Lac</b><span data-i18n="goal.lacTrend">trend</span></div>
+    <div class="hdr-right">
+      <div class="hdr-timer" id="hdr-timer">00:00</div>
+      <button class="pfab" id="pfab" onclick="G.togglePause()">⏸</button>
+    </div>
   </div>
   <div class="prob"><div class="ptag ok" id="prob1">STABLE</div><div class="ptag sec ok" id="prob2" style="display:none"></div></div>
   <div class="vp">
-    <div class="vc" id="vc-map"><div class="vl">MAP</div><div><span class="vv" id="v-map">72</span><span class="vu"> mmHg</span></div></div>
-    <div class="vc" id="vc-spo2"><div class="vl">SpO₂</div><div><span class="vv" id="v-spo2">96</span><span class="vu"> %</span></div></div>
+    <div class="vc" id="vc-map"><div class="vl">MAP <span class="vg" data-i18n="vital.mapGoal">≥65</span></div><div><span class="vv" id="v-map">72</span><span class="vu"> mmHg</span></div></div>
+    <div class="vc" id="vc-spo2"><div class="vl">SpO₂ <span class="vg" data-i18n="vital.spo2Goal">≥90</span></div><div><span class="vv" id="v-spo2">96</span><span class="vu"> %</span></div></div>
   </div>
   <div class="vs">
     <div class="vc" id="vc-hr"><div class="vl">HR</div><div><span class="vv" id="v-hr">82</span><span class="vu"> bpm</span></div></div>
     <div class="vc" id="vc-rr"><div class="vl">RR</div><div><span class="vv" id="v-rr">16</span><span class="vu"> /min</span></div></div>
   </div>
-  <div class="lac-strip">
-    <div class="lac-strip-lbl" data-i18n="lac.trend">Lac trend</div>
-    <canvas id="lac-canvas"></canvas>
-    <span class="lac-strip-val" id="lac-cur">1.2</span>
-  </div>
   <canvas id="wave"></canvas>
   <div class="log" id="log"><span class="lx" id="lx" onclick="G.toggleLog()">▼</span></div>
   <div class="ast" id="ast"></div>
   <div class="ag" id="ag"></div>
-  <button class="pfab" id="pfab" onclick="G.togglePause()">⏸</button>
 </div>
 
 <!-- === OVERLAYS === -->
@@ -264,26 +242,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 </div>
 <div class="ov ov-dim" id="ov-end"><div id="ov-end-c"></div></div>
 
+<div class="modal-backdrop" id="modal-backdrop" onclick="G.dismissModals()"></div>
 <div class="modal diag" id="modal-diag">
-  <button class="modal-x" onclick="G.closeModals()">✕</button>
   <div class="modal-title" data-i18n="modal.diagnostics">Diagnostics</div>
   <button class="wide" data-i18n="modal.pocus" onclick="G.runDiagFromMenu('pocus')">🩺 Lung POCUS</button>
   <button class="wide" data-i18n="modal.echo" onclick="G.runDiagFromMenu('echo')">❤️ Echo</button>
   <button class="wide" data-i18n="modal.labs" onclick="G.runDiagFromMenu('labs')">🧪 Labs</button>
 </div>
 <div class="modal fio2" id="modal-fio2">
-  <button class="modal-x" onclick="G.confirmFio2()">✕</button>
   <div class="modal-title">FiO₂</div>
   <div class="modal-val" id="modal-fio2-val">40%</div>
-  <button onclick="G.adjustFio2(-1)">−10%</button>
-  <button onclick="G.adjustFio2(1)">+10%</button>
+  <div class="modal-row">
+    <button onclick="G.adjustFio2(-1)">−10%</button>
+    <button onclick="G.adjustFio2(1)">+10%</button>
+  </div>
 </div>
 <div class="modal peep" id="modal-peep">
-  <button class="modal-x" onclick="G.confirmPeep()">✕</button>
   <div class="modal-title">PEEP</div>
   <div class="modal-val" id="modal-peep-val">8</div>
-  <button onclick="G.adjustPeep(-1)">−2</button>
-  <button onclick="G.adjustPeep(1)">+2</button>
+  <div class="modal-row">
+    <button onclick="G.adjustPeep(-1)">−2</button>
+    <button onclick="G.adjustPeep(1)">+2</button>
+  </div>
 </div>
 </div>
 
@@ -713,7 +693,8 @@ class Game {
     if(lv.events<1)this.evts=[];
 
     // UI
-    this._wCtx=null;this._lacCtx=null;
+    this._wCtx=null;
+    this._waveLt=0;
     this.$('hdr-lvl').textContent=t('lvl.header',{n:lv.id});
     this.$('log').innerHTML='<span class="lx" id="lx" onclick="G.toggleLog()">▼</span>';
     this.$('app').classList.remove('alarm');
@@ -731,10 +712,10 @@ class Game {
 
   buildActions(){
     const g=this.$('ag');
-    const ab=(cls,icon,label,sub,onclick,id,cdid)=>{
+    const ab=(cls,icon,label,sub,onclick,id,cdid,subid)=>{
       let h='<button class="ab '+cls+'"'+(id?' id="'+id+'"':'')+' onclick="'+onclick+'">';
       h+='<span class="bi">'+icon+'</span><span>'+label+'</span>';
-      if(sub)h+='<span class="bl">'+sub+'</span>';
+      if(sub||subid)h+='<span class="bl"'+(subid?' id="'+subid+'"':'')+'>'+(sub||'')+'</span>';
       if(cdid)h+='<div class="co" id="'+cdid+'"></div>';
       h+='</button>';return h;
     };
@@ -742,21 +723,95 @@ class Game {
     h+=ab('ah','💧',t('action.fluids'),t('action.fluidsSub'),'G.doFluids()','bf','cf');
     h+=ab('ah','⚡',t('action.norepi'),t('action.norepiSub'),'G.toggleNE()','bn');
     h+=ab('ah','💊',t('action.diuretic'),t('action.diureticSub'),'G.doDiuretic()','bd','cdi');
-    h+=ab('av','O₂',t('action.fio2'),null,'G.showFio2Modal()');
-    h+=ab('av','P',t('action.peep'),null,'G.showPeepModal()');
+    h+=ab('av','O₂',t('action.fio2'),'40%','G.showFio2Modal()','bfio2',null,'bfio2-sub');
+    h+=ab('av','P',t('action.peep'),'8','G.showPeepModal()','bpeep',null,'bpeep-sub');
     h+=ab('av','🫧',t('action.suction'),t('action.suctionSub'),'G.doSuction()','bs','cs');
     h+=ab('al','🩸',t('action.abg'),t('action.abgSub'),'G.orderABG()','ba','ca');
-    h+=ab('ad','🔬',t('action.diagnostics'),t('action.diagnosticsSub'),'G.showDiagMenu()');
+    h+=ab('ad','🔬',t('action.diagnostics'),null,'G.showDiagMenu()','bdiag');
     g.innerHTML=h;
   }
 
-  closeModals(){document.querySelectorAll('.modal').forEach(el=>el.classList.remove('v'));}
+  closeModals(){
+    document.querySelectorAll('.modal').forEach(el=>el.classList.remove('v'));
+    const b=this.$('modal-backdrop');
+    if(b)b.classList.remove('v');
+    this.updateModalButtons();
+  }
 
-  showDiagMenu(){if(this._bl())return;this.closeModals();this.$('modal-diag').classList.add('v');}
+  updateModalButtons(){
+    const f=this.$('bfio2'),p=this.$('bpeep'),d=this.$('bdiag');
+    if(f)f.classList.toggle('to',!!this.$('modal-fio2')?.classList.contains('v'));
+    if(p)p.classList.toggle('to',!!this.$('modal-peep')?.classList.contains('v'));
+    if(d)d.classList.toggle('to',!!this.$('modal-diag')?.classList.contains('v'));
+  }
 
-  showFio2Modal(){if(this._bl())return;this.closeModals();this._modalFio2Start=this.p.fio2;this.$('modal-fio2-val').textContent=this.p.fio2+'%';this.$('modal-fio2').classList.add('v');}
+  _showBackdrop(){
+    const b=this.$('modal-backdrop'),ag=this.$('ag');
+    if(!b)return;
+    if(ag){
+      const h=window.innerHeight-ag.getBoundingClientRect().top;
+      b.style.bottom=h+'px';
+    }else b.style.bottom='0';
+    b.classList.add('v');
+  }
 
-  showPeepModal(){if(this._bl())return;this.closeModals();this._modalPeepStart=this.p.peep;this.$('modal-peep-val').textContent=this.p.peep;this.$('modal-peep').classList.add('v');}
+  positionModal(modalId,btnId){
+    const modal=this.$(modalId),btn=this.$(btnId),app=this.$('app');
+    if(!modal||!btn||!app)return;
+    const appR=app.getBoundingClientRect();
+    const br=btn.getBoundingClientRect();
+    const mw=modal.classList.contains('diag')?180:152;
+    modal.style.width=Math.min(mw,appR.width-16)+'px';
+    const mW=modal.offsetWidth||mw;
+    let left=br.left+br.width/2-mW/2;
+    left=Math.max(appR.left+8,Math.min(left,appR.right-mW-8));
+    modal.style.left=left+'px';
+    modal.style.right='auto';
+    modal.style.bottom=(window.innerHeight-br.top+8)+'px';
+    modal.style.transform='none';
+  }
+
+  _openModal(modalId,btnId){
+    const m=this.$(modalId);
+    m.classList.add('v');
+    this._showBackdrop();
+    this.positionModal(modalId,btnId);
+    this.updateModalButtons();
+  }
+
+  dismissModals(){
+    if(this.$('modal-fio2')?.classList.contains('v')){this.confirmFio2();return;}
+    if(this.$('modal-peep')?.classList.contains('v')){this.confirmPeep();return;}
+    this.closeModals();
+  }
+
+  showDiagMenu(){
+    if(this._bl())return;
+    const m=this.$('modal-diag');
+    if(m.classList.contains('v')){this.closeModals();return;}
+    this.closeModals();
+    this._openModal('modal-diag','bdiag');
+  }
+
+  showFio2Modal(){
+    if(this._bl())return;
+    const m=this.$('modal-fio2');
+    if(m.classList.contains('v')){this.confirmFio2();return;}
+    this.closeModals();
+    this._modalFio2Start=this.p.fio2;
+    this.$('modal-fio2-val').textContent=this.p.fio2+'%';
+    this._openModal('modal-fio2','bfio2');
+  }
+
+  showPeepModal(){
+    if(this._bl())return;
+    const m=this.$('modal-peep');
+    if(m.classList.contains('v')){this.confirmPeep();return;}
+    this.closeModals();
+    this._modalPeepStart=this.p.peep;
+    this.$('modal-peep-val').textContent=this.p.peep;
+    this._openModal('modal-peep','bpeep');
+  }
 
   adjustFio2(dir){if(dir>0&&this.p.fio2>=100)return;if(dir<0&&this.p.fio2<=21)return;this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.$('modal-fio2-val').textContent=this.p.fio2+'%';}
 
@@ -775,7 +830,12 @@ class Game {
       const d=(now-this.lt)/1000;this.lt=now;this.acc+=d;
       while(this.acc>=1){this.acc-=1;this.tick();}
     }else{this.lt=now;}
-    if(this.running&&!this.over)this.drawWave();
+    if(this.running&&!this.over){
+      if(!this._waveLt)this._waveLt=now;
+      const wdt=this.paused?0:Math.min(0.05,(now-this._waveLt)/1000);
+      this._waveLt=now;
+      this.drawWave(wdt);
+    }else{this._waveLt=now;}
     requestAnimationFrame(()=>this.renderLoop());
   }
 
@@ -818,12 +878,6 @@ class Game {
     const pe=this.$('prob1');pe.textContent=prob.p.label;pe.className='ptag '+prob.p.id;
     const se=this.$('prob2');if(prob.s){se.textContent=prob.s.label;se.className='ptag sec '+prob.s.id;se.style.display='';}else se.style.display='none';
     vs('vc-map',prob.p.id==='hemo'?'hl':'');vs('vc-spo2',prob.p.id==='oxy'?'hl':'');
-    // Goals
-    const gm=p.MAP>=65,gs=p.SpO2>=90;
-    this.$('gl-map').className='gl'+(gm?' ok':' bad');this.$('gl-spo2').className='gl'+(gs?' ok':' bad');
-    this.$('gv-map').textContent='MAP:'+p.MAP;this.$('gv-spo2').textContent='SpO₂:'+p.SpO2;
-    this.$('gv-lac').textContent='Lac:'+p.lacTrend;
-    this.$('gl-lac').className='gl'+(p.lacTrend==='↓'?' ok':p.lacTrend==='↑'?' bad':'');
     // Phase
     const ph=this.$('hdr-phase');ph.textContent=p.phaseName;ph.className='pb '+p.phaseCSS;
     // Timer
@@ -838,6 +892,9 @@ class Game {
     if(p.compliance<35)tags.push({t:'Crs:'+Math.round(p.compliance),c:p.compliance<25?'cr':'hi'});
     this.$('ast').innerHTML=tags.map(t=>'<span class="at '+t.c+'">'+t.t+'</span>').join('');
     if(this.$('bn'))this.$('bn').classList.toggle('to',p.norepiOn);
+    const fs=this.$('bfio2-sub');if(fs)fs.textContent=p.fio2+'%';
+    const ps=this.$('bpeep-sub');if(ps)ps.textContent=String(p.peep);
+    this.updateModalButtons();
   }
 
   _colorVital(id,c){const e=this.$(id);if(e)e.style.color=c;}
@@ -849,30 +906,6 @@ class Game {
   _hrColor(v){if(v<=100)return'var(--g)';if(v<=130)return'var(--y)';return'var(--r)';}
 
   _rrColor(v){if(v<=22)return'var(--g)';if(v<=28)return'var(--y)';return'var(--r)';}
-
-  _lacColor(v){if(v<2)return'var(--g)';if(v<=2.5)return'var(--y)';return'var(--r)';}
-
-  drawLacGraph(){
-    const c=this.$('lac-canvas');if(!c)return;
-    if(!this._lacCtx){const r=c.parentElement.getBoundingClientRect();c.width=Math.max(120,r.width*2);c.height=52;this._lacCtx=c.getContext('2d');}
-    const ctx=this._lacCtx,w=c.width,h=c.height,p=this.p;
-    const hist=p.lacHist.length?p.lacHist.slice():[p.lactate];
-    while(hist.length<2)hist.unshift(hist[0]);
-    const yMin=Math.max(0.5,Math.min(...hist)-0.3);
-    const yMax=Math.max(3,Math.max(...hist)+0.5,2.5);
-    const yR=yMax-yMin||1;
-    const xStep=w/(hist.length-1);
-    ctx.fillStyle='#0a1019';ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle='rgba(255,204,0,.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-    const refY=h-((2.5-yMin)/yR)*h;ctx.beginPath();ctx.moveTo(0,refY);ctx.lineTo(w,refY);ctx.stroke();ctx.setLineDash([]);
-    const tr=p.lacTrend;
-    ctx.strokeStyle=tr==='↓'?'#00ff88':tr==='↑'?'#ff3344':'#ffcc00';
-    ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();
-    hist.forEach((v,i)=>{const x=i*xStep,y=h-((v-yMin)/yR)*h;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-    ctx.stroke();
-    const lx=hist.length-1,ly=h-((hist[lx]-yMin)/yR)*h;
-    ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(lx*xStep,ly,3,0,Math.PI*2);ctx.fill();
-  }
 
   // -- Alerts (contextual only) --
   _thr(k,i){if(!this.at[k]||this.gt-this.at[k]>=i){this.at[k]=this.gt;return true;}return false;}
@@ -968,33 +1001,94 @@ class Game {
 
   goLS(){this.hideOv('ov-end');this.showLevelSelect();}
 
-  // -- Waveform --
-  drawWave(){
-    const c=this.$('wave');if(!this._wCtx){const r=c.parentElement.getBoundingClientRect();c.width=r.width*2;c.height=48;this._wCtx=c.getContext('2d');this._wX=0;this._wD=new Float32Array(c.width);}
-    const ctx=this._wCtx,w=c.width,h=c.height;
+  // -- Waveform (continuous scroll, HR-synced, P–QRS–T morphology) --
+  _ecgSample(phase){
+    let y=0;
+    if(phase>=0.05&&phase<0.13){
+      const t=(phase-0.05)/0.08;
+      y+=0.13*Math.sin(t*Math.PI);
+    }
+    if(phase>=0.19&&phase<0.29){
+      const t=(phase-0.19)/0.10;
+      if(t<0.14)y+=-0.16*Math.sin(t/0.14*Math.PI);
+      else if(t<0.48)y+=1.0*Math.sin((t-0.14)/0.34*Math.PI);
+      else y+=-0.24*Math.sin((t-0.48)/0.52*Math.PI);
+    }
+    if(phase>=0.43&&phase<0.60){
+      const t=(phase-0.43)/0.17;
+      y+=0.32*Math.sin(t*Math.PI);
+    }
+    return y;
+  }
+
+  drawWave(dt){
+    const c=this.$('wave');
+    if(!this._wCtx){
+      const r=c.parentElement.getBoundingClientRect();
+      c.width=Math.max(1,Math.floor(r.width*2));
+      c.height=48;
+      this._wCtx=c.getContext('2d');
+      this._wX=0;
+      this._wSub=0;
+      this._wD=new Float32Array(c.width);
+    }
+    const ctx=this._wCtx,w=c.width,h=c.height,mid=h*0.5;
     const hr=Math.max(40,Math.min(200,this.p.HR));
-    const speedFactor=hr/60;
-    const steps=Math.max(1,Math.round(3*speedFactor));
-    const pr=180;
+    const beatsVisible=3.2;
+    const samplesPerBeat=Math.max(140,Math.round(w/beatsVisible));
+    const samplesPerSec=(hr/60)*samplesPerBeat;
+
+    this._wSub+=dt*samplesPerSec;
+    let steps=Math.floor(this._wSub);
+    this._wSub-=steps;
+    if(steps>samplesPerBeat)steps=samplesPerBeat;
+
     for(let i=0;i<steps;i++){
-      const n=(this._wX%pr)/pr;
-      let y=0;
-      if(n<.08)y=Math.sin(n/.08*Math.PI)*.12;
-      else if(n>.15&&n<.18)y=-.1;
-      else if(n>.18&&n<.22)y=Math.sin((n-.18)/.04*Math.PI)*.85;
-      else if(n>.22&&n<.26)y=-.15;
-      else if(n>.3&&n<.42)y=Math.sin((n-.3)/.12*Math.PI)*.2;
-      y+=(Math.random()-.5)*.02;
+      const phase=(this._wX%samplesPerBeat)/samplesPerBeat;
+      let y=this._ecgSample(phase);
+      y+=(Math.random()-0.5)*0.006;
       this._wD[this._wX%w]=y;
       this._wX++;
     }
-    ctx.fillStyle='#030608';ctx.fillRect(0,0,w,h);ctx.strokeStyle='rgba(0,255,136,.05)';ctx.lineWidth=.5;for(let g=0;g<h;g+=12){ctx.beginPath();ctx.moveTo(0,g);ctx.lineTo(w,g);ctx.stroke();}
-    ctx.strokeStyle='#00ff88';ctx.lineWidth=1.5;ctx.shadowColor='#00ff88';ctx.shadowBlur=3;ctx.beginPath();const hX=this._wX%w,mid=h*.5;for(let px=0;px<w;px++){const dX=(hX+px+1)%w,v=this._wD[dX]||0,dY=mid-v*mid*.8;if((w-px)<25)continue;px===0?ctx.moveTo(dX,dY):ctx.lineTo(dX,dY);}ctx.stroke();ctx.shadowBlur=0;
+
+    ctx.fillStyle='#030608';
+    ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='rgba(0,255,136,.05)';
+    ctx.lineWidth=0.5;
+    for(let g=0;g<h;g+=12){
+      ctx.beginPath();ctx.moveTo(0,g);ctx.lineTo(w,g);ctx.stroke();
+    }
+    const beatPx=samplesPerBeat;
+    ctx.strokeStyle='rgba(0,255,136,.03)';
+    for(let gx=0;gx<w;gx+=Math.round(beatPx/5)){
+      ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,h);ctx.stroke();
+    }
+
+    ctx.strokeStyle='#00ff88';
+    ctx.lineWidth=1.4;
+    ctx.shadowColor='#00ff88';
+    ctx.shadowBlur=2;
+    ctx.beginPath();
+    for(let px=0;px<w;px++){
+      const idx=(this._wX-w+px+w*1000)%w;
+      const py=mid-(this._wD[idx]||0)*mid*0.72;
+      if(px===0)ctx.moveTo(px,py);
+      else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
   }
 }
 
 const G=new Game();
-window.addEventListener('resize',()=>{G._wCtx=null;G._lacCtx=null;});
+window.addEventListener('resize',()=>{
+  G._wCtx=null;
+  ['modal-fio2:bfio2','modal-peep:bpeep','modal-diag:bdiag'].forEach(pair=>{
+    const [mid,bid]=pair.split(':');
+    if(G.$(mid)?.classList.contains('v'))G.positionModal(mid,bid);
+  });
+  if(G.$('modal-backdrop')?.classList.contains('v'))G._showBackdrop();
+});
 </script>
 </body>
 </html>
