@@ -28,6 +28,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-footer{position:absolute;bottom:16px;left:16px;right:16px;text-align:center;border-top:1px solid rgba(0,221,255,.2);padding-top:12px}
 .mm-credit{font-size:11px;font-weight:600;color:var(--cy);letter-spacing:1px;margin-bottom:6px}
 .mm-disclaimer{font-size:8px;color:var(--tm);line-height:1.4;max-width:280px;margin:0 auto}
+.lang-toggle{display:flex;gap:8px;margin-bottom:4px}
+.lang-btn{padding:6px 14px;border:1px solid var(--b);background:var(--c);color:var(--td);font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;border-radius:4px;transition:all .15s;-webkit-user-select:none;user-select:none;min-height:36px}
+.lang-btn.on{border-color:var(--cy);color:var(--cy);background:rgba(0,221,255,.08)}
+.lang-btn:active{transform:scale(.95)}
 
 /* === LEVEL SELECT === */
 .ls{background:var(--bg);padding:16px;overflow-y:auto}
@@ -80,9 +84,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .vl{font-size:7px;letter-spacing:2px;color:var(--td);text-transform:uppercase}
 .vv{font-family:var(--fd);font-size:32px;font-weight:900;color:var(--g);line-height:1;transition:color .4s}
 .vc.w .vv{color:var(--y)}.vc.cr .vv{color:var(--r)}
+.vs .vc .vv{opacity:1}
 .vu{font-size:7px;color:var(--td);margin-left:2px}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b);border-bottom:1px solid var(--b);flex-shrink:0}
-.vs .vc{padding:3px 10px}.vs .vv{font-size:18px;font-weight:700;opacity:.7}.vs .vl{font-size:6px}
+.vs .vc{padding:3px 10px}.vs .vv{font-size:18px;font-weight:700}.vs .vl{font-size:6px}
+
+.lac-strip{display:none}
+.lac-strip-lbl{font-size:6px;letter-spacing:1px;color:var(--td);width:26px;line-height:1.3;flex-shrink:0;text-transform:uppercase}
+#lac-canvas{flex:1;height:26px;display:block;min-width:0}
+.lac-strip-val{font-family:var(--fd);font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;transition:color .4s}
 
 #wave{width:100%;height:24px;display:block;background:var(--bg);border-bottom:1px solid var(--b);flex-shrink:0}
 
@@ -188,21 +198,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <!-- === MAIN MENU === -->
 <div class="screen mm active" id="scr-mm">
   <div class="mm-title">ICU CRISIS</div>
-  <div class="mm-sub">CLINICAL SIMULATION</div>
-  <div class="mm-desc">Diagnose and manage ICU patients under time pressure. No diagnosis spoilers. Pure clinical reasoning.</div>
+  <div class="mm-sub" data-i18n="menu.sub">CLINICAL SIMULATION</div>
+  <div class="mm-desc" data-i18n="menu.desc">Diagnose and manage ICU patients under time pressure. No diagnosis spoilers. Pure clinical reasoning.</div>
   <div class="mm-divider"></div>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lang-en" onclick="G.setLang('en')">EN</button>
+    <button class="lang-btn" id="lang-es" onclick="G.setLang('es')">ES</button>
+  </div>
   <div class="mm-stats" id="mm-stats"></div>
-  <button class="mm-btn" onclick="G.showLevelSelect()">PLAY</button>
+  <button class="mm-btn" data-i18n="menu.play" onclick="G.showLevelSelect()">PLAY</button>
   <div class="mm-footer">
-    <div class="mm-credit">Made by Christopher Godines</div>
-    <div class="mm-disclaimer">Medical simulation for educational purposes only. Not for clinical decision-making.</div>
+    <div class="mm-credit" data-i18n="menu.credit">Made by Christopher Godines</div>
+    <div class="mm-disclaimer" data-i18n="menu.disclaimer">Medical simulation for educational purposes only. Not for clinical decision-making.</div>
   </div>
 </div>
 
 <!-- === LEVEL SELECT SCREEN === -->
 <div class="screen ls" id="scr-ls">
   <div class="ls-title">ICU CRISIS</div>
-  <div class="ls-sub">CLINICAL SIMULATION</div>
+  <div class="ls-sub" data-i18n="menu.sub">CLINICAL SIMULATION</div>
   <div id="ls-tiers"></div>
 </div>
 
@@ -215,7 +229,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <div class="goals">
     <div class="gl ok" id="gl-map"><b id="gv-map">MAP</b>&gt;65</div>
     <div class="gl ok" id="gl-spo2"><b id="gv-spo2">SpO₂</b>&gt;90</div>
-    <div class="gl" id="gl-lac"><b id="gv-lac">Lac</b>trend</div>
+    <div class="gl" id="gl-lac"><b id="gv-lac">Lac</b><span data-i18n="goal.lacTrend">trend</span></div>
   </div>
   <div class="prob"><div class="ptag ok" id="prob1">STABLE</div><div class="ptag sec ok" id="prob2" style="display:none"></div></div>
   <div class="vp">
@@ -225,6 +239,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <div class="vs">
     <div class="vc" id="vc-hr"><div class="vl">HR</div><div><span class="vv" id="v-hr">82</span><span class="vu"> bpm</span></div></div>
     <div class="vc" id="vc-rr"><div class="vl">RR</div><div><span class="vv" id="v-rr">16</span><span class="vu"> /min</span></div></div>
+  </div>
+  <div class="lac-strip">
+    <div class="lac-strip-lbl" data-i18n="lac.trend">Lac trend</div>
+    <canvas id="lac-canvas"></canvas>
+    <span class="lac-strip-val" id="lac-cur">1.2</span>
   </div>
   <canvas id="wave"></canvas>
   <div class="log" id="log"><span class="lx" id="lx" onclick="G.toggleLog()">▼</span></div>
@@ -237,20 +256,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <div class="ov ov-solid" id="ov-brief"><div class="pbb" id="pbb"></div></div>
 <div class="ov ov-dim" id="ov-pause">
   <div class="pause-menu" id="pause-menu">
-    <div class="pause-title">PAUSED</div>
-    <button class="pause-btn" onclick="G.unpause()">RESUME</button>
-    <button class="pause-btn" onclick="G.resetLevel()">RESTART</button>
-    <button class="pause-btn quit" onclick="G.quitToLevels()">QUIT</button>
+    <div class="pause-title" data-i18n="pause.title">PAUSED</div>
+    <button class="pause-btn" data-i18n="pause.resume" onclick="G.unpause()">RESUME</button>
+    <button class="pause-btn" data-i18n="pause.restart" onclick="G.resetLevel()">RESTART</button>
+    <button class="pause-btn quit" data-i18n="pause.quit" onclick="G.quitToLevels()">QUIT</button>
   </div>
 </div>
 <div class="ov ov-dim" id="ov-end"><div id="ov-end-c"></div></div>
 
 <div class="modal diag" id="modal-diag">
   <button class="modal-x" onclick="G.closeModals()">✕</button>
-  <div class="modal-title">Diagnostics</div>
-  <button class="wide" onclick="G.runDiagFromMenu('pocus')">🩺 Lung POCUS</button>
-  <button class="wide" onclick="G.runDiagFromMenu('echo')">❤️ Bedside Echo</button>
-  <button class="wide" onclick="G.runDiagFromMenu('labs')">🧪 Labs Panel</button>
+  <div class="modal-title" data-i18n="modal.diagnostics">Diagnostics</div>
+  <button class="wide" data-i18n="modal.pocus" onclick="G.runDiagFromMenu('pocus')">🩺 Lung POCUS</button>
+  <button class="wide" data-i18n="modal.echo" onclick="G.runDiagFromMenu('echo')">❤️ Echo</button>
+  <button class="wide" data-i18n="modal.labs" onclick="G.runDiagFromMenu('labs')">🧪 Labs</button>
 </div>
 <div class="modal fio2" id="modal-fio2">
   <button class="modal-x" onclick="G.confirmFio2()">✕</button>
@@ -268,6 +287,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 </div>
 </div>
 
+<script src="i18n.js"></script>
 <script>
 // ================================================================
 //  PATHOLOGY DATABASE  -  12 conditions, no spoilers
@@ -332,13 +352,7 @@ mixed:{name:'Mixed Pathology',desc:'Multiple concurrent problems overlapping.\nN
     {pt:'73M, intubated for worsening hypoxia',hx:'Admitted 3d ago for pneumonia. Multiple fluid boluses. Febrile again',vitals:[{t:'MAP 66',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 104',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Crackles + scattered rhonchi\n▸ Some secretions in ETT\n▸ Borderline warm peripheries\n▸ CXR: bilateral haze',concern:'Multiple overlapping findings\nUnclear dominant pathology'}]}
 };
 
-// Level 1 tutorial — fixed brief & stable edema case
-const LEVEL1_BRIEF={
-  pt:'64F, admitted for shortness of breath',
-  hx:'Bilateral crackles, CXR shows bilateral infiltrates, fluid overload suspected',
-  vitals:[{t:'MAP 72',c:'ok'},{t:'SpO₂ 89%',c:'w'},{t:'HR 98',c:'ok'},{t:'Lac 1.2',c:'ok'}],
-  exam:'▸ Crackles throughout both lungs\n▸ Mild peripheral edema\n▸ Elevated JVP',
-  concern:'Hypoxemia from pulmonary edema. Needs diuresis.'};
+// Level 1 brief — see getLevel1Brief() in i18n.js
 
 // ================================================================
 //  LEVEL DATABASE  -  30 levels
@@ -368,48 +382,24 @@ t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:1.5,stabReq:28,events
 //  DIAGNOSTIC TOOLS  -  delayed partial info
 // ================================================================
 const DIAG_TOOLS={
-  pocus:{name:'Lung POCUS',icon:'🩺',delay:5,cd:20,run(p){
-    const r=[];
-    if(p.pulmonaryEdema>20) r.push('B-lines: multiple bilateral');
-    else r.push('A-lines predominant');
-    if(p.secretions>30) r.push('Consolidation pattern noted');
-    if(p._hasPneumo) r.push('Absent lung sliding on right');
-    else r.push('Lung sliding present bilaterally');
-    if(r.length===1) r.push('No significant findings');
-    return 'POCUS: '+r.join('. ');}},
-  echo:{name:'Bedside Echo',icon:'❤️',delay:8,cd:25,run(p){
-    const r=[];
-    const rvs=p.rvStrain||(p._hasPneumo?30:0);
-    if(p.cardiacOutput<50) r.push('LV function: reduced (EF ~25-30%)');
-    else if(p.cardiacOutput<65) r.push('LV function: mildly reduced');
-    else r.push('LV function: grossly preserved');
-    if(rvs>25) r.push('RV dilated, septal bowing');
-    else r.push('RV normal size');
-    if(p.totalFluids>2000&&p.pulmonaryEdema<10) r.push('IVC plethoric, >2cm');
-    else if(p.perfusion<50) r.push('IVC collapsing >50%');
-    else r.push('IVC intermediate');
-    return 'Echo: '+r.join('. ');}},
-  labs:{name:'Labs Panel',icon:'🧪',delay:6,cd:18,run(p){
-    const wbc=Math.round(8+p.infection*.2+Math.random()*3);
-    const hb=p.bleed>15?Math.round((12-p.bleed*.08)*10)/10:Math.round((13.5+Math.random())*10)/10;
-    const cr=p.perfusion<50?Math.round((1.2+(60-p.perfusion)*.02)*10)/10:Math.round((0.9+Math.random()*.3)*10)/10;
-    return 'Labs: WBC '+wbc+'k | Hb '+hb+' | Cr '+cr+' | Lac '+p.lactate.toFixed(1);}},
-  vexus:{name:'VExUS',icon:'🔬',delay:7,cd:22,run(p){
-    const rvs=p.rvStrain||0;
-    const overload=p.pulmonaryEdema+rvs;
-    if(overload>50) return 'VExUS Grade 3: Severe venous congestion. Hepatic/portal/renal vein pulsatility abnormal.';
-    if(overload>25) return 'VExUS Grade 1-2: Moderate congestion. Some venous pulsatility noted.';
-    return 'VExUS Grade 0: No significant venous congestion.';}}
+  pocus:{delay:5,cd:20,run(p){return runDiagPocus(p);}},
+  echo:{delay:8,cd:25,run(p){return runDiagEcho(p);}},
+  labs:{delay:6,cd:18,run(p){return runDiagLabs(p);}},
+  vexus:{delay:7,cd:22,run(p){
+    const rvs=p.rvStrain||0,overload=p.pulmonaryEdema+rvs,es=getLang()==='es';
+    if(overload>50)return es?'VExUS Grado 3: Congestión venosa severa. Pulsatilidad venosa hepática/portal/renal anormal.':'VExUS Grade 3: Severe venous congestion. Hepatic/portal/renal vein pulsatility abnormal.';
+    if(overload>25)return es?'VExUS Grado 1-2: Congestión moderada. Algo de pulsatilidad venosa.':'VExUS Grade 1-2: Moderate congestion. Some venous pulsatility noted.';
+    return es?'VExUS Grado 0: Sin congestión venosa significativa.':'VExUS Grade 0: No significant venous congestion.';}}
 };
 
 // ================================================================
 //  ACUTE EVENTS
 // ================================================================
 const EVENTS=[
-  {id:'plug',msg:'⚠ Sudden SpO₂ drop! Peak pressures spiking!',apply(p){p.secretions=Math.min(95,p.secretions+40);p._evtSec=true;},clue:'HIGH PRESSURE alarm. Cannot ventilate.'},
-  {id:'pneumo',msg:'⚠ Acute desaturation! Unilateral findings!',apply(p){p.oxygenation-=20;p.compliance=Math.max(15,p.compliance-15);p.cardiacOutput-=15;p._hasPneumo=true;p._pneumoT=0;},clue:'Absent breath sounds. Tracheal deviation?'},
-  {id:'vaso',msg:'⚠ MAP crashing! Warm shock!',apply(p){p.vascularTone=Math.max(5,p.vascularTone-30);},clue:'Wide pulse pressure. Flash cap refill.'},
-  {id:'bleed',msg:'⚠ Sudden tachycardia! Pressure dropping!',apply(p){p.bleed=Math.min(80,p.bleed+25);p.perfusion-=10;},clue:'Drain output increasing. Check Hb.'},
+  {id:'plug',apply(p){p.secretions=Math.min(95,p.secretions+40);p._evtSec=true;}},
+  {id:'pneumo',apply(p){p.oxygenation-=20;p.compliance=Math.max(15,p.compliance-15);p.cardiacOutput-=15;p._hasPneumo=true;p._pneumoT=0;}},
+  {id:'vaso',apply(p){p.vascularTone=Math.max(5,p.vascularTone-30);}},
+  {id:'bleed',apply(p){p.bleed=Math.min(80,p.bleed+25);p.perfusion-=10;}},
 ];
 
 // ================================================================
@@ -425,7 +415,7 @@ class Patient {
     const mRates={edema:0,sec:0,inf:0,vasc:0};
     const allClues=[];
     pathKeys.forEach(k=>{
-      const p=PATH[k];if(!p)return;
+      const p=getPathEntry(k,PATH);if(!p)return;
       Object.keys(p.init).forEach(v=>{
         if(v==='vasc'||v==='perf') merged[v]=Math.min(merged[v],p.init[v]);
         else merged[v]=Math.max(merged[v],p.init[v]);
@@ -471,10 +461,10 @@ class Patient {
     this.phase=1;this.phaseT=0;
     this.nextSecEvt=9999;
     this._dMAP=72;this._dSpO2=89;this._dHR=98;this._dRR=20;
-    this.clues=['Bilateral crackles on exam.','CXR: bilateral infiltrates.','Hypoxemia — consider diuresis.'];
+    this.clues=getL1Clues();
   }
 
-  get phaseName(){return['','STABLE','DECLINING','UNSTABLE','CRASHING'][this.phase]}
+  get phaseName(){return getPhaseName(this.phase)}
   get phaseCSS(){return['','s','d','u','x'][this.phase]}
 
   get rawHR(){let h=55+(100-this.perfusion)*.7+(100-this.oxygenation)*.25+this.infection*.2+(100-this.vascularTone)*.15+this.rvStrain*.1;if(this.norepiOn)h+=5;if(this.bleed>15)h+=this.bleed*.3;return Math.round(Math.min(200,Math.max(30,h)));}
@@ -487,7 +477,7 @@ class Patient {
   get RR(){return Math.round(this._dRR)}
   get Pplat(){return Math.round((this.tidalVolume*100)/Math.max(15,this.compliance)+this.peep+this.autoPeep);}
 
-  get primaryProblem(){const pr=[];if(this.MAP<65)pr.push({id:'hemo',sev:this.MAP<50?3:this.MAP<60?2:1,label:'HEMODYNAMIC'});if(this.SpO2<92)pr.push({id:'oxy',sev:this.SpO2<80?3:this.SpO2<88?2:1,label:'OXYGENATION'});if(this.secretions>35)pr.push({id:'airway',sev:this.secretions>65?3:this.secretions>50?2:1,label:'AIRWAY'});if(!pr.length)return{p:{id:'ok',label:'STABLE',sev:0},s:null};pr.sort((a,b)=>b.sev-a.sev);return{p:pr[0],s:pr[1]||null};}
+  get primaryProblem(){const pr=[];if(this.MAP<65)pr.push({id:'hemo',sev:this.MAP<50?3:this.MAP<60?2:1,label:getProblemLabel('hemo')});if(this.SpO2<92)pr.push({id:'oxy',sev:this.SpO2<80?3:this.SpO2<88?2:1,label:getProblemLabel('oxy')});if(this.secretions>35)pr.push({id:'airway',sev:this.secretions>65?3:this.secretions>50?2:1,label:getProblemLabel('airway')});if(!pr.length)return{p:{id:'ok',label:getProblemLabel('ok'),sev:0},s:null};pr.sort((a,b)=>b.sev-a.sev);return{p:pr[0],s:pr[1]||null};}
   get lacTrend(){const h=this.lacHist;if(h.length<3)return'?';const r=h.slice(-3);return r[2]<r[0]-.2?'↓':r[2]>r[0]+.2?'↑':'→';}
 
   tick(dt,gt){
@@ -530,8 +520,8 @@ class Patient {
     if(this.perfusion>65&&this.lactate>.8)this.lactate-=.008;
     this.lactate=Math.max(.5,Math.min(20,this.lactate));
     this.peakLac=Math.max(this.peakLac,this.lactate);
-    if(gt%15===0)this.lacHist.push(Math.round(this.lactate*10)/10);
-    if(this.lacHist.length>20)this.lacHist.shift();
+    if(gt%5===0)this.lacHist.push(Math.round(this.lactate*10)/10);
+    if(this.lacHist.length>13)this.lacHist.shift();
 
     // Lung injury
     if(this.tidalVolume>8)this.lungInjury+=(this.tidalVolume-8)*.04*M;
@@ -596,24 +586,15 @@ class Patient {
     // Arrest
     if(this.MAP<50)this.lowMAPT+=dt;else this.lowMAPT=Math.max(0,this.lowMAPT-dt*.5);
     if(this.SpO2<75)this.lowSPT+=dt;else this.lowSPT=Math.max(0,this.lowSPT-dt*.5);
-    if(this.lowMAPT>=8){this.arrest=true;this.arrestReason='Refractory hypotension → PEA arrest';}
-    if(this.lowSPT>=8){this.arrest=true;this.arrestReason='Severe hypoxemia → Cardiac arrest';}
+    if(this.lowMAPT>=8){this.arrest=true;this.arrestReason=t('arrest.map');}
+    if(this.lowSPT>=8){this.arrest=true;this.arrestReason=t('arrest.spo2');}
   }
 
   giveFluids(){this._mapAtF=this.MAP;this.totalFluids+=500;this.fluidBoluses++;this.perfusion=Math.min(100,this.perfusion+4);this.cardiacOutput=Math.min(100,this.cardiacOutput+3);const resp=this.vascularTone>30;this._mapB.push({a:resp?6:2,r:12,d:(resp?6:2)/12});this._perfB.push({a:8,r:10,d:.8});return resp;}
   doSuction(){if(this.secretions>15){const c=Math.min(this.secretions,25+Math.random()*15);this.secretions=Math.max(0,this.secretions-c);this.goodSuctions++;this._oxyB.push({a:4,r:15,d:4/15});return true;}this.badSuctions++;this.secretions+=2;return false;}
   giveDiuretic(){this.diureticActive=true;this.diureticTimer=45;this.diureticsGiven++;if(this._tutorial){this.perfusion=Math.max(0,this.perfusion-1);this.cardiacOutput=Math.max(10,this.cardiacOutput-1);this._oxyB.push({a:5,r:15,d:5/15});this._dSpO2=Math.min(100,this._dSpO2+5);}else{this.perfusion=Math.max(0,this.perfusion-3);this.cardiacOutput=Math.max(10,this.cardiacOutput-3);}}
   getABG(){const lE=Math.max(.3,1-this.lungInjury/120),eo=this.oxygenation*lE*(this.compliance/50);const pao2=Math.max(30,Math.min(500,Math.round(35+eo*.55+(this.fio2-21)*.75+(this.peep-5)*1.2-this.secretions*.25-this.pulmonaryEdema*.2)));const ph=Math.max(6.9,Math.min(7.55,Math.round((7.25+this.perfusion*.002-this.infection*.001-this.lactate*.008)*100)/100));const paco2=Math.max(15,Math.min(80,Math.round(45-(this.RR-14)*.8+(this.tidalVolume-6)*1.5+this.co2bias+this.autoPeep*.8)));const pf=Math.round(pao2/(this.fio2/100));
-    // Interpretation
-    const oF=pf<200,pF=this.lactate>2.5,acid=ph<7.30,hiCo2=paco2>50;
-    let interp;
-    if(oF&&pF)interp='Dual failure: oxygenation + perfusion deficit.';
-    else if(oF&&!pF){if(this.secretions>30)interp='Oxygenation impaired  -  airway resistance pattern.';else if(this.pulmonaryEdema>20)interp='Low P/F with compliance drop  -  alveolar flooding pattern.';else if(this.rvStrain>25)interp='Hypoxemia with preserved compliance  -  shunt or dead space?';else interp='Shunt physiology  -  refractory to FiO₂.';}
-    else if(!oF&&pF)interp='Oxygenation adequate but perfusion failing.';
-    else if(hiCo2)interp='CO₂ retention  -  ventilatory failure or air trapping.';
-    else if(acid)interp='Acidemia  -  '+(paco2>45?'respiratory component.':'metabolic, check perfusion.');
-    else interp='Gas exchange acceptable. Monitor trends.';
-    return{pH:ph,PaO2:pao2,PaCO2:paco2,Lac:Math.round(this.lactate*10)/10,PF:pf,interp};}
+    return{pH:ph,PaO2:pao2,PaCO2:paco2,Lac:Math.round(this.lactate*10)/10,PF:pf,interp:interpretABG(this,ph,paco2,pf)};}
 }
 
 // ================================================================
@@ -625,10 +606,28 @@ class Game {
     this.at={};this.abgPend=false;this._cd={};this.evts=[];this.fEvts=[];
     this._stabM1=false;this._stabM2=false;this._abgUntil=0;this._abgN=0;
     this.lt=0;this.acc=0;
-    // DOM refs
     this.$ = id => document.getElementById(id);
+    this.applyStaticUI();
     this.showMainMenu();
     this.renderLoop();
+  }
+
+  setLang(code){
+    if(this.running&&!this.over)return;
+    setLang(code);
+    this.applyStaticUI();
+    if(this.$('scr-ls').classList.contains('active'))this.initLS();
+    else this.showMainMenu();
+  }
+
+  applyStaticUI(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      el.textContent=t(el.dataset.i18n);
+    });
+    const lang=getLang();
+    const en=this.$('lang-en'),es=this.$('lang-es');
+    if(en){en.classList.toggle('on',lang==='en');}
+    if(es){es.classList.toggle('on',lang==='es');}
   }
 
   showMainMenu(){
@@ -638,11 +637,13 @@ class Game {
     const scores=Object.keys(stats).filter(k=>k.startsWith('l')).map(k=>stats[k].score||0);
     const bestScore=scores.length?Math.max(...scores):0;
     const statsDiv=this.$('mm-stats');
-    if(completed>0)statsDiv.innerHTML='Levels Completed: '+completed+'/30<br>Best Score: '+bestScore;
-    else statsDiv.textContent='Ready to diagnose?';
+    if(completed>0)statsDiv.innerHTML=t('menu.levelsDone',{n:completed})+'<br>'+t('menu.bestScore',{n:bestScore});
+    else statsDiv.textContent=t('menu.ready');
+    this.applyStaticUI();
   }
 
   showLevelSelect(){
+    this.applyStaticUI();
     this.initLS();
     this.showScreen('scr-ls');
   }
@@ -657,7 +658,7 @@ class Game {
   // -- Level Select --
   initLS(){
     const c=this.$('ls-tiers');c.innerHTML='';
-    const tiers=[{n:'FOUNDATIONS',l:1,r:5},{n:'INTERMEDIATE',l:6,r:10},{n:'OVERLAP',l:11,r:15},{n:'COMPLEX',l:16,r:20},{n:'CHALLENGE',l:21,r:25},{n:'MASTER',l:26,r:30}];
+    const tiers=[{n:t('tier.foundations'),l:1,r:5},{n:t('tier.intermediate'),l:6,r:10},{n:t('tier.overlap'),l:11,r:15},{n:t('tier.complex'),l:16,r:20},{n:t('tier.challenge'),l:21,r:25},{n:t('tier.master'),l:26,r:30}];
     const mx=this.getMaxUnlocked();
     tiers.forEach(t=>{
       let h='<div class="ls-tier"><div class="ls-tier-title">'+t.n+' ('+t.l+'-'+t.r+')</div><div class="ls-grid">';
@@ -677,18 +678,20 @@ class Game {
   // -- Start Level --
   startLevel(n){
     this.lvl=LEVELS[n-1];if(!this.lvl)return;
+    this.hideOv('ov-end');
+    this.over=false;
+    this.closeModals();
     this.showScreen('scr-gs');
-    const pk=this.lvl.paths[0];const pr=PATH[pk];
-    const cs=(n===1)?LEVEL1_BRIEF:pr.cases[Math.floor(Math.random()*pr.cases.length)];
+    const pk=this.lvl.paths[0];const pr=getPathEntry(pk,PATH);
+    const cs=(n===1)?getLevel1Brief():pr.cases[Math.floor(Math.random()*pr.cases.length)];
 
-    // Show brief
     const bb=this.$('pbb');
-    bb.innerHTML='<div class="pbb-h">ADMISSION BRIEF  -  Level '+n+'</div>'+
-      '<div class="pbb-s"><div class="pbb-l">Patient</div><div class="pbb-t">'+cs.pt+'<br><span style="color:var(--tm);font-size:9px">'+cs.hx+'</span></div></div>'+
-      '<div class="pbb-s"><div class="pbb-l">Status</div><div class="pbb-v">'+cs.vitals.map(v=>'<div class="pbb-vi '+(v.c||'')+'">'+v.t+'</div>').join('')+'</div></div>'+
-      '<div class="pbb-s"><div class="pbb-l">Exam Findings</div><div class="pbb-ex">'+cs.exam+'</div></div>'+
-      '<div class="pbb-s"><div class="pbb-l">What worries me</div><div class="pbb-cn">'+cs.concern+'</div></div>'+
-      '<button class="obtn" onclick="G.acceptCase()">ACCEPT PATIENT</button>';
+    bb.innerHTML='<div class="pbb-h">'+t('brief.title',{n:n})+'</div>'+
+      '<div class="pbb-s"><div class="pbb-l">'+t('brief.patient')+'</div><div class="pbb-t">'+cs.pt+'<br><span style="color:var(--tm);font-size:9px">'+cs.hx+'</span></div></div>'+
+      '<div class="pbb-s"><div class="pbb-l">'+t('brief.status')+'</div><div class="pbb-v">'+cs.vitals.map(v=>'<div class="pbb-vi '+(v.c||'')+'">'+v.t+'</div>').join('')+'</div></div>'+
+      '<div class="pbb-s"><div class="pbb-l">'+t('brief.exam')+'</div><div class="pbb-ex">'+cs.exam+'</div></div>'+
+      '<div class="pbb-s"><div class="pbb-l">'+t('brief.concern')+'</div><div class="pbb-cn">'+cs.concern+'</div></div>'+
+      '<button class="obtn" onclick="G.acceptCase()">'+t('brief.accept')+'</button>';
     this.showOv('ov-brief');
   }
 
@@ -710,11 +713,12 @@ class Game {
     if(lv.events<1)this.evts=[];
 
     // UI
-    this.$('hdr-lvl').textContent='LVL '+lv.id;
+    this._wCtx=null;this._lacCtx=null;
+    this.$('hdr-lvl').textContent=t('lvl.header',{n:lv.id});
     this.$('log').innerHTML='<span class="lx" id="lx" onclick="G.toggleLog()">▼</span>';
     this.$('app').classList.remove('alarm');
     this.buildActions();
-    this.log('Patient accepted. VC: VT 6, PEEP 8, FiO₂ 40%.','i');
+    this.log(t('game.patientAccepted'),'i');
 
     // Early clues
     const clues=this.p.clues;
@@ -735,14 +739,14 @@ class Game {
       h+='</button>';return h;
     };
     let h='';
-    h+=ab('ah','💧','Fluids','+500ml','G.doFluids()','bf','cf');
-    h+=ab('ah','⚡','Norepi','vasopressor','G.toggleNE()','bn');
-    h+=ab('ah','💊','Diuretic','furosemide','G.doDiuretic()','bd','cdi');
-    h+=ab('av','O₂','FiO₂',null,'G.showFio2Modal()');
-    h+=ab('av','P','PEEP',null,'G.showPeepModal()');
-    h+=ab('av','🫧','Suction','airway','G.doSuction()','bs','cs');
-    h+=ab('al','🩸','ABG','~15s','G.orderABG()','ba','ca');
-    h+=ab('ad','🔬','Diagnostics','menu','G.showDiagMenu()');
+    h+=ab('ah','💧',t('action.fluids'),t('action.fluidsSub'),'G.doFluids()','bf','cf');
+    h+=ab('ah','⚡',t('action.norepi'),t('action.norepiSub'),'G.toggleNE()','bn');
+    h+=ab('ah','💊',t('action.diuretic'),t('action.diureticSub'),'G.doDiuretic()','bd','cdi');
+    h+=ab('av','O₂',t('action.fio2'),null,'G.showFio2Modal()');
+    h+=ab('av','P',t('action.peep'),null,'G.showPeepModal()');
+    h+=ab('av','🫧',t('action.suction'),t('action.suctionSub'),'G.doSuction()','bs','cs');
+    h+=ab('al','🩸',t('action.abg'),t('action.abgSub'),'G.orderABG()','ba','ca');
+    h+=ab('ad','🔬',t('action.diagnostics'),t('action.diagnosticsSub'),'G.showDiagMenu()');
     g.innerHTML=h;
   }
 
@@ -758,9 +762,9 @@ class Game {
 
   adjustPeep(dir){if(dir>0&&this.p.peep>=18)return;if(dir<0&&this.p.peep<=4)return;this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.$('modal-peep-val').textContent=this.p.peep;}
 
-  confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log('FiO₂ → '+this.p.fio2+'%.'+(this.p.fio2>60?' ⚠ Toxicity risk.':''),this.p.fio2>80?'w':'i');}this.closeModals();}
+  confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}this.closeModals();}
 
-  confirmPeep(){if(this.p.peep!==this._modalPeepStart){this.log('PEEP → '+this.p.peep+'.'+(this.p.peep>12?' ⚠ Watch MAP.':''),'i');if(this.p._hasPneumo&&this.p.peep<=8){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log('Chest decompressed. Stabilizing.','s');}}this.closeModals();}
+  confirmPeep(){if(this.p.peep!==this._modalPeepStart){this.log(t('game.peepSet',{n:this.p.peep})+(this.p.peep>12?t('game.peepWatch'):''),'i');if(this.p._hasPneumo&&this.p.peep<=8){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log(t('game.chestDecomp'),'s');}}this.closeModals();}
 
   runDiagFromMenu(key){this.closeModals();this.runDiag(key);}
 
@@ -782,11 +786,10 @@ class Game {
     this.$('app').classList.toggle('alarm',this.p.MAP<50||this.p.SpO2<80);
 
     // Events
-    for(const se of this.evts){if(!se.fired&&this.gt>=se.time){se.fired=true;this.fEvts.push(se.evt.id);se.evt.apply(this.p);this.log(se.evt.msg,'e');setTimeout(()=>{if(!this.over)this.log(se.evt.clue,'w');},4000);}}
+    for(const se of this.evts){if(!se.fired&&this.gt>=se.time){se.fired=true;this.fEvts.push(se.evt.id);se.evt.apply(this.p);this.log(getEventMsg(se.evt.id),'e');setTimeout(()=>{if(!this.over)this.log(getEventClue(se.evt.id),'w');},4000);}}
 
-    // Stabilization
-    if(this.p.stabAnnounced&&!this._stabM1){this._stabM1=true;this.log('Vitals trending toward stability...','s');}
-    if(this.p.stableT>=12&&!this._stabM2){this._stabM2=true;this.log('Patient stabilizing.','s');}
+    if(this.p.stabAnnounced&&!this._stabM1){this._stabM1=true;this.log(t('game.stabTrend'),'s');}
+    if(this.p.stableT>=12&&!this._stabM2){this._stabM2=true;this.log(t('game.stabilizing'),'s');}
     if(!this.p.stabAnnounced){this._stabM1=false;this._stabM2=false;}
     if(this.p.stableT>=this.lvl.stabReq){this.p.stabilized=true;}
     if(this.p.stabilized){this.endGame(true,'stabilized');return;}
@@ -800,6 +803,10 @@ class Game {
     const p=this.p;
     this.$('v-map').textContent=p.MAP;this.$('v-spo2').textContent=p.SpO2;
     this.$('v-hr').textContent=p.HR;this.$('v-rr').textContent=p.RR;
+    this._colorVital('v-map',this._mapColor(p.MAP));
+    this._colorVital('v-spo2',this._spo2Color(p.SpO2));
+    this._colorVital('v-hr',this._hrColor(p.HR));
+    this._colorVital('v-rr',this._rrColor(p.RR));
     // Status colors
     const vs=(id,s)=>{const e=this.$(id);e.classList.remove('w','cr','hl');if(s)e.classList.add(s);};
     vs('vc-map',p.MAP<50?'cr':p.MAP<65?'w':'');
@@ -823,8 +830,8 @@ class Game {
     const m=Math.floor(this.gt/60),s=this.gt%60;this.$('hdr-timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     // Active strip
     const tags=[];
-    if(p.norepiOn)tags.push({t:'NE ON',c:p.norepiCum>120?'cr':'on'});
-    if(p.diureticActive)tags.push({t:'DIURESIS',c:'on'});
+    if(p.norepiOn)tags.push({t:t('tag.neOn'),c:p.norepiCum>120?'cr':'on'});
+    if(p.diureticActive)tags.push({t:t('tag.diuresis'),c:'on'});
     if(p.fio2>50)tags.push({t:'FiO₂:'+p.fio2,c:p.fio2>80?'cr':p.fio2>60?'hi':'on'});
     if(p.peep>8)tags.push({t:'PEEP:'+p.peep,c:p.peep>12?'hi':'on'});
     if(p.totalFluids>0)tags.push({t:p.totalFluids+'ml',c:p.totalFluids>2500?'cr':p.totalFluids>1500?'hi':'dm'});
@@ -833,29 +840,63 @@ class Game {
     if(this.$('bn'))this.$('bn').classList.toggle('to',p.norepiOn);
   }
 
+  _colorVital(id,c){const e=this.$(id);if(e)e.style.color=c;}
+
+  _mapColor(v){if(v>=65)return'var(--g)';if(v>=55)return'var(--y)';return'var(--r)';}
+
+  _spo2Color(v){if(v>=92)return'var(--g)';if(v>=80)return'var(--y)';return'var(--r)';}
+
+  _hrColor(v){if(v<=100)return'var(--g)';if(v<=130)return'var(--y)';return'var(--r)';}
+
+  _rrColor(v){if(v<=22)return'var(--g)';if(v<=28)return'var(--y)';return'var(--r)';}
+
+  _lacColor(v){if(v<2)return'var(--g)';if(v<=2.5)return'var(--y)';return'var(--r)';}
+
+  drawLacGraph(){
+    const c=this.$('lac-canvas');if(!c)return;
+    if(!this._lacCtx){const r=c.parentElement.getBoundingClientRect();c.width=Math.max(120,r.width*2);c.height=52;this._lacCtx=c.getContext('2d');}
+    const ctx=this._lacCtx,w=c.width,h=c.height,p=this.p;
+    const hist=p.lacHist.length?p.lacHist.slice():[p.lactate];
+    while(hist.length<2)hist.unshift(hist[0]);
+    const yMin=Math.max(0.5,Math.min(...hist)-0.3);
+    const yMax=Math.max(3,Math.max(...hist)+0.5,2.5);
+    const yR=yMax-yMin||1;
+    const xStep=w/(hist.length-1);
+    ctx.fillStyle='#0a1019';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='rgba(255,204,0,.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    const refY=h-((2.5-yMin)/yR)*h;ctx.beginPath();ctx.moveTo(0,refY);ctx.lineTo(w,refY);ctx.stroke();ctx.setLineDash([]);
+    const tr=p.lacTrend;
+    ctx.strokeStyle=tr==='↓'?'#00ff88':tr==='↑'?'#ff3344':'#ffcc00';
+    ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();
+    hist.forEach((v,i)=>{const x=i*xStep,y=h-((v-yMin)/yR)*h;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.stroke();
+    const lx=hist.length-1,ly=h-((hist[lx]-yMin)/yR)*h;
+    ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(lx*xStep,ly,3,0,Math.PI*2);ctx.fill();
+  }
+
   // -- Alerts (contextual only) --
   _thr(k,i){if(!this.at[k]||this.gt-this.at[k]>=i){this.at[k]=this.gt;return true;}return false;}
   checkAlerts(){
     const p=this.p,cl=this.gt<this._abgUntil;
-    if(p.MAP<50&&this._thr('m3',8))this.log('MAP '+p.MAP+'  -  Imminent arrest.','d');
-    if(p.SpO2<80&&this._thr('s3',8))this.log('SpO₂ '+p.SpO2+'%  -  Critical.','d');
-    if(p.MAP<65&&p.norepiOn&&this._thr('cx1',22)){if(p.lactate>3)this.log('MAP supported but lactate rising  -  perfusion inadequate.','w');else if(p.totalFluids<1000)this.log('MAP low on vasopressor  -  volume-depleted?','w');}
-    if(p.MAP<65&&!p.norepiOn&&p.totalFluids<500&&this._thr('cx2',25))this.log('MAP '+p.MAP+'  -  No hemodynamic support.','w');
-    if(p.totalFluids>=1500&&p.MAP<65&&!p.norepiOn&&this._thr('cx3',25))this.log('No MAP response to fluids  -  alternate cause?','w');
-    if(p.SpO2<90&&p.fio2>=60&&this._thr('cx4',22)){if(p.secretions>40)this.log('SpO₂ refractory  -  airway pressures elevated.','w');else if(p.pulmonaryEdema>30)this.log('SpO₂ refractory  -  crackles noted.','w');else this.log('Oxygenation not improving despite FiO₂.','w');}
-    if(p.secretions>40&&this._thr('cx6',20))this.log(cl?'Peak pressures rising  -  resistive pattern.':'Vent alarming. Elevated pressures.','w');
-    if(p.secretions>70&&this._thr('cx7',12))this.log('Cannot ventilate!','d');
-    if(p.pulmonaryEdema>30&&this._thr('cx8',22))this.log(cl?'B-lines increasing  -  extravascular lung water.':'Crackles increasing.','w');
+    if(p.MAP<50&&this._thr('m3',8))this.log(t('alert.mapArrest',{n:p.MAP}),'d');
+    if(p.SpO2<80&&this._thr('s3',8))this.log(t('alert.spo2Crit',{n:p.SpO2}),'d');
+    if(p.MAP<65&&p.norepiOn&&this._thr('cx1',22)){if(p.lactate>3)this.log(t('alert.mapLac'),'w');else if(p.totalFluids<1000)this.log(t('alert.mapVol'),'w');}
+    if(p.MAP<65&&!p.norepiOn&&p.totalFluids<500&&this._thr('cx2',25))this.log(t('alert.mapNoSupport',{n:p.MAP}),'w');
+    if(p.totalFluids>=1500&&p.MAP<65&&!p.norepiOn&&this._thr('cx3',25))this.log(t('alert.noFluidResp'),'w');
+    if(p.SpO2<90&&p.fio2>=60&&this._thr('cx4',22)){if(p.secretions>40)this.log(t('alert.spo2Airway'),'w');else if(p.pulmonaryEdema>30)this.log(t('alert.spo2Crackles'),'w');else this.log(t('alert.spo2Fio2'),'w');}
+    if(p.secretions>40&&this._thr('cx6',20))this.log(cl?t('alert.peakResist'):t('alert.ventAlarm'),'w');
+    if(p.secretions>70&&this._thr('cx7',12))this.log(t('alert.cannotVent'),'d');
+    if(p.pulmonaryEdema>30&&this._thr('cx8',22))this.log(cl?t('alert.blines'):t('alert.cracklesInc'),'w');
     if(cl){
-      if(p.vascularTone<40&&this._thr('cl1',25))this.log('Low SVR pattern. Warm shock.','i');
-      if(p.compliance<30&&p.pulmonaryEdema>20&&this._thr('cl2',25))this.log('Low compliance + lung water.','i');
-      if(p.secretions>35&&p.compliance>35&&this._thr('cl3',25))this.log('Compliance preserved, pressures high  -  resistive.','i');
-      if(p.rvStrain>25&&this._thr('cl4',25))this.log('RV strain pattern detected.','i');
-      if(p.co2bias>5&&this._thr('cl5',25))this.log('CO₂ retention noted.','i');
+      if(p.vascularTone<40&&this._thr('cl1',25))this.log(t('alert.warmShock'),'i');
+      if(p.compliance<30&&p.pulmonaryEdema>20&&this._thr('cl2',25))this.log(t('alert.compWater'),'i');
+      if(p.secretions>35&&p.compliance>35&&this._thr('cl3',25))this.log(t('alert.compResist'),'i');
+      if(p.rvStrain>25&&this._thr('cl4',25))this.log(t('alert.rvStrain'),'i');
+      if(p.co2bias>5&&this._thr('cl5',25))this.log(t('alert.co2Ret'),'i');
     }
-    if(p.phase===3&&this._thr('p3',999))this.log('Trajectory worsening.','d');
-    if(p.phase===4&&this._thr('p4',999))this.log('Decompensating.','d');
-    if(p._evtSec&&p.secretions<20&&this._thr('esr',999)){p._evtSec=false;this.log('Airways cleared.','s');}
+    if(p.phase===3&&this._thr('p3',999))this.log(t('alert.worsening'),'d');
+    if(p.phase===4&&this._thr('p4',999))this.log(t('alert.decomp'),'d');
+    if(p._evtSec&&p.secretions<20&&this._thr('esr',999)){p._evtSec=false;this.log(t('game.airwaysClear'),'s');}
   }
 
   // -- Actions --
@@ -863,18 +904,18 @@ class Game {
   _toast(id,t,c){const el=this.$(id);if(!el)return;const s=document.createElement('span');s.className='mt '+(c||'pos');s.textContent=t;el.appendChild(s);el.classList.add('gw');setTimeout(()=>{el.classList.remove('gw');if(s.parentNode)s.remove();},1200);}
   _setCD(key,id,cdid,sec){this._cd[key]=true;const b=id?this.$(id):null,c=cdid?this.$(cdid):null;if(b)b.classList.add('cd');let r=sec;if(c)c.textContent=r+'s';const iv=setInterval(()=>{r--;if(c)c.textContent=r>0?r+'s':'';if(r<=0){clearInterval(iv);if(b)b.classList.remove('cd');this._cd[key]=false;}},1000);}
 
-  doFluids(){if(this._bl()||this._cd.f)return;const r=this.p.giveFluids();this._toast('bf',r?'+MAP':'~','pos');this.log('Fluid bolus +500ml (total: '+this.p.totalFluids+'ml).','i');setTimeout(()=>{if(this.over)return;if(r)this.log('Transient preload response.','s');else this.log('Minimal fluid response.','w');},2000);this._setCD('f','bf','cf',8);}
-  toggleNE(){if(this._bl())return;this.p.norepiOn=!this.p.norepiOn;if(this.p.norepiOn){this.p._neJust=true;this.p._mapAtN=this.p.MAP;this.p._mapB.push({a:5,r:8,d:5/8});this._toast('bn','+MAP','pos');this.log('Norepinephrine STARTED.','i');setTimeout(()=>{if(!this.over&&this.p.norepiOn){const d=this.p.MAP-this.p._mapAtN;this.log(d>=5?'MAP responding (+'+d+').':'MAP trend improving.','s');}},4000);}else{this.log('Norepinephrine STOPPED.','i');}}
-  doSuction(){if(this._bl()||this._cd.s)return;const r=this.p.doSuction();this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');this.log(r?'Suction: thick secretions cleared.':'Suction: minimal secretions.',r?'s':'');this._setCD('s','bs','cs',12);}
-  doDiuretic(){if(this._bl()||this._cd.di)return;if(this.p.diureticActive){this.log('Already infusing.','');return;}this.p.giveDiuretic();this.log('Furosemide 40mg IV.','i');const fb=this.p._tutorial?5000:10000;setTimeout(()=>{if(!this.over){if(this.p.pulmonaryEdema>15||this.p._tutorial)this.log('Urine output increasing. Crackles improving.','s');else this.log('Minimal diuretic response.','w');}},fb);this._setCD('di','bd','cdi',30);}
-  fio2(dir){if(this._bl())return;if(dir>0&&this.p.fio2>=100){this.log('FiO₂ max.','');return;}if(dir<0&&this.p.fio2<=21){this.log('FiO₂ at RA.','');return;}this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.log('FiO₂ → '+this.p.fio2+'%.'+(this.p.fio2>60?' ⚠ Toxicity risk.':''),this.p.fio2>80?'w':'i');}
-  peep(dir){if(this._bl())return;if(dir>0&&this.p.peep>=18){this.log('PEEP max.','');return;}if(dir<0&&this.p.peep<=4){this.log('PEEP min.','');return;}this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.log('PEEP → '+this.p.peep+'.'+(this.p.peep>12?' ⚠ Watch MAP.':''),'i');if(this.p._hasPneumo&&this.p.peep<=8&&dir<0){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log('Chest decompressed. Stabilizing.','s');}}
+  doFluids(){if(this._bl()||this._cd.f)return;const r=this.p.giveFluids();this._toast('bf',r?'+MAP':'~','pos');this.log(t('game.fluidBolus',{n:this.p.totalFluids}),'i');setTimeout(()=>{if(this.over)return;if(r)this.log(t('game.preloadOk'),'s');else this.log(t('game.preloadMin'),'w');},2000);this._setCD('f','bf','cf',8);}
+  toggleNE(){if(this._bl())return;this.p.norepiOn=!this.p.norepiOn;if(this.p.norepiOn){this.p._neJust=true;this.p._mapAtN=this.p.MAP;this.p._mapB.push({a:5,r:8,d:5/8});this._toast('bn','+MAP','pos');this.log(t('game.neStart'),'i');setTimeout(()=>{if(!this.over&&this.p.norepiOn){const d=this.p.MAP-this.p._mapAtN;this.log(d>=5?t('game.neRespond',{n:d}):t('game.neTrend'),'s');}},4000);}else{this.log(t('game.neStop'),'i');}}
+  doSuction(){if(this._bl()||this._cd.s)return;const r=this.p.doSuction();this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');this.log(r?t('game.suctionOk'):t('game.suctionMin'),r?'s':'');this._setCD('s','bs','cs',12);}
+  doDiuretic(){if(this._bl()||this._cd.di)return;if(this.p.diureticActive){this.log(t('game.diureticInfusing'),'');return;}this.p.giveDiuretic();this.log(t('game.diureticGiven'),'i');const fb=this.p._tutorial?5000:10000;setTimeout(()=>{if(!this.over){if(this.p.pulmonaryEdema>15||this.p._tutorial)this.log(t('game.diureticOk'),'s');else this.log(t('game.diureticMin'),'w');}},fb);this._setCD('di','bd','cdi',30);}
+  fio2(dir){if(this._bl())return;if(dir>0&&this.p.fio2>=100){this.log(t('game.fio2Max'),'');return;}if(dir<0&&this.p.fio2<=21){this.log(t('game.fio2Ra'),'');return;}this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}
+  peep(dir){if(this._bl())return;if(dir>0&&this.p.peep>=18){this.log(t('game.peepMax'),'');return;}if(dir<0&&this.p.peep<=4){this.log(t('game.peepMin'),'');return;}this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.log(t('game.peepSet',{n:this.p.peep})+(this.p.peep>12?t('game.peepWatch'):''),'i');if(this.p._hasPneumo&&this.p.peep<=8&&dir<0){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log(t('game.chestDecomp'),'s');}}
 
-  orderABG(){if(this._bl()||this.abgPend)return;this.abgPend=true;this._abgN++;this.log('ABG drawn...','i');this._setCD('abg','ba','ca',15);
-    setTimeout(()=>{if(this.over)return;const a=this.p.getABG();const sev=a.Lac>4?'d':a.Lac>2?'w':'s';this.log('ABG → pH '+a.pH.toFixed(2)+' | PaO₂ '+a.PaO2+' | PaCO₂ '+a.PaCO2+' | Lac '+a.Lac.toFixed(1)+' | P/F '+a.PF,sev);this.log(a.interp,a.PF<200||a.Lac>2.5?'w':'s');this._abgUntil=this.gt+20;this.abgPend=false;},10000);}
+  orderABG(){if(this._bl()||this.abgPend)return;this.abgPend=true;this._abgN++;this.log(t('game.abgDrawn'),'i');this._setCD('abg','ba','ca',15);
+    setTimeout(()=>{if(this.over)return;const a=this.p.getABG();const sev=a.Lac>4?'d':a.Lac>2?'w':'s';this.log(t('game.abgResult',{ph:a.pH.toFixed(2),pao2:a.PaO2,paco2:a.PaCO2,lac:a.Lac.toFixed(1),pf:a.PF}),sev);this.log(a.interp,a.PF<200||a.Lac>2.5?'w':'s');this._abgUntil=this.gt+20;this.abgPend=false;},10000);}
 
   runDiag(key){const tool=DIAG_TOOLS[key];if(!tool||this._bl()||this._cd['d_'+key])return;
-    this.log(tool.name+' ordered...','i');this._setCD('d_'+key,null,null,tool.cd);
+    this.log(t('diag.'+key+'.ordered'),'i');this._setCD('d_'+key,null,null,tool.cd);
     setTimeout(()=>{if(this.over)return;const r=tool.run(this.p);this.log(r,'i');this._abgUntil=Math.max(this._abgUntil,this.gt+12);},tool.delay*1000);}
 
   togglePause(){if(this.over||!this.running)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');}}
@@ -892,9 +933,8 @@ class Game {
   endGame(win,winType){
     this.closeModals();this.over=true;this.running=false;this.$('app').classList.remove('alarm');
     const p=this.p,lv=this.lvl,mins=Math.floor(this.gt/60),secs=this.gt%60;
-    let reason=!win?p.arrestReason:winType==='stabilized'?'Patient stabilized through correct treatment.':'Patient survived the full window.';
+    let reason=!win?p.arrestReason:winType==='stabilized'?t('win.stabilized'):t('win.survived');
 
-    // Score
     const tt=this.gt||1;const mapPct=Math.round((1-p.goalMapF/tt)*100);const spoPct=Math.round((1-p.goalSpoF/tt)*100);
     let score=0;
     if(win){score=Math.round(mapPct*.3+spoPct*.3+(p.lacTrend==='↓'||p.lactate<2?15:0)+(winType==='stabilized'?15:0)+Math.max(0,Math.round((300-this.gt)/30)));if(p.peakLI>40)score-=10;if(p.wrongAct>3)score-=10;}
@@ -905,24 +945,24 @@ class Game {
 
     if(win)this.setLvlData(lv.id,stars,score);
 
-    // Diagnosis reveal
-    const names=p.pathKeys.map(function(k){var x=PATH[k];return x?x.name:k;}).join(' + ');
-    const descs=p.pathKeys.map(function(k){var x=PATH[k];return x?x.desc:'';}).join('\n\n');
+    const names=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.name:k;}).join(' + ');
+    const descs=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.desc:'';}).join('\n\n');
+    const neStr=p.norepiCum>0?Math.round(p.norepiCum)+'s':t('end.neNone');
 
     const c=this.$('ov-end-c');
-    c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+(win?'CASE RESOLVED':'CARDIAC ARREST')+'</div>'+
+    c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+(win?t('end.win'):t('end.lose'))+'</div>'+
       '<div class="go-sub">'+reason+'</div>'+
       '<div class="go-stars">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>'+
-      '<div class="go-diag"><strong>DIAGNOSIS:</strong> '+names+'<br><br>'+descs.replace(/\n/g,'<br>')+'</div>'+
-      '<div class="go-stats">Time: '+mins+'m '+secs+'s | Grade: <strong>'+grade+'</strong> ('+score+')<br>'+
-      'MAP≥65: '+mapPct+'% | SpO₂≥90: '+spoPct+'%<br>'+
-      'Fluids: '+p.totalFluids+'ml | NE: '+(p.norepiCum>0?Math.round(p.norepiCum)+'s':' - ')+'<br>'+
-      'Suctions: '+p.goodSuctions+'ok/'+p.badSuctions+'bad | Diuretics: '+p.diureticsGiven+'<br>'+
-      'Peak lac: '+p.peakLac.toFixed(1)+' | Lung injury: '+Math.round(p.peakLI)+'</div>'+
+      '<div class="go-diag"><strong>'+t('end.diagnosis')+'</strong> '+names+'<br><br>'+descs.replace(/\n/g,'<br>')+'</div>'+
+      '<div class="go-stats">'+t('end.time',{m:mins,s:secs,grade:grade,score:score})+'<br>'+
+      t('end.mapPct',{n:mapPct})+' | '+t('end.spoPct',{n:spoPct})+'<br>'+
+      t('end.fluids',{n:p.totalFluids,ne:neStr})+'<br>'+
+      t('end.suctions',{ok:p.goodSuctions,bad:p.badSuctions,n:p.diureticsGiven})+'<br>'+
+      t('end.peak',{lac:p.peakLac.toFixed(1),li:Math.round(p.peakLI)})+'</div>'+
       '<div class="go-btns">'+
-      '<div class="go-btn" onclick="G.goLS()">LEVELS</div>'+
-      (win&&lv.id<30?'<div class="go-btn pri" onclick="G.startLevel('+(lv.id+1)+')">NEXT →</div>':
-        '<div class="go-btn pri" onclick="G.startLevel('+lv.id+')">RETRY</div>')+'</div>';
+      '<div class="go-btn" onclick="G.goLS()">'+t('end.levels')+'</div>'+
+      (win&&lv.id<30?'<div class="go-btn pri" onclick="G.startLevel('+(lv.id+1)+')">'+t('end.next')+'</div>':
+        '<div class="go-btn pri" onclick="G.startLevel('+lv.id+')">'+t('end.retry')+'</div>')+'</div>';
     this.showOv('ov-end');
   }
 
@@ -932,14 +972,29 @@ class Game {
   drawWave(){
     const c=this.$('wave');if(!this._wCtx){const r=c.parentElement.getBoundingClientRect();c.width=r.width*2;c.height=48;this._wCtx=c.getContext('2d');this._wX=0;this._wD=new Float32Array(c.width);}
     const ctx=this._wCtx,w=c.width,h=c.height;
-    for(let i=0;i<3;i++){const pr=Math.max(30,Math.round(3600/Math.max(40,this.p.HR))),n=(this._wX%pr)/pr;let y=0;if(n<.08)y=Math.sin(n/.08*Math.PI)*.12;else if(n>.15&&n<.18)y=-.1;else if(n>.18&&n<.22)y=Math.sin((n-.18)/.04*Math.PI)*.85;else if(n>.22&&n<.26)y=-.15;else if(n>.3&&n<.42)y=Math.sin((n-.3)/.12*Math.PI)*.2;y+=(Math.random()-.5)*.02;this._wD[this._wX%w]=y;this._wX++;}
+    const hr=Math.max(40,Math.min(200,this.p.HR));
+    const speedFactor=hr/60;
+    const steps=Math.max(1,Math.round(3*speedFactor));
+    const pr=180;
+    for(let i=0;i<steps;i++){
+      const n=(this._wX%pr)/pr;
+      let y=0;
+      if(n<.08)y=Math.sin(n/.08*Math.PI)*.12;
+      else if(n>.15&&n<.18)y=-.1;
+      else if(n>.18&&n<.22)y=Math.sin((n-.18)/.04*Math.PI)*.85;
+      else if(n>.22&&n<.26)y=-.15;
+      else if(n>.3&&n<.42)y=Math.sin((n-.3)/.12*Math.PI)*.2;
+      y+=(Math.random()-.5)*.02;
+      this._wD[this._wX%w]=y;
+      this._wX++;
+    }
     ctx.fillStyle='#030608';ctx.fillRect(0,0,w,h);ctx.strokeStyle='rgba(0,255,136,.05)';ctx.lineWidth=.5;for(let g=0;g<h;g+=12){ctx.beginPath();ctx.moveTo(0,g);ctx.lineTo(w,g);ctx.stroke();}
     ctx.strokeStyle='#00ff88';ctx.lineWidth=1.5;ctx.shadowColor='#00ff88';ctx.shadowBlur=3;ctx.beginPath();const hX=this._wX%w,mid=h*.5;for(let px=0;px<w;px++){const dX=(hX+px+1)%w,v=this._wD[dX]||0,dY=mid-v*mid*.8;if((w-px)<25)continue;px===0?ctx.moveTo(dX,dY):ctx.lineTo(dX,dY);}ctx.stroke();ctx.shadowBlur=0;
   }
 }
 
 const G=new Game();
-window.addEventListener('resize',()=>{G._wCtx=null;});
+window.addEventListener('resize',()=>{G._wCtx=null;G._lacCtx=null;});
 </script>
 </body>
 </html>
