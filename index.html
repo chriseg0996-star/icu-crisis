@@ -15,6 +15,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
 
+/* === MAIN MENU === */
+.mm{background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 16px 120px 16px;min-height:100vh;position:relative}
+.mm-title{font-family:var(--fd);font-size:clamp(28px,8vw,48px);font-weight:900;letter-spacing:clamp(4px,2vw,8px);color:var(--cy);text-align:center}
+.mm-sub{font-family:var(--fd);font-size:13px;letter-spacing:4px;color:var(--td);text-transform:uppercase}
+.mm-desc{font-size:10px;color:var(--tm);text-align:center;max-width:300px;line-height:1.5;padding:0 8px}
+.mm-divider{width:60px;height:1px;background:var(--cy);margin:8px 0}
+.mm-stats{font-size:9px;color:var(--td);text-align:center;margin:8px 0;line-height:1.6;min-height:28px}
+.mm-btn{padding:12px 48px;border:1px solid var(--cy);background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:6px;margin-top:16px;transition:all .2s;-webkit-user-select:none;user-select:none;min-height:44px}
+.mm-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.06)}
+.mm-btn:active{transform:scale(.95)}
+.mm-footer{position:absolute;bottom:16px;left:16px;right:16px;text-align:center;border-top:1px solid rgba(0,221,255,.2);padding-top:12px}
+.mm-credit{font-size:11px;font-weight:600;color:var(--cy);letter-spacing:1px;margin-bottom:6px}
+.mm-disclaimer{font-size:8px;color:var(--tm);line-height:1.4;max-width:280px;margin:0 auto}
+
 /* === LEVEL SELECT === */
 .ls{background:var(--bg);padding:16px;overflow-y:auto}
 .ls-title{font-family:var(--fd);font-size:16px;font-weight:900;letter-spacing:4px;color:var(--cy);text-align:center;margin-bottom:4px}
@@ -140,14 +154,53 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .pa-t{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:6px;color:var(--cy);margin-bottom:14px;animation:pp 2s infinite}
 @keyframes pp{0%,100%{opacity:1}50%{opacity:.35}}
 .pa-btn{padding:12px 32px;border:1px solid var(--cy);border-radius:6px;background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:13px;letter-spacing:3px;cursor:pointer}
+.pause-menu{display:flex;flex-direction:column;align-items:center}
+.pause-title{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:6px;color:var(--cy);margin-bottom:14px;animation:pp 2s infinite}
+.pause-btn{padding:12px 32px;margin:8px 0;border:1px solid var(--cy);background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:12px;letter-spacing:2px;cursor:pointer;border-radius:6px;transition:all .2s;width:160px;-webkit-user-select:none;user-select:none;min-height:44px}
+.pause-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.06)}
+.pause-btn.quit{color:var(--r);border-color:var(--r)}
+.pause-btn.quit:hover{color:var(--r);background:rgba(255,80,100,.06)}
 .pfab{position:absolute;top:4px;right:8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--b);background:var(--c);color:var(--tm);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:30}
+
+.modal{position:fixed;background:var(--c);border:1px solid var(--cy);padding:8px;border-radius:6px;z-index:50;width:180px;box-shadow:0 4px 12px rgba(0,0,0,.5);display:none}
+.modal.v{display:flex;flex-direction:column}
+.modal.fio2.v,.modal.peep.v{display:block}
+.modal.diag{bottom:110px;left:50%;transform:translateX(-50%)}
+.modal.fio2{bottom:110px;left:10px}
+.modal.peep{bottom:110px;right:10px}
+.modal.fio2,.modal.peep{width:160px}
+.modal button{margin:4px 2px;padding:6px 8px;font-size:10px;cursor:pointer;background:var(--b);border:1px solid var(--cy);color:var(--cy);border-radius:4px;font-family:var(--fm);-webkit-user-select:none;user-select:none}
+.modal.fio2>button:not(.modal-x),.modal.peep>button:not(.modal-x){display:inline-block;width:calc(50% - 4px);margin:2px;padding:6px 4px}
+.modal button:active{background:rgba(0,255,136,.1)}
+.modal-title{font-family:var(--fd);font-size:8px;letter-spacing:2px;color:var(--cy);text-align:center;margin-bottom:4px;text-transform:uppercase}
+.modal-val{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--g);text-align:center;margin:2px 0 4px}
+.modal button.wide{width:calc(100% - 4px);margin-top:2px}
+.modal-x{align-self:flex-end;padding:2px 6px;margin:-2px -2px 2px 0;font-size:10px;line-height:1;background:transparent;border:1px solid var(--b);color:var(--td);border-radius:4px;cursor:pointer;width:auto!important;display:block!important}
+@media (max-width:480px){
+.modal{width:140px;left:50%!important;right:auto!important;transform:translateX(-50%)!important;bottom:100px!important}
+.modal.fio2,.modal.peep{left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+}
 </style>
 </head>
 <body>
 <div id="app">
 
+<!-- === MAIN MENU === -->
+<div class="screen mm active" id="scr-mm">
+  <div class="mm-title">ICU CRISIS</div>
+  <div class="mm-sub">CLINICAL SIMULATION</div>
+  <div class="mm-desc">Diagnose and manage ICU patients under time pressure. No diagnosis spoilers. Pure clinical reasoning.</div>
+  <div class="mm-divider"></div>
+  <div class="mm-stats" id="mm-stats"></div>
+  <button class="mm-btn" onclick="G.showLevelSelect()">PLAY</button>
+  <div class="mm-footer">
+    <div class="mm-credit">Made by Christopher Godines</div>
+    <div class="mm-disclaimer">Medical simulation for educational purposes only. Not for clinical decision-making.</div>
+  </div>
+</div>
+
 <!-- === LEVEL SELECT SCREEN === -->
-<div class="screen ls active" id="scr-ls">
+<div class="screen ls" id="scr-ls">
   <div class="ls-title">ICU CRISIS</div>
   <div class="ls-sub">CLINICAL SIMULATION</div>
   <div id="ls-tiers"></div>
@@ -182,8 +235,37 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
 <!-- === OVERLAYS === -->
 <div class="ov ov-solid" id="ov-brief"><div class="pbb" id="pbb"></div></div>
-<div class="ov ov-dim" id="ov-pause"><div class="pa-t">PAUSED</div><button class="pa-btn" onclick="G.togglePause()">RESUME</button></div>
+<div class="ov ov-dim" id="ov-pause">
+  <div class="pause-menu" id="pause-menu">
+    <div class="pause-title">PAUSED</div>
+    <button class="pause-btn" onclick="G.unpause()">RESUME</button>
+    <button class="pause-btn" onclick="G.resetLevel()">RESTART</button>
+    <button class="pause-btn quit" onclick="G.quitToLevels()">QUIT</button>
+  </div>
+</div>
 <div class="ov ov-dim" id="ov-end"><div id="ov-end-c"></div></div>
+
+<div class="modal diag" id="modal-diag">
+  <button class="modal-x" onclick="G.closeModals()">✕</button>
+  <div class="modal-title">Diagnostics</div>
+  <button class="wide" onclick="G.runDiagFromMenu('pocus')">🩺 Lung POCUS</button>
+  <button class="wide" onclick="G.runDiagFromMenu('echo')">❤️ Bedside Echo</button>
+  <button class="wide" onclick="G.runDiagFromMenu('labs')">🧪 Labs Panel</button>
+</div>
+<div class="modal fio2" id="modal-fio2">
+  <button class="modal-x" onclick="G.confirmFio2()">✕</button>
+  <div class="modal-title">FiO₂</div>
+  <div class="modal-val" id="modal-fio2-val">40%</div>
+  <button onclick="G.adjustFio2(-1)">−10%</button>
+  <button onclick="G.adjustFio2(1)">+10%</button>
+</div>
+<div class="modal peep" id="modal-peep">
+  <button class="modal-x" onclick="G.confirmPeep()">✕</button>
+  <div class="modal-title">PEEP</div>
+  <div class="modal-val" id="modal-peep-val">8</div>
+  <button onclick="G.adjustPeep(-1)">−2</button>
+  <button onclick="G.adjustPeep(1)">+2</button>
+</div>
 </div>
 
 <script>
@@ -250,6 +332,14 @@ mixed:{name:'Mixed Pathology',desc:'Multiple concurrent problems overlapping.\nN
     {pt:'73M, intubated for worsening hypoxia',hx:'Admitted 3d ago for pneumonia. Multiple fluid boluses. Febrile again',vitals:[{t:'MAP 66',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 104',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Crackles + scattered rhonchi\n▸ Some secretions in ETT\n▸ Borderline warm peripheries\n▸ CXR: bilateral haze',concern:'Multiple overlapping findings\nUnclear dominant pathology'}]}
 };
 
+// Level 1 tutorial — fixed brief & stable edema case
+const LEVEL1_BRIEF={
+  pt:'64F, admitted for shortness of breath',
+  hx:'Bilateral crackles, CXR shows bilateral infiltrates, fluid overload suspected',
+  vitals:[{t:'MAP 72',c:'ok'},{t:'SpO₂ 89%',c:'w'},{t:'HR 98',c:'ok'},{t:'Lac 1.2',c:'ok'}],
+  exam:'▸ Crackles throughout both lungs\n▸ Mild peripheral edema\n▸ Elevated JVP',
+  concern:'Hypoxemia from pulmonary edema. Needs diuresis.'};
+
 // ================================================================
 //  LEVEL DATABASE  -  30 levels
 // ================================================================
@@ -257,6 +347,7 @@ const LEVELS=[];
 // Tier 1: Single pathology (1-5)
 const t1=[['edema'],['airway'],['sepsis'],['hypovolemic'],['copd']];
 t1.forEach((p,i)=>LEVELS.push({id:i+1,tier:1,paths:p,mult:0.8,stabReq:15,events:0,desc:'Single pathology'}));
+LEVELS[0]={id:1,tier:1,paths:['edema'],mult:0.5,stabReq:12,events:0,desc:'Tutorial: pulmonary edema'};
 // Tier 2: Single harder (6-10)
 const t2=[['cardiogenic'],['pe'],['rvfail'],['sepsis'],['edema']];
 t2.forEach((p,i)=>LEVELS.push({id:i+6,tier:2,paths:p,mult:1.0,stabReq:18,events:1,desc:'Single, faster'}));
@@ -328,7 +419,7 @@ class Patient {
   constructor(){this.reset(['edema'],1);}
 
   reset(pathKeys,mult){
-    this.pathKeys=pathKeys;this.mult=mult;
+    this.pathKeys=pathKeys;this.mult=mult;this._tutorial=false;
     // Merge init values from all active pathologies
     const merged={edema:0,sec:0,inf:0,vasc:80,perf:78,co2bias:0,rvStrain:0,autoPeep:0,bleed:0};
     const mRates={edema:0,sec:0,inf:0,vasc:0};
@@ -370,12 +461,25 @@ class Patient {
     this._neJust=false;this._mapAtF=0;this._mapAtN=0;
   }
 
+  initLevel1(){
+    this._tutorial=true;
+    this.pulmonaryEdema=35;this.secretions=15;this.infection=3;
+    this.vascularTone=80;this.perfusion=78;this.lactate=1.2;
+    this.lacHist=[1.2];this.cardiacOutput=72;
+    this.oxygenation=92;this.compliance=50-this.pulmonaryEdema*.15;
+    this.rates={edema:.01,sec:0,inf:.01,vasc:0};
+    this.phase=1;this.phaseT=0;
+    this.nextSecEvt=9999;
+    this._dMAP=72;this._dSpO2=89;this._dHR=98;this._dRR=20;
+    this.clues=['Bilateral crackles on exam.','CXR: bilateral infiltrates.','Hypoxemia — consider diuresis.'];
+  }
+
   get phaseName(){return['','STABLE','DECLINING','UNSTABLE','CRASHING'][this.phase]}
   get phaseCSS(){return['','s','d','u','x'][this.phase]}
 
   get rawHR(){let h=55+(100-this.perfusion)*.7+(100-this.oxygenation)*.25+this.infection*.2+(100-this.vascularTone)*.15+this.rvStrain*.1;if(this.norepiOn)h+=5;if(this.bleed>15)h+=this.bleed*.3;return Math.round(Math.min(200,Math.max(30,h)));}
-  get rawMAP(){let m=20+this.vascularTone*.35+this.cardiacOutput*.25;if(this.norepiOn)m+=14;if(this.diureticActive)m-=3;if(this.peep>10)m-=(this.peep-10)*1.5;if(this.rvStrain>30)m-=(this.rvStrain-30)*.15;for(const b of this._mapB)m+=b.a;return Math.round(Math.min(140,Math.max(20,m)));}
-  get rawSpO2(){const ce=this.compliance/50,le=Math.max(.3,1-this.lungInjury/120);const eo=this.oxygenation*le*ce;const pb=Math.min(8,(this.peep-5)*.7*(1+this.pulmonaryEdema/100));let s=68+eo*.28+(this.fio2-21)*.07+pb-this.secretions*.22-this.pulmonaryEdema*.18;if(this._hasPneumo)s-=8;if(this.rvStrain>25)s-=(this.rvStrain-25)*.12;for(const b of this._oxyB)s+=b.a;return Math.round(Math.min(100,Math.max(0,s)));}
+  get rawMAP(){let m=20+this.vascularTone*.35+this.cardiacOutput*.25;if(this.norepiOn)m+=14;if(this.diureticActive)m-=(this._tutorial?1:3);if(this.peep>10)m-=(this.peep-10)*1.5;if(this.rvStrain>30)m-=(this.rvStrain-30)*.15;for(const b of this._mapB)m+=b.a;return Math.round(Math.min(140,Math.max(20,m)));}
+  get rawSpO2(){const ce=this.compliance/50,le=Math.max(.3,1-this.lungInjury/120);const eo=this.oxygenation*le*ce;const pb=Math.min(8,(this.peep-5)*.7*(1+this.pulmonaryEdema/100));let s=68+eo*.28+(this.fio2-21)*.07+pb-this.secretions*.22-this.pulmonaryEdema*(this._tutorial&&this.pulmonaryEdema>30?0.22:0.18);if(this._hasPneumo)s-=8;if(this.rvStrain>25)s-=(this.rvStrain-25)*.12;for(const b of this._oxyB)s+=b.a;return Math.round(Math.min(100,Math.max(0,s)));}
   get rawRR(){return Math.round(Math.min(45,Math.max(6,12+(100-this.oxygenation)*.16+this.infection*.07+this.pulmonaryEdema*.06+this.lungInjury*.04+this.co2bias*.15)));}
   get HR(){return Math.round(this._dHR)}
   get MAP(){return Math.round(this._dMAP)}
@@ -388,11 +492,13 @@ class Patient {
 
   tick(dt,gt){
     const M=this.mult,R=this.rates;
-    this.infection=Math.min(100,this.infection+(R.inf+Math.random()*.08)*M);
+    this.infection=Math.min(100,this.infection+(R.inf+Math.random()*(.08*(this._tutorial?0:1)))*M);
     this.phaseT+=dt;
-    if(this.phase===1&&(this.infection>25||gt>60)){this.phase=2;this.phaseT=0;}
-    if(this.phase===2&&(this.infection>50||gt>180)){this.phase=3;this.phaseT=0;}
-    if(this.phase===3&&(this.infection>75||gt>360)){this.phase=4;this.phaseT=0;}
+    if(!this._tutorial){
+      if(this.phase===1&&(this.infection>25||gt>60)){this.phase=2;this.phaseT=0;}
+      if(this.phase===2&&(this.infection>50||gt>180)){this.phase=3;this.phaseT=0;}
+      if(this.phase===3&&(this.infection>75||gt>360)){this.phase=4;this.phaseT=0;}
+    }
 
     // Vascular tone
     this.vascularTone-=this.infection*R.vasc*(this.phase>=3?1.6:1);
@@ -441,15 +547,15 @@ class Patient {
     this.compliance=Math.max(15,Math.min(60,this.compliance));
 
     // Secretions
-    if(gt>=this.nextSecEvt){this.secretions=Math.min(90,this.secretions+(5+Math.random()*10)*(this.phase>=2?1.5:1)*R.sec);this.secEvtCount++;this.nextSecEvt=gt+35+Math.floor(Math.random()*25);}
-    if(this.secretions>10)this.secretions+=.04*(this.phase>=3?2:1);
+    if(!this._tutorial&&gt>=this.nextSecEvt){this.secretions=Math.min(90,this.secretions+(5+Math.random()*10)*(this.phase>=2?1.5:1)*R.sec);this.secEvtCount++;this.nextSecEvt=gt+35+Math.floor(Math.random()*25);}
+    if(this.secretions>10&&!this._tutorial)this.secretions+=.04*(this.phase>=3?2:1);
     this.secretions=Math.max(0,Math.min(100,this.secretions));
 
     // Edema
     if(this.totalFluids>1500)this.pulmonaryEdema=Math.min(80,this.pulmonaryEdema+((this.totalFluids-1500)/1000)*.05);
     this.pulmonaryEdema+=R.edema*(this.phase>=2?1.3:1)*M;
     if(this.infection>40)this.pulmonaryEdema+=.01*(this.infection/100);
-    if(this.diureticActive){this.diureticTimer-=dt;this.pulmonaryEdema=Math.max(0,this.pulmonaryEdema-.35);this.totalFluids=Math.max(0,this.totalFluids-8);if(this.diureticTimer<=0)this.diureticActive=false;}
+    if(this.diureticActive){this.diureticTimer-=dt;const dr=this._tutorial?0.5:0.35;this.pulmonaryEdema=Math.max(0,this.pulmonaryEdema-dr);this.totalFluids=Math.max(0,this.totalFluids-8);if(this.diureticTimer<=0)this.diureticActive=false;}
     this.pulmonaryEdema=Math.max(0,Math.min(100,this.pulmonaryEdema));
 
     // Auto-PEEP (COPD)
@@ -466,6 +572,8 @@ class Patient {
     const lE=Math.max(.3,1-this.lungInjury/120);
     this.oxygenation+=(this.fio2-40)*.012*lE*(this.compliance/50);
     this.oxygenation-=.07+this.infection*.004+this.pulmonaryEdema*.003+this.lungInjury*.002;
+    if(this._tutorial&&this.pulmonaryEdema<15)this.oxygenation=Math.min(100,this.oxygenation+.25);
+    if(this._tutorial&&this.diureticActive)this.oxygenation=Math.min(100,this.oxygenation+.12);
     this.oxygenation=Math.max(0,Math.min(100,this.oxygenation));
     this.perfusion=Math.max(0,Math.min(100,this.perfusion));
 
@@ -481,7 +589,8 @@ class Patient {
     const gm=this.MAP>=65&&this.SpO2>=92&&this.HR<130;
     const ls=this.lactate<2.5;
     const nc=this.vascularTone>30&&this.secretions<40&&this.pulmonaryEdema<40;
-    if(gm&&ls&&nc&&gt>90){this.stableT+=dt;if(this.stableT>=5&&!this.stabAnnounced)this.stabAnnounced=true;}
+    const gtMin=this._tutorial?10:90;
+    if(gm&&ls&&nc&&gt>gtMin){this.stableT+=dt;if(this.stableT>=5&&!this.stabAnnounced)this.stabAnnounced=true;}
     else{if(this.stabAnnounced)this.stabAnnounced=false;this.stableT=Math.max(0,this.stableT-dt*2);}
 
     // Arrest
@@ -493,7 +602,7 @@ class Patient {
 
   giveFluids(){this._mapAtF=this.MAP;this.totalFluids+=500;this.fluidBoluses++;this.perfusion=Math.min(100,this.perfusion+4);this.cardiacOutput=Math.min(100,this.cardiacOutput+3);const resp=this.vascularTone>30;this._mapB.push({a:resp?6:2,r:12,d:(resp?6:2)/12});this._perfB.push({a:8,r:10,d:.8});return resp;}
   doSuction(){if(this.secretions>15){const c=Math.min(this.secretions,25+Math.random()*15);this.secretions=Math.max(0,this.secretions-c);this.goodSuctions++;this._oxyB.push({a:4,r:15,d:4/15});return true;}this.badSuctions++;this.secretions+=2;return false;}
-  giveDiuretic(){this.diureticActive=true;this.diureticTimer=45;this.diureticsGiven++;this.perfusion=Math.max(0,this.perfusion-3);this.cardiacOutput=Math.max(10,this.cardiacOutput-3);}
+  giveDiuretic(){this.diureticActive=true;this.diureticTimer=45;this.diureticsGiven++;if(this._tutorial){this.perfusion=Math.max(0,this.perfusion-1);this.cardiacOutput=Math.max(10,this.cardiacOutput-1);this._oxyB.push({a:5,r:15,d:5/15});this._dSpO2=Math.min(100,this._dSpO2+5);}else{this.perfusion=Math.max(0,this.perfusion-3);this.cardiacOutput=Math.max(10,this.cardiacOutput-3);}}
   getABG(){const lE=Math.max(.3,1-this.lungInjury/120),eo=this.oxygenation*lE*(this.compliance/50);const pao2=Math.max(30,Math.min(500,Math.round(35+eo*.55+(this.fio2-21)*.75+(this.peep-5)*1.2-this.secretions*.25-this.pulmonaryEdema*.2)));const ph=Math.max(6.9,Math.min(7.55,Math.round((7.25+this.perfusion*.002-this.infection*.001-this.lactate*.008)*100)/100));const paco2=Math.max(15,Math.min(80,Math.round(45-(this.RR-14)*.8+(this.tidalVolume-6)*1.5+this.co2bias+this.autoPeep*.8)));const pf=Math.round(pao2/(this.fio2/100));
     // Interpretation
     const oF=pf<200,pF=this.lactate>2.5,acid=ph<7.30,hiCo2=paco2>50;
@@ -518,8 +627,24 @@ class Game {
     this.lt=0;this.acc=0;
     // DOM refs
     this.$ = id => document.getElementById(id);
-    this.initLS();
+    this.showMainMenu();
     this.renderLoop();
+  }
+
+  showMainMenu(){
+    this.showScreen('scr-mm');
+    const stats=this.getSave();
+    const completed=Object.keys(stats).filter(k=>k.startsWith('l')&&stats[k].stars>0).length;
+    const scores=Object.keys(stats).filter(k=>k.startsWith('l')).map(k=>stats[k].score||0);
+    const bestScore=scores.length?Math.max(...scores):0;
+    const statsDiv=this.$('mm-stats');
+    if(completed>0)statsDiv.innerHTML='Levels Completed: '+completed+'/30<br>Best Score: '+bestScore;
+    else statsDiv.textContent='Ready to diagnose?';
+  }
+
+  showLevelSelect(){
+    this.initLS();
+    this.showScreen('scr-ls');
   }
 
   // -- Save/Load --
@@ -553,9 +678,8 @@ class Game {
   startLevel(n){
     this.lvl=LEVELS[n-1];if(!this.lvl)return;
     this.showScreen('scr-gs');
-    // Pick case from primary pathology
     const pk=this.lvl.paths[0];const pr=PATH[pk];
-    const cs=pr.cases[Math.floor(Math.random()*pr.cases.length)];
+    const cs=(n===1)?LEVEL1_BRIEF:pr.cases[Math.floor(Math.random()*pr.cases.length)];
 
     // Show brief
     const bb=this.$('pbb');
@@ -577,11 +701,13 @@ class Game {
     this._stabM1=false;this._stabM2=false;this._abgUntil=0;this._abgN=0;
 
     this.p.reset(lv.paths,lv.mult);
+    if(lv.id===1)this.p.initLevel1();
 
-    // Schedule events
+    // Schedule events — Level 1+ never fires acute events when events < 1
     this.evts=[];
     if(lv.events>=1){const t1=100+Math.floor(Math.random()*80);const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];this.evts.push({time:t1,evt:e,fired:false});}
     if(lv.events>=2){const t2=280+Math.floor(Math.random()*100);const pool=EVENTS.filter(e=>!this.evts.some(x=>x.evt.id===e.id));const e2=pool[Math.floor(Math.random()*pool.length)]||EVENTS[0];this.evts.push({time:t2,evt:e2,fired:false});}
+    if(lv.events<1)this.evts=[];
 
     // UI
     this.$('hdr-lvl').textContent='LVL '+lv.id;
@@ -612,18 +738,31 @@ class Game {
     h+=ab('ah','💧','Fluids','+500ml','G.doFluids()','bf','cf');
     h+=ab('ah','⚡','Norepi','vasopressor','G.toggleNE()','bn');
     h+=ab('ah','💊','Diuretic','furosemide','G.doDiuretic()','bd','cdi');
-    h+=ab('av','↑O₂','FiO₂+10',null,'G.fio2(1)');
-    h+=ab('av','↑P','PEEP+2',null,'G.peep(1)');
+    h+=ab('av','O₂','FiO₂',null,'G.showFio2Modal()');
+    h+=ab('av','P','PEEP',null,'G.showPeepModal()');
     h+=ab('av','🫧','Suction','airway','G.doSuction()','bs','cs');
-    h+=ab('av','↓O₂','FiO₂-10',null,'G.fio2(-1)');
-    h+=ab('av','↓P','PEEP-2',null,'G.peep(-1)');
     h+=ab('al','🩸','ABG','~15s','G.orderABG()','ba','ca');
-    // Diagnostic tools row
-    h+=ab('ad','🩺','POCUS',null,'G.runDiag("pocus")','dp','dpc');
-    h+=ab('ad','❤️','Echo',null,'G.runDiag("echo")','de','dec');
-    h+=ab('ad','🧪','Labs',null,'G.runDiag("labs")','dl','dlc');
+    h+=ab('ad','🔬','Diagnostics','menu','G.showDiagMenu()');
     g.innerHTML=h;
   }
+
+  closeModals(){document.querySelectorAll('.modal').forEach(el=>el.classList.remove('v'));}
+
+  showDiagMenu(){if(this._bl())return;this.closeModals();this.$('modal-diag').classList.add('v');}
+
+  showFio2Modal(){if(this._bl())return;this.closeModals();this._modalFio2Start=this.p.fio2;this.$('modal-fio2-val').textContent=this.p.fio2+'%';this.$('modal-fio2').classList.add('v');}
+
+  showPeepModal(){if(this._bl())return;this.closeModals();this._modalPeepStart=this.p.peep;this.$('modal-peep-val').textContent=this.p.peep;this.$('modal-peep').classList.add('v');}
+
+  adjustFio2(dir){if(dir>0&&this.p.fio2>=100)return;if(dir<0&&this.p.fio2<=21)return;this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.$('modal-fio2-val').textContent=this.p.fio2+'%';}
+
+  adjustPeep(dir){if(dir>0&&this.p.peep>=18)return;if(dir<0&&this.p.peep<=4)return;this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.$('modal-peep-val').textContent=this.p.peep;}
+
+  confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log('FiO₂ → '+this.p.fio2+'%.'+(this.p.fio2>60?' ⚠ Toxicity risk.':''),this.p.fio2>80?'w':'i');}this.closeModals();}
+
+  confirmPeep(){if(this.p.peep!==this._modalPeepStart){this.log('PEEP → '+this.p.peep+'.'+(this.p.peep>12?' ⚠ Watch MAP.':''),'i');if(this.p._hasPneumo&&this.p.peep<=8){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log('Chest decompressed. Stabilizing.','s');}}this.closeModals();}
+
+  runDiagFromMenu(key){this.closeModals();this.runDiag(key);}
 
   // -- Core Loop --
   renderLoop(){
@@ -722,12 +861,12 @@ class Game {
   // -- Actions --
   _bl(){return this.over||this.paused||!this.running;}
   _toast(id,t,c){const el=this.$(id);if(!el)return;const s=document.createElement('span');s.className='mt '+(c||'pos');s.textContent=t;el.appendChild(s);el.classList.add('gw');setTimeout(()=>{el.classList.remove('gw');if(s.parentNode)s.remove();},1200);}
-  _setCD(key,id,cdid,sec){this._cd[key]=true;const b=this.$(id),c=this.$(cdid);if(!b||!c)return;b.classList.add('cd');let r=sec;c.textContent=r+'s';const iv=setInterval(()=>{r--;c.textContent=r+'s';if(r<=0){clearInterval(iv);b.classList.remove('cd');c.textContent='';this._cd[key]=false;}},1000);}
+  _setCD(key,id,cdid,sec){this._cd[key]=true;const b=id?this.$(id):null,c=cdid?this.$(cdid):null;if(b)b.classList.add('cd');let r=sec;if(c)c.textContent=r+'s';const iv=setInterval(()=>{r--;if(c)c.textContent=r>0?r+'s':'';if(r<=0){clearInterval(iv);if(b)b.classList.remove('cd');this._cd[key]=false;}},1000);}
 
   doFluids(){if(this._bl()||this._cd.f)return;const r=this.p.giveFluids();this._toast('bf',r?'+MAP':'~','pos');this.log('Fluid bolus +500ml (total: '+this.p.totalFluids+'ml).','i');setTimeout(()=>{if(this.over)return;if(r)this.log('Transient preload response.','s');else this.log('Minimal fluid response.','w');},2000);this._setCD('f','bf','cf',8);}
   toggleNE(){if(this._bl())return;this.p.norepiOn=!this.p.norepiOn;if(this.p.norepiOn){this.p._neJust=true;this.p._mapAtN=this.p.MAP;this.p._mapB.push({a:5,r:8,d:5/8});this._toast('bn','+MAP','pos');this.log('Norepinephrine STARTED.','i');setTimeout(()=>{if(!this.over&&this.p.norepiOn){const d=this.p.MAP-this.p._mapAtN;this.log(d>=5?'MAP responding (+'+d+').':'MAP trend improving.','s');}},4000);}else{this.log('Norepinephrine STOPPED.','i');}}
   doSuction(){if(this._bl()||this._cd.s)return;const r=this.p.doSuction();this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');this.log(r?'Suction: thick secretions cleared.':'Suction: minimal secretions.',r?'s':'');this._setCD('s','bs','cs',12);}
-  doDiuretic(){if(this._bl()||this._cd.di)return;if(this.p.diureticActive){this.log('Already infusing.','');return;}this.p.giveDiuretic();this.log('Furosemide 40mg IV.','i');setTimeout(()=>{if(!this.over){if(this.p.pulmonaryEdema>15)this.log('Urine output improving. Crackles better.','s');else this.log('Minimal diuretic response.','w');}},10000);this._setCD('di','bd','cdi',30);}
+  doDiuretic(){if(this._bl()||this._cd.di)return;if(this.p.diureticActive){this.log('Already infusing.','');return;}this.p.giveDiuretic();this.log('Furosemide 40mg IV.','i');const fb=this.p._tutorial?5000:10000;setTimeout(()=>{if(!this.over){if(this.p.pulmonaryEdema>15||this.p._tutorial)this.log('Urine output increasing. Crackles improving.','s');else this.log('Minimal diuretic response.','w');}},fb);this._setCD('di','bd','cdi',30);}
   fio2(dir){if(this._bl())return;if(dir>0&&this.p.fio2>=100){this.log('FiO₂ max.','');return;}if(dir<0&&this.p.fio2<=21){this.log('FiO₂ at RA.','');return;}this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.log('FiO₂ → '+this.p.fio2+'%.'+(this.p.fio2>60?' ⚠ Toxicity risk.':''),this.p.fio2>80?'w':'i');}
   peep(dir){if(this._bl())return;if(dir>0&&this.p.peep>=18){this.log('PEEP max.','');return;}if(dir<0&&this.p.peep<=4){this.log('PEEP min.','');return;}this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.log('PEEP → '+this.p.peep+'.'+(this.p.peep>12?' ⚠ Watch MAP.':''),'i');if(this.p._hasPneumo&&this.p.peep<=8&&dir<0){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log('Chest decompressed. Stabilizing.','s');}}
 
@@ -735,18 +874,23 @@ class Game {
     setTimeout(()=>{if(this.over)return;const a=this.p.getABG();const sev=a.Lac>4?'d':a.Lac>2?'w':'s';this.log('ABG → pH '+a.pH.toFixed(2)+' | PaO₂ '+a.PaO2+' | PaCO₂ '+a.PaCO2+' | Lac '+a.Lac.toFixed(1)+' | P/F '+a.PF,sev);this.log(a.interp,a.PF<200||a.Lac>2.5?'w':'s');this._abgUntil=this.gt+20;this.abgPend=false;},10000);}
 
   runDiag(key){const tool=DIAG_TOOLS[key];if(!tool||this._bl()||this._cd['d_'+key])return;
-    const idMap={pocus:'dp',echo:'de',labs:'dl'};const cdMap={pocus:'dpc',echo:'dec',labs:'dlc'};
-    this.log(tool.name+' ordered...','i');this._setCD('d_'+key,idMap[key],cdMap[key],tool.cd);
+    this.log(tool.name+' ordered...','i');this._setCD('d_'+key,null,null,tool.cd);
     setTimeout(()=>{if(this.over)return;const r=tool.run(this.p);this.log(r,'i');this._abgUntil=Math.max(this._abgUntil,this.gt+12);},tool.delay*1000);}
 
-  togglePause(){if(this.over||!this.running)return;this.paused=!this.paused;if(this.paused)this.showOv('ov-pause');else{this.hideOv('ov-pause');this.lt=performance.now();this.acc=0;}}
+  togglePause(){if(this.over||!this.running)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');}}
+
+  unpause(){if(this.over||!this.running||!this.paused)return;this.paused=false;this.hideOv('ov-pause');this.lt=performance.now();this.acc=0;}
+
+  resetLevel(){if(!this.lvl)return;this.paused=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this.showScreen('scr-gs');this.acceptCase();}
+
+  quitToLevels(){this.paused=false;this.running=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this.showLevelSelect();}
   toggleLog(){const l=this.$('log');l.classList.toggle('exp');this.$('lx').textContent=l.classList.contains('exp')?'▲':'▼';}
 
   log(t,type){const d=document.createElement('div');d.className='lm '+(type||'');d.textContent='▸ '+t;const l=this.$('log');l.appendChild(d);l.scrollTop=l.scrollHeight;while(l.children.length>50)l.removeChild(l.children[1]);}
 
   // -- End Game --
   endGame(win,winType){
-    this.over=true;this.running=false;this.$('app').classList.remove('alarm');
+    this.closeModals();this.over=true;this.running=false;this.$('app').classList.remove('alarm');
     const p=this.p,lv=this.lvl,mins=Math.floor(this.gt/60),secs=this.gt%60;
     let reason=!win?p.arrestReason:winType==='stabilized'?'Patient stabilized through correct treatment.':'Patient survived the full window.';
 
@@ -782,7 +926,7 @@ class Game {
     this.showOv('ov-end');
   }
 
-  goLS(){this.hideOv('ov-end');this.showScreen('scr-ls');this.initLS();}
+  goLS(){this.hideOv('ov-end');this.showLevelSelect();}
 
   // -- Waveform --
   drawWave(){
