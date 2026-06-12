@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-<title>ICU Crisis</title>
+<title>ICU Crisis — Clinical Reasoning Game</title>
+<meta name="description" content="Diagnose and stabilize ICU patients in real time. Pure clinical reasoning under pressure: ventilator, vasopressors, diagnostics. No spoilers.">
+<meta name="theme-color" content="#030608">
+<meta property="og:title" content="ICU Crisis — Clinical Reasoning Game">
+<meta property="og:description" content="Diagnose and stabilize ICU patients in real time. Pure clinical reasoning under pressure. Can you keep them alive?">
+<meta property="og:image" content="https://chriseg0996-star.github.io/icu-crisis/og.png">
+<meta property="og:url" content="https://chriseg0996-star.github.io/icu-crisis/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -168,6 +181,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .go-btns{display:flex;gap:8px;margin-top:8px}
 .go-btn{flex:1;padding:10px;border:1px solid var(--b);border-radius:6px;background:var(--c);color:var(--tm);font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;text-align:center}
 .go-btn.pri{border-color:var(--cy);color:var(--cy);background:rgba(0,221,255,.06)}
+.go-btn.share{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.05)}
+.go-debrief{margin:6px 0;padding:7px 10px;border:1px solid var(--y);border-radius:4px;font-size:8px;color:var(--y);line-height:1.6;max-width:360px;text-align:left}
+.go-debrief strong{color:var(--w);font-weight:normal;letter-spacing:1px}
+
+/* Guided tutorial */
+.tut-ov{position:absolute;inset:0;background:rgba(0,0,0,.62);z-index:90;display:none}
+.tut-ov.v{display:block}
+.tut-box{position:absolute;z-index:92;background:var(--p);border:1px solid var(--cy);border-radius:8px;padding:10px 12px;max-width:250px;font-size:10px;line-height:1.55;color:var(--w);box-shadow:0 6px 24px rgba(0,0,0,.7)}
+.tut-box .tut-t{font-family:var(--fd);color:var(--cy);font-size:9px;letter-spacing:2px;margin-bottom:5px}
+.tut-box .tut-btns{display:flex;gap:8px;margin-top:9px;justify-content:flex-end}
+.tut-box button{background:rgba(0,221,255,.1);border:1px solid var(--cy);color:var(--cy);font-family:var(--fd);font-size:9px;padding:6px 12px;border-radius:5px;cursor:pointer;letter-spacing:1px}
+.tut-box button.skip{border-color:var(--b);color:var(--tm);background:none}
+.tut-hl{position:relative;z-index:91;box-shadow:0 0 0 2px var(--cy),0 0 18px rgba(0,221,255,.55);border-radius:6px}
 
 @keyframes pp{0%,100%{opacity:1}50%{opacity:.35}}
 .pause-menu{display:flex;flex-direction:column;align-items:center}
@@ -301,6 +327,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <button onclick="G.adjustVt(1)">+1</button>
   </div>
 </div>
+
+<div class="tut-ov" id="tut-ov"><div class="tut-box" id="tut-box"></div></div>
 </div>
 
 <script src="i18n.js"></script>
@@ -335,37 +363,63 @@ pe:{name:'Pulmonary Embolism',desc:'Acute PE with RV strain.\nClues: sudden desa
   rates:{edema:.01,sec:.2,inf:.08,vasc:.003},
   clues:['Sudden-onset tachycardia.','SpO₂ drops with clear lungs.','RV strain on ECG pattern.'],
   cases:[
-    {pt:'52F, POD3 hip replacement, sudden deterioration',hx:'Was doing well. Acute onset dyspnea and tachycardia 30min ago',vitals:[{t:'MAP 68',c:'w'},{t:'SpO₂ 88%',c:'w'},{t:'HR 120',c:'w'},{t:'Lac 1.8',c:'ok'}],exam:'▸ Lungs clear bilaterally\n▸ JVP elevated\n▸ Loud P2, RV heave\n▸ Unilateral leg edema noted',concern:'Sudden desaturation with clear lungs\nAcute right heart strain pattern'}]},
+    {pt:'52F, POD3 hip replacement, sudden deterioration',hx:'Was doing well. Acute onset dyspnea and tachycardia 30min ago',vitals:[{t:'MAP 68',c:'w'},{t:'SpO₂ 88%',c:'w'},{t:'HR 120',c:'w'},{t:'Lac 1.8',c:'ok'}],exam:'▸ Lungs clear bilaterally\n▸ JVP elevated\n▸ Loud P2, RV heave\n▸ Unilateral leg edema noted',concern:'Sudden desaturation with clear lungs\nAcute right heart strain pattern'},
+    {pt:'47M, ICU day 2 after femur fixation, acute event',hx:'On DVT prophylaxis only. Sudden HR jump while being turned',vitals:[{t:'MAP 64',c:'w'},{t:'SpO₂ 86%',c:'w'},{t:'HR 124',c:'w'},{t:'Lac 2.0',c:'w'}],exam:'▸ Clear lungs, no crackles\n▸ New S1Q3 pattern on telemetry\n▸ Distended neck veins\n▸ Left calf swelling',concern:'Acute hypoxia with a clear chest\nObstructive physiology suspected'},
+    {pt:'66F, metastatic cancer, sudden collapse on ward',hx:'Hypercoagulable state. Syncopal episode, now intubated',vitals:[{t:'MAP 60',c:'w'},{t:'SpO₂ 87%',c:'w'},{t:'HR 126',c:'w'},{t:'Lac 2.6',c:'w'}],exam:'▸ Lungs clear bilaterally\n▸ RV heave, loud P2\n▸ JVP elevated\n▸ ECG: right heart strain',concern:'Shock with clear lungs\nHigh thrombotic risk'}]},
 copd:{name:'COPD Exacerbation',desc:'Air trapping and hyperinflation.\nClues: prolonged expiration, auto-PEEP, CO₂ rising, wheezing.\nOptimal: reduce RR, allow exhalation, bronchodilators (implied).',
   init:{edema:0,sec:10,inf:8,vasc:75,perf:74,co2bias:12,rvStrain:0,autoPeep:6,bleed:0},
   rates:{edema:.01,sec:.5,inf:.1,vasc:.003},
   clues:['Prolonged expiratory phase.','Auto-PEEP detected on vent.','PaCO₂ trending up.'],
   cases:[
-    {pt:'69M, known COPD, intubated for respiratory failure',hx:'Uses home O₂. Came in wheezing. Intubated after BiPAP failure',vitals:[{t:'MAP 74',c:'ok'},{t:'SpO₂ 90%',c:'w'},{t:'HR 108',c:'ok'},{t:'Lac 1.5',c:'ok'}],exam:'▸ Diffuse wheezes, prolonged expiration\n▸ Barrel chest\n▸ Vent: flow not reaching zero before next breath\n▸ Intrinsic PEEP measured at 6',concern:'Difficult to ventilate\nTrapped air, auto-cycling vent alarms'}]},
+    {pt:'69M, known COPD, intubated for respiratory failure',hx:'Uses home O₂. Came in wheezing. Intubated after BiPAP failure',vitals:[{t:'MAP 74',c:'ok'},{t:'SpO₂ 90%',c:'w'},{t:'HR 108',c:'ok'},{t:'Lac 1.5',c:'ok'}],exam:'▸ Diffuse wheezes, prolonged expiration\n▸ Barrel chest\n▸ Vent: flow not reaching zero before next breath\n▸ Intrinsic PEEP measured at 6',concern:'Difficult to ventilate\nTrapped air, auto-cycling vent alarms'},
+    {pt:'74F, severe COPD, intubated for hypercapnic coma',hx:'FEV1 28%. PaCO₂ 95 on arrival, pH 7.12',vitals:[{t:'MAP 70',c:'ok'},{t:'SpO₂ 89%',c:'w'},{t:'HR 112',c:'w'},{t:'Lac 1.7',c:'ok'}],exam:'▸ Distant breath sounds, faint wheeze\n▸ Hyperresonant chest\n▸ Vent: expiratory flow never reaches baseline\n▸ Breath stacking visible',concern:'Severe air trapping\nPressure dips with every stacked breath'},
+    {pt:'63M, smoker, failed extubation this morning',hx:'Re-intubated 1h ago. Agitated, asynchronous with vent',vitals:[{t:'MAP 76',c:'ok'},{t:'SpO₂ 91%',c:'w'},{t:'HR 105',c:'ok'},{t:'Lac 1.4',c:'ok'}],exam:'▸ Diffuse expiratory wheeze\n▸ Prolonged expiratory phase\n▸ High peak, normal plateau pressures\n▸ Auto-PEEP 8 on hold maneuver',concern:'Resistive pressure pattern\nCO₂ climbing despite ventilation'}]},
 cardiogenic:{name:'Cardiogenic Shock',desc:'Pump failure with low output.\nClues: cold extremities, elevated JVP, pulmonary edema, low CO.\nOptimal: cautious fluids (often harmful), vasopressors, diuretics.',
   init:{edema:20,sec:0,inf:5,vasc:80,perf:55,co2bias:0,rvStrain:15,autoPeep:0,bleed:0},
   rates:{edema:.06,sec:.2,inf:.06,vasc:.002},
   clues:['Cold mottled extremities.','JVP markedly elevated.','Gallop rhythm on auscultation.'],
   cases:[
-    {pt:'72M, found unresponsive, intubated in ED',hx:'PMH: ischemic cardiomyopathy, EF 20%. Missed medications x3 days',vitals:[{t:'MAP 58',c:'w'},{t:'SpO₂ 89%',c:'w'},{t:'HR 110',c:'w'},{t:'Lac 3.5',c:'w'}],exam:'▸ Cold, mottled extremities\n▸ JVP to earlobes\n▸ S3 gallop, bilateral crackles\n▸ CXR: cardiomegaly, pulmonary edema',concern:'Shock with cold peripheries\nBoth hemodynamics and oxygenation failing'}]},
+    {pt:'72M, found unresponsive, intubated in ED',hx:'PMH: ischemic cardiomyopathy, EF 20%. Missed medications x3 days',vitals:[{t:'MAP 58',c:'w'},{t:'SpO₂ 89%',c:'w'},{t:'HR 110',c:'w'},{t:'Lac 3.5',c:'w'}],exam:'▸ Cold, mottled extremities\n▸ JVP to earlobes\n▸ S3 gallop, bilateral crackles\n▸ CXR: cardiomegaly, pulmonary edema',concern:'Shock with cold peripheries\nBoth hemodynamics and oxygenation failing'},
+    {pt:'58F, anterior STEMI s/p PCI, deteriorating',hx:'Door-to-balloon 90min. EF now 25% on bedside echo',vitals:[{t:'MAP 56',c:'w'},{t:'SpO₂ 90%',c:'w'},{t:'HR 115',c:'w'},{t:'Lac 3.8',c:'w'}],exam:'▸ Cold clammy extremities\n▸ Faint pulses, narrow pulse pressure\n▸ Bibasilar crackles\n▸ Oliguric since admission',concern:'Post-MI pump failure\nEnd-organ hypoperfusion progressing'},
+    {pt:'66M, new-onset heart failure, intubated for exhaustion',hx:'Viral illness 2 weeks ago. Troponin mildly elevated',vitals:[{t:'MAP 60',c:'w'},{t:'SpO₂ 91%',c:'w'},{t:'HR 118',c:'w'},{t:'Lac 2.9',c:'w'}],exam:'▸ Cool peripheries, mottling at knees\n▸ JVP elevated, S3 gallop\n▸ Scattered crackles\n▸ Echo tech reports poor squeeze',concern:'Suspected myocarditis with low output\nLactate trending up'}]},
 hypovolemic:{name:'Hypovolemic Shock',desc:'Volume depletion from hemorrhage or fluid loss.\nClues: tachycardia, flat JVP, fluid-responsive, improving with volume.\nOptimal: aggressive fluid resuscitation.',
   init:{edema:0,sec:0,inf:3,vasc:80,perf:50,co2bias:0,rvStrain:0,autoPeep:0,bleed:30},
   rates:{edema:.005,sec:.2,inf:.06,vasc:.002},
   clues:['Flat neck veins.','Tachycardia with narrow pulse pressure.','Urine output dropping.'],
   cases:[
-    {pt:'38M, intubated after MVC with abdominal trauma',hx:'Splenectomy 4h ago. Received 2 units PRBC. Now re-declining',vitals:[{t:'MAP 55',c:'w'},{t:'SpO₂ 95%',c:'ok'},{t:'HR 128',c:'w'},{t:'Lac 4.1',c:'w'}],exam:'▸ Cool peripheries, thready pulse\n▸ Flat JVP\n▸ Abdomen distended, firm\n▸ Drain output increasing',concern:'MAP declining again post-surgery\nHigh suspicion for ongoing loss'}]},
+    {pt:'38M, intubated after MVC with abdominal trauma',hx:'Splenectomy 4h ago. Received 2 units PRBC. Now re-declining',vitals:[{t:'MAP 55',c:'w'},{t:'SpO₂ 95%',c:'ok'},{t:'HR 128',c:'w'},{t:'Lac 4.1',c:'w'}],exam:'▸ Cool peripheries, thready pulse\n▸ Flat JVP\n▸ Abdomen distended, firm\n▸ Drain output increasing',concern:'MAP declining again post-surgery\nHigh suspicion for ongoing loss'},
+    {pt:'29F, postpartum hemorrhage, transferred to ICU',hx:'EBL 2.5L at delivery. 4U PRBC given. Still oozing',vitals:[{t:'MAP 58',c:'w'},{t:'SpO₂ 97%',c:'ok'},{t:'HR 132',c:'w'},{t:'Lac 4.5',c:'w'}],exam:'▸ Pale, cool extremities\n▸ Flat neck veins\n▸ Boggy uterus, ongoing vaginal bleeding\n▸ Narrow pulse pressure',concern:'Ongoing hemorrhage\nPreload critically low'},
+    {pt:'70M, massive GI bleed, intubated for airway protection',hx:'Melena x2 days. Hb 6.1. Endoscopy pending',vitals:[{t:'MAP 54',c:'w'},{t:'SpO₂ 96%',c:'ok'},{t:'HR 125',c:'w'},{t:'Lac 3.9',c:'w'}],exam:'▸ Pale conjunctiva, cold hands\n▸ Flat JVP\n▸ Melena on rectal exam\n▸ NG aspirate: coffee grounds',concern:'Active GI losses\nNeeds aggressive volume resuscitation'}]},
 rvfail:{name:'RV Failure / Volume Overload',desc:'Right heart failure with venous congestion.\nClues: elevated JVP, hepatomegaly, fluid-resistant hypotension.\nOptimal: diuretics, avoid excess PEEP, cautious vasopressors.',
   init:{edema:10,sec:0,inf:5,vasc:65,perf:55,co2bias:0,rvStrain:35,autoPeep:0,bleed:0},
   rates:{edema:.03,sec:.2,inf:.08,vasc:.004},
   clues:['JVP markedly elevated.','Hepatomegaly with pulsatile liver.','Poor response to fluids.'],
   cases:[
-    {pt:'61F, known pulmonary hypertension, intubated for syncope',hx:'Worsening dyspnea x1 week. On sildenafil and diuretics at home',vitals:[{t:'MAP 62',c:'w'},{t:'SpO₂ 90%',c:'w'},{t:'HR 105',c:'ok'},{t:'Lac 2.4',c:'w'}],exam:'▸ Elevated JVP, peripheral edema +3\n▸ Pulsatile liver on palpation\n▸ Lungs: scattered crackles right base\n▸ RV heave palpable',concern:'Hypotension with signs of right-sided congestion\nFluids given on floor  -  no improvement'}]},
+    {pt:'61F, known pulmonary hypertension, intubated for syncope',hx:'Worsening dyspnea x1 week. On sildenafil and diuretics at home',vitals:[{t:'MAP 62',c:'w'},{t:'SpO₂ 90%',c:'w'},{t:'HR 105',c:'ok'},{t:'Lac 2.4',c:'w'}],exam:'▸ Elevated JVP, peripheral edema +3\n▸ Pulsatile liver on palpation\n▸ Lungs: scattered crackles right base\n▸ RV heave palpable',concern:'Hypotension with signs of right-sided congestion\nFluids given on floor  -  no improvement'},
+    {pt:'55M, decompensated cor pulmonale',hx:'Severe OSA, noncompliant with CPAP. Weight up 8kg this month',vitals:[{t:'MAP 64',c:'w'},{t:'SpO₂ 88%',c:'w'},{t:'HR 98',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Massive peripheral edema\n▸ JVP at jaw\n▸ Hepatomegaly, ascites\n▸ Loud P2',concern:'Right heart congestion\nDecongestion vs pressure support dilemma'},
+    {pt:'48F, ARDS day 5, new hemodynamic instability',hx:'Proned twice. PEEP 14 for refractory hypoxemia',vitals:[{t:'MAP 61',c:'w'},{t:'SpO₂ 91%',c:'w'},{t:'HR 110',c:'w'},{t:'Lac 2.5',c:'w'}],exam:'▸ JVP elevated\n▸ New TR murmur\n▸ CVP rising while MAP falls\n▸ Echo: septal flattening',concern:'Acute cor pulmonale on high PEEP\nRV failing under pressure'}]},
 mixed:{name:'Mixed Pathology',desc:'Multiple concurrent problems overlapping.\nNo single treatment dominates.',
   init:{edema:12,sec:8,inf:15,vasc:68,perf:70,co2bias:0,rvStrain:0,autoPeep:0,bleed:0},
   rates:{edema:.04,sec:.7,inf:.18,vasc:.008},
   clues:['Complex presentation.','CXR: bilateral haze + airway debris.','Lactate mildly elevated.'],
   cases:[
-    {pt:'73M, intubated for worsening hypoxia',hx:'Admitted 3d ago for pneumonia. Multiple fluid boluses. Febrile again',vitals:[{t:'MAP 66',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 104',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Crackles + scattered rhonchi\n▸ Some secretions in ETT\n▸ Borderline warm peripheries\n▸ CXR: bilateral haze',concern:'Multiple overlapping findings\nUnclear dominant pathology'}]}
+    {pt:'73M, intubated for worsening hypoxia',hx:'Admitted 3d ago for pneumonia. Multiple fluid boluses. Febrile again',vitals:[{t:'MAP 66',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 104',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Crackles + scattered rhonchi\n▸ Some secretions in ETT\n▸ Borderline warm peripheries\n▸ CXR: bilateral haze',concern:'Multiple overlapping findings\nUnclear dominant pathology'},
+    {pt:'81F, nursing home resident, found obtunded',hx:'UTI treated last week. Poor intake x3 days. Aspirated during intubation',vitals:[{t:'MAP 60',c:'w'},{t:'SpO₂ 92%',c:'ok'},{t:'HR 115',c:'w'},{t:'Lac 3.2',c:'w'}],exam:'▸ Dry mucous membranes\n▸ Coarse crackles right base\n▸ Febrile 38.6°C\n▸ Concentrated urine output',concern:'Multiple insults: infection? volume? aspiration?\nUnclear what to fix first'},
+    {pt:'59M, alcohol use disorder, intubated post-seizure',hx:'Vomited before intubation. Febrile. BP soft since arrival',vitals:[{t:'MAP 63',c:'w'},{t:'SpO₂ 91%',c:'w'},{t:'HR 119',c:'w'},{t:'Lac 3.6',c:'w'}],exam:'▸ Rhonchi right lung\n▸ Warm peripheries\n▸ Poor dentition, foul secretions\n▸ CXR: right lower lobe haze',concern:'Aspiration + possible sepsis\nHemodynamics drifting down'}]},
+anaphylaxis:{name:'Anaphylactic Shock',desc:'Distributive shock + bronchospasm from massive mediator release.\nClues: sudden onset, urticaria, wheeze, rising airway pressures, profound vasodilation.\nOptimal: vasopressor early + bronchodilator. Fluids help.',
+  init:{edema:0,sec:5,inf:0,vasc:38,perf:62,co2bias:6,rvStrain:0,autoPeep:8,bleed:0},
+  rates:{edema:.01,sec:.3,inf:.02,vasc:.015},
+  clues:['Diffuse urticaria on trunk.','Wheeze with high peak pressures.','Collapse minutes after a new medication.'],
+  cases:[
+    {pt:'34F, anaphylaxis after IV antibiotic, intubated for stridor',hx:'Penicillin given 20min ago. Immediate facial swelling and hypotension',vitals:[{t:'MAP 55',c:'w'},{t:'SpO₂ 90%',c:'w'},{t:'HR 128',c:'w'},{t:'Lac 2.4',c:'w'}],exam:'▸ Diffuse urticaria, flushed skin\n▸ Expiratory wheeze throughout\n▸ Lip and tongue edema\n▸ Warm extremities, pulses fading',concern:'Profound vasodilation\nBronchospasm raising airway pressures'},
+    {pt:'52M, bee sting, rapid collapse',hx:'Known severe allergy, no epi-pen available. Intubated on arrival',vitals:[{t:'MAP 52',c:'w'},{t:'SpO₂ 89%',c:'w'},{t:'HR 132',c:'w'},{t:'Lac 2.8',c:'w'}],exam:'▸ Generalized flushing and wheals\n▸ Tight wheeze, prolonged expiration\n▸ Wide pulse pressure initially\n▸ Facial angioedema',concern:'Shock refractory to positioning\nVentilation getting harder'}]},
+tamponade:{name:'Cardiac Tamponade',desc:'Pericardial fluid compressing the heart.\nClues: elevated JVP, clear lungs, low output, worsens with PEEP, transient fluid response.\nOptimal: keep PEEP low, fluids temporize, vasopressors bridge to drainage.',
+  init:{edema:0,sec:0,inf:3,vasc:78,perf:52,co2bias:0,rvStrain:25,autoPeep:0,bleed:0},
+  rates:{edema:.01,sec:.2,inf:.04,vasc:.003},
+  clues:['Muffled heart sounds.','Pulsus paradoxus 18 mmHg.','JVP elevated with clear lungs.'],
+  cases:[
+    {pt:'61M, ESRD, missed dialysis x2, now hypotensive',hx:'Pericardial rub noted last week. Progressive dyspnea',vitals:[{t:'MAP 58',c:'w'},{t:'SpO₂ 94%',c:'ok'},{t:'HR 122',c:'w'},{t:'Lac 2.7',c:'w'}],exam:'▸ Distant muffled heart sounds\n▸ JVP markedly elevated\n▸ Lungs clear bilaterally\n▸ Pulsus paradoxus noted',concern:'Low output with clear lungs\nFilling pressures climbing'},
+    {pt:'45F, lupus, known pericardial effusion, acute decompensation',hx:'Moderate effusion on last echo. Worsening fatigue and dyspnea',vitals:[{t:'MAP 56',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 125',c:'w'},{t:'Lac 2.9',c:'w'}],exam:'▸ Muffled heart sounds\n▸ JVP to angle of jaw\n▸ Clear lung fields\n▸ Cool extremities, narrow pulse pressure',concern:'Obstructive physiology suspected\nEvery PEEP increase drops the pressure'}]}
 };
 
 // Level 1 brief — see getLevel1Brief() in i18n.js
@@ -379,7 +433,7 @@ const t1=[['edema'],['airway'],['sepsis'],['hypovolemic'],['copd']];
 t1.forEach((p,i)=>LEVELS.push({id:i+1,tier:1,paths:p,mult:0.8,stabReq:15,events:0,desc:'Single pathology'}));
 LEVELS[0]={id:1,tier:1,paths:['edema'],mult:0.5,stabReq:12,events:0,desc:'Tutorial: pulmonary edema'};
 // Tier 2: Single harder (6-10)
-const t2=[['cardiogenic'],['pe'],['rvfail'],['sepsis'],['edema']];
+const t2=[['cardiogenic'],['pe'],['rvfail'],['sepsis'],['anaphylaxis']];
 t2.forEach((p,i)=>LEVELS.push({id:i+6,tier:2,paths:p,mult:1.0,stabReq:18,events:1,desc:'Single, faster'}));
 // Tier 3: Two overlapping (11-15)
 const t3=[['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema']];
@@ -388,7 +442,7 @@ t3.forEach((p,i)=>LEVELS.push({id:i+11,tier:3,paths:p,mult:1.1,stabReq:20,events
 const t4=[['sepsis','airway','edema'],['cardiogenic','rvfail'],['hypovolemic','sepsis'],['copd','edema'],['pe','sepsis']];
 t4.forEach((p,i)=>LEVELS.push({id:i+16,tier:4,paths:p,mult:1.2,stabReq:22,events:1,desc:'Complex cases'}));
 // Tier 5: Mixed chaos (21-25)
-const t5=[['mixed'],['sepsis','pe','edema'],['cardiogenic','airway'],['hypovolemic','copd'],['rvfail','sepsis','edema']];
+const t5=[['mixed'],['sepsis','pe','edema'],['tamponade'],['hypovolemic','copd'],['rvfail','sepsis','edema']];
 t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:1.3,stabReq:25,events:2,desc:'Diagnostic challenge'}));
 // Tier 6: Master (26-30)
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
@@ -466,7 +520,7 @@ class Patient {
     this._mapB=[];this._perfB=[];this._oxyB=[];
     this._neJust=false;this._mapAtF=0;this._mapAtN=0;
     this.abxGiven=false;this.abxT=0;this.abxApplied=false;this._abxWorks=false;
-    this.bronchT=0;this.anticoagOn=false;
+    this.bronchT=0;this.anticoagOn=false;this._bronchGiven=false;
   }
 
   initLevel1(){
@@ -572,6 +626,9 @@ class Patient {
     // RV strain
     if(this.rvStrain>0&&this.peep>10)this.rvStrain+=.02*M;
     if(this.rvStrain>0&&this.totalFluids>2000)this.rvStrain+=.01;
+
+    // Tamponade: PEEP compresses the heart further
+    if(this.pathKeys.includes('tamponade')&&this.peep>8)this.cardiacOutput=Math.max(10,this.cardiacOutput-.06*M);
 
     // Medications
     if(this.abxGiven&&!this.abxApplied){this.abxT-=dt;if(this.abxT<=0&&this._abxWorks){this.abxApplied=true;this.rates.inf*=0.15;}}
@@ -714,6 +771,8 @@ class Game {
     let html=completed>0?t('menu.levelsDone',{n:completed})+'<br>'+t('menu.bestScore',{n:bestScore}):t('menu.ready');
     if(stats.survBest&&stats.survBest.p>0)html+='<br>'+t('menu.survBest',{p:stats.survBest.p,s:stats.survBest.s});
     if(stats.daily&&stats.daily.date===this._dailyStr())html+='<br>'+t('menu.dailyDone',{n:stats.daily.score});
+    const stk=stats.dailyStreak;
+    if(stk&&stk.n>0&&(stk.last===this._dailyStr()||stk.last===this._yesterStr()))html+='<br>'+t('menu.streak',{n:stk.n});
     statsDiv.innerHTML=html;
     this.applyStaticUI();
   }
@@ -787,7 +846,7 @@ class Game {
 
   _survCase(){
     const n=this.survN;
-    const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail'];
+    const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail','anaphylaxis','tamponade'];
     const count=n<=2?1:n<=5?2:3;
     const pool=singles.slice();const paths=[];
     for(let i=0;i<count;i++){const idx=Math.floor(Math.random()*pool.length);paths.push(pool.splice(idx,1)[0]);}
@@ -800,12 +859,36 @@ class Game {
   // -- Daily Case --
   _dailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
   _dailyStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _yesterStr(){const d=new Date(Date.now()-864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _dailyNum(){const d=new Date();const t0=new Date(2026,5,1);return Math.max(1,Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-t0)/864e5)+1);}
+
+  shareResult(){
+    const r=this._lastResult;if(!r)return;
+    const url='https://chriseg0996-star.github.io/icu-crisis/';
+    const blocks=p=>{const f=Math.max(0,Math.min(5,Math.round(p/20)));return '🟩'.repeat(f)+'⬛'.repeat(5-f);};
+    let txt;
+    if(r.mode==='daily'){
+      const s=this.getSave();const stk=s.dailyStreak?s.dailyStreak.n:1;
+      txt=t('share.dailyTitle',{n:r.dn})+'\n'+
+        (r.win?'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)+' '+r.score+' pts':'💀 '+r.score+' pts')+'\n'+
+        'MAP  '+blocks(r.mapPct)+'\n'+
+        'SpO₂ '+blocks(r.spoPct)+'\n'+
+        t('share.streak',{n:stk})+'\n'+url;
+    }else if(r.mode==='survival'){
+      txt=t('share.survTitle',{p:r.patients,s:r.total})+'\n'+url;
+    }else{
+      txt='🏥 ICU Crisis — '+(r.win?'★'.repeat(r.stars):'💀')+' '+r.score+' pts\n'+url;
+    }
+    const done=()=>{const b=this.$('share-btn');if(b)b.textContent=t('end.copied');};
+    if(navigator.share){navigator.share({text:txt}).then(done).catch(()=>{});}
+    else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(done).catch(()=>{});}
+  }
   _rng(seed){let a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296;};}
 
   startDaily(){
     this.mode='daily';
     const rng=this._rng(this._dailySeed());
-    const pool=[['sepsis'],['cardiogenic'],['pe'],['rvfail'],['copd'],['edema'],['hypovolemic'],['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema'],['hypovolemic','sepsis'],['sepsis','airway','edema'],['mixed']];
+    const pool=[['sepsis'],['cardiogenic'],['pe'],['rvfail'],['copd'],['edema'],['hypovolemic'],['anaphylaxis'],['tamponade'],['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema'],['hypovolemic','sepsis'],['anaphylaxis','edema'],['sepsis','airway','edema'],['mixed']];
     const paths=pool[Math.floor(rng()*pool.length)];
     this.lvl={id:999,paths:paths,mult:1.0+Math.floor(rng()*4)*0.1,stabReq:20,events:1,desc:'Daily'};
     const pr=getPathEntry(paths[0],PATH);
@@ -859,6 +942,7 @@ class Game {
     if(clues[2])setTimeout(()=>{if(!this.over)this.log(clues[2],'w');},11000);
 
     this.updateAll();
+    this.maybeStartTutorial();
   }
 
   buildActions(){
@@ -969,6 +1053,59 @@ class Game {
   confirmVt(){if(this.p.tidalVolume!==this._modalVtStart){this.log(t('game.vtSet',{n:this.p.tidalVolume})+(this.p.tidalVolume>8?t('game.vtTox'):''),this.p.tidalVolume>8?'w':'i');}this.closeModals();}
 
   runMedFromMenu(key){this.closeModals();this.giveMed(key);}
+
+  // -- Guided tutorial (level 1, first time only) --
+  maybeStartTutorial(){
+    let seen=null;try{seen=localStorage.getItem('icuTut');}catch(e){}
+    if(seen||this.mode!=='campaign'||this.lvl.id!==1)return;
+    this._tutSteps=[
+      {el:'vc-map',k:'tut.map'},
+      {el:'vc-spo2',k:'tut.spo2'},
+      {el:'log',k:'tut.log'},
+      {el:'bmeds',k:'tut.actions'},
+      {el:'bdiag',k:'tut.diag'},
+    ];
+    this._tutI=0;this._tutOn=true;this.paused=true;
+    this.$('tut-ov').classList.add('v');
+    this._tutShow();
+  }
+
+  _tutShow(){
+    const st=this._tutSteps[this._tutI];
+    document.querySelectorAll('.tut-hl').forEach(e=>e.classList.remove('tut-hl'));
+    const el=this.$(st.el);
+    if(el)el.classList.add('tut-hl');
+    const box=this.$('tut-box');
+    const last=this._tutI===this._tutSteps.length-1;
+    box.innerHTML='<div class="tut-t">'+t('tut.title')+' '+(this._tutI+1)+'/'+this._tutSteps.length+'</div>'+t(st.k)+
+      '<div class="tut-btns"><button class="skip" onclick="G.endTutorial()">'+t('tut.skip')+'</button>'+
+      '<button onclick="G.tutNext()">'+(last?t('tut.go'):t('tut.next'))+'</button></div>';
+    const app=this.$('app').getBoundingClientRect();
+    box.style.visibility='hidden';
+    requestAnimationFrame(()=>{
+      const bw=box.offsetWidth,bh=box.offsetHeight;
+      let left=12,top=12;
+      if(el){
+        const r=el.getBoundingClientRect();
+        left=r.left-app.left+r.width/2-bw/2;
+        left=Math.max(8,Math.min(left,app.width-bw-8));
+        top=r.bottom-app.top+10;
+        if(top+bh>app.height-8)top=r.top-app.top-bh-10;
+        if(top<8)top=8;
+      }
+      box.style.left=left+'px';box.style.top=top+'px';box.style.visibility='visible';
+    });
+  }
+
+  tutNext(){this._tutI++;if(this._tutI>=this._tutSteps.length)this.endTutorial();else this._tutShow();}
+
+  endTutorial(){
+    try{localStorage.setItem('icuTut','1');}catch(e){}
+    document.querySelectorAll('.tut-hl').forEach(e=>e.classList.remove('tut-hl'));
+    this.$('tut-ov').classList.remove('v');
+    this._tutOn=false;this.paused=false;this.lt=performance.now();this.acc=0;
+    this._syncPauseIcon();
+  }
 
   showFio2Modal(){
     if(this._bl())return;
@@ -1127,7 +1264,7 @@ class Game {
 
   doFluids(){if(this._bl()||this._cd.f)return;const p=this.p;const r=p.giveFluids();
     if(p.pulmonaryEdema>40||p.pathKeys.includes('rvfail')){p.wrongAct++;this._judge('bf',false);}
-    else if(p.MAP<65&&(p.pathKeys.includes('sepsis')||p.pathKeys.includes('hypovolemic'))){p.correctAct++;this._judge('bf',true);}
+    else if(p.MAP<65&&(p.pathKeys.includes('sepsis')||p.pathKeys.includes('hypovolemic')||p.pathKeys.includes('anaphylaxis'))){p.correctAct++;this._judge('bf',true);}
     else this._toast('bf',r?'+MAP':'~','pos');
     this.log(t('game.fluidBolus',{n:p.totalFluids}),'i');setTimeout(()=>{if(this.over)return;if(r)this.log(t('game.preloadOk'),'s');else this.log(t('game.preloadMin'),'w');},2000);this._setCD('f','bf','cf',8);}
   toggleNE(){if(this._bl())return;const p=this.p;p.norepiOn=!p.norepiOn;if(p.norepiOn){p._neJust=true;p._mapAtN=p.MAP;p._mapB.push({a:5,r:8,d:5/8});
@@ -1162,7 +1299,7 @@ class Game {
     if(key==='bronch'){
       this.log(t('game.bronchGiven'),'i');
       this._setCD('m_bronch','mb-bronch','mc-bronch',45);
-      if(p.pathKeys.includes('copd')){p.bronchT=60;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.bronchOk'),'s');},8000);}
+      if(p.pathKeys.includes('copd')||p.pathKeys.includes('anaphylaxis')){p.bronchT=60;p._bronchGiven=true;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.bronchOk'),'s');},8000);}
       else{p._dHR+=8;p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.bronchNo'),'w');},5000);}
       return;
     }
@@ -1170,7 +1307,7 @@ class Game {
       this.log(t('game.anticoagGiven'),'i');
       this._lock('m_anticoag','mb-anticoag','mc-anticoag');
       if(p.bleed>5||p.pathKeys.includes('hypovolemic')){p.bleed=Math.min(95,p.bleed+25);p.perfusion=Math.max(0,p.perfusion-5);p.wrongAct++;this._judge('bmeds',false);this._vib(80);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagBleed'),'d');},5000);}
-      else if(p.pathKeys.includes('pe')||p.rvStrain>30){p.anticoagOn=true;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagOk'),'s');},10000);}
+      else if(p.pathKeys.includes('pe')||(p.rvStrain>30&&!p.pathKeys.includes('tamponade'))){p.anticoagOn=true;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagOk'),'s');},10000);}
       else{p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagNo'),'w');},5000);}
       return;
     }
@@ -1185,7 +1322,7 @@ class Game {
 
   _syncPauseIcon(){const b=this.$('pfab');if(b)b.textContent=this.paused?'▶':'⏸';}
 
-  togglePause(){if(this.over||!this.running)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');this._syncPauseIcon();}}
+  togglePause(){if(this.over||!this.running||this._tutOn)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');this._syncPauseIcon();}}
 
   unpause(){if(this.over||!this.running||!this.paused)return;this.paused=false;this.hideOv('ov-pause');this.lt=performance.now();this.acc=0;this._syncPauseIcon();}
 
@@ -1219,11 +1356,17 @@ class Game {
       const prev=this.getLvlData(lv.id).score||0;
       newBest=prev>0&&score>prev;
       this.setLvlData(lv.id,stars,score);
-    }else if(this.mode==='daily'&&win){
-      const s=this.getSave(),ds=this._dailyStr();
-      const prev=(s.daily&&s.daily.date===ds)?s.daily.score:0;
-      newBest=prev>0&&score>prev;
-      if(!s.daily||s.daily.date!==ds||score>s.daily.score){s.daily={date:ds,score:score};this.setSave(s);}
+    }else if(this.mode==='daily'){
+      const s=this.getSave(),ds=this._dailyStr(),ys=this._yesterStr();
+      if(!s.dailyStreak||s.dailyStreak.last!==ds){
+        s.dailyStreak={last:ds,n:(s.dailyStreak&&s.dailyStreak.last===ys)?s.dailyStreak.n+1:1};
+      }
+      if(win){
+        const prev=(s.daily&&s.daily.date===ds)?s.daily.score:0;
+        newBest=prev>0&&score>prev;
+        if(!s.daily||s.daily.date!==ds||score>s.daily.score)s.daily={date:ds,score:score};
+      }
+      this.setSave(s);
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
       else{
@@ -1238,6 +1381,22 @@ class Game {
     const names=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.name:k;}).join(' + ');
     const descs=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.desc:'';}).join('\n\n');
     const neStr=p.norepiCum>0?Math.round(p.norepiCum)+'s':t('end.neNone');
+
+    // Educational debrief: your actions vs ideal management
+    const db=[];
+    const pk=p.pathKeys;
+    if(pk.includes('edema'))db.push(p.totalFluids>500?t('db.edemaBad',{n:p.totalFluids}):(p.diureticsGiven>0?t('db.edemaGood'):t('db.edemaMiss')));
+    if(pk.includes('airway'))db.push(p.goodSuctions>0?t('db.airwayGood'):t('db.airwayMiss'));
+    if(pk.includes('sepsis'))db.push(p.abxGiven&&p._abxWorks?t('db.sepsisGood'):t('db.sepsisMiss'));
+    if(pk.includes('pe'))db.push(p.anticoagOn?t('db.peGood'):t('db.peMiss'));
+    if(pk.includes('copd'))db.push(p._bronchGiven||p.tidalVolume<6?t('db.copdGood'):t('db.copdMiss'));
+    if(pk.includes('hypovolemic'))db.push(p.totalFluids>=1000?t('db.hypoGood'):t('db.hypoMiss'));
+    if(pk.includes('cardiogenic'))db.push(p.totalFluids>1000?t('db.cardioBad'):(p.norepiCum>0?t('db.cardioGood'):t('db.cardioMiss')));
+    if(pk.includes('rvfail'))db.push(p.totalFluids>500?t('db.rvBad'):(p.diureticsGiven>0?t('db.rvGood'):t('db.rvMiss')));
+    if(pk.includes('anaphylaxis'))db.push(p._bronchGiven&&p.norepiCum>0?t('db.anaGood'):t('db.anaMiss'));
+    if(pk.includes('tamponade'))db.push(p.peep>8?t('db.tampBad'):t('db.tampGood'));
+    if(p.wrongAct>=3)db.push(t('db.wrong',{n:p.wrongAct}));
+    const dbHtml=db.length?'<div class="go-debrief"><strong>'+t('db.title')+'</strong><br>'+db.slice(0,3).map(x=>'▸ '+x).join('<br>')+'</div>':'';
 
     // Component bars
     const lacPct=Math.round(lacPts/15*100),spdPct=Math.max(0,Math.min(100,speedPts*10));
@@ -1261,14 +1420,18 @@ class Game {
       survLine='<div class="go-sub" style="color:var(--cy)">'+(win?'':t('end.survSummary',{p:this.survN-1})+' | ')+t('end.survTotal',{s:this.survTotal})+'</div>';
     }
 
+    // Result snapshot for sharing
+    this._lastResult={mode:this.mode,win:win,score:score,stars:stars,mapPct:mapPct,spoPct:spoPct,dn:this._dailyNum(),patients:win?this.survN:this.survN-1,total:this.survTotal};
+    const shareBtn='<div class="go-btn share" id="share-btn" onclick="G.shareResult()">'+t('end.share')+'</div>';
+
     // Buttons per mode
     let btns;
     if(this.mode==='survival'){
-      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+
+      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+shareBtn+
         (win?'<div class="go-btn pri" onclick="G.nextSurvival()">'+t('end.nextPatient')+'</div>'
             :'<div class="go-btn pri" onclick="G.startSurvival()">'+t('end.retry')+'</div>');
     }else if(this.mode==='daily'){
-      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+
+      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+shareBtn+
         '<div class="go-btn pri" onclick="G.startDaily()">'+t('end.retry')+'</div>';
     }else{
       btns='<div class="go-btn" onclick="G.goLS()">'+t('end.levels')+'</div>'+
@@ -1284,6 +1447,7 @@ class Game {
       survLine+
       barsHtml+
       hintHtml+
+      dbHtml+
       '<div class="go-diag"><strong>'+t('end.diagnosis')+'</strong> '+names+'<br><br>'+descs.replace(/\n/g,'<br>')+'</div>'+
       '<div class="go-stats">'+t('end.time',{m:mins,s:secs,grade:grade,score:'<b id="go-score">0</b>'})+'<br>'+
       t('end.fluids',{n:p.totalFluids,ne:neStr})+'<br>'+
@@ -1396,6 +1560,10 @@ window.addEventListener('resize',()=>{
   });
   if(G.$('modal-backdrop')?.classList.contains('v'))G._showBackdrop();
 });
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
 </script>
 </body>
 </html>
