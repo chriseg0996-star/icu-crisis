@@ -25,6 +25,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-btn{padding:12px 48px;border:1px solid var(--cy);background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:6px;margin-top:16px;transition:all .2s;-webkit-user-select:none;user-select:none;min-height:44px}
 .mm-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.06)}
 .mm-btn:active{transform:scale(.95)}
+.mm-modes{display:flex;gap:8px;margin-top:2px}
+.mm-btn-sm{padding:10px 14px;border:1px solid var(--b);background:var(--c);color:var(--tm);font-family:var(--fd);font-size:9px;letter-spacing:2px;cursor:pointer;border-radius:6px;transition:all .2s;-webkit-user-select:none;user-select:none;min-height:40px}
+.mm-btn-sm:hover{border-color:var(--cy);color:var(--cy)}
+.mm-btn-sm:active{transform:scale(.95)}
 .mm-footer{position:absolute;bottom:16px;left:16px;right:16px;text-align:center;border-top:1px solid rgba(0,221,255,.2);padding-top:12px}
 .mm-credit{font-size:11px;font-weight:600;color:var(--cy);letter-spacing:1px;margin-bottom:6px}
 .mm-disclaimer{font-size:8px;color:var(--tm);line-height:1.4;max-width:280px;margin:0 auto}
@@ -151,13 +155,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .go-diag strong{color:var(--w);font-weight:normal}
 .go-stats{margin:6px 0;font-size:8px;color:var(--td);line-height:1.6;max-width:360px}
 .go-stars{font-size:24px;margin:8px 0;letter-spacing:4px}
+.go-bars{width:100%;max-width:300px;margin:6px auto;display:flex;flex-direction:column;gap:4px}
+.go-bar{display:flex;align-items:center;gap:6px;font-size:8px;color:var(--tm)}
+.go-bar span{width:42px;text-align:right;flex-shrink:0}
+.go-bar b{width:34px;text-align:left;font-family:var(--fd);font-weight:700}
+.go-bar-t{flex:1;height:6px;background:var(--c);border:1px solid var(--b);border-radius:3px;overflow:hidden}
+.go-bar-f{height:100%;background:var(--g);width:0;transition:width .8s ease-out}
+.go-bar-f.mid{background:var(--y)}.go-bar-f.low{background:var(--r)}
+.go-best{font-family:var(--fd);font-size:12px;color:var(--y);letter-spacing:3px;margin:4px 0;animation:bl 1s infinite}
+.go-hint{font-size:8px;color:var(--cy);margin:4px 0;max-width:300px;line-height:1.4}
 .go-btns{display:flex;gap:8px;margin-top:8px}
 .go-btn{flex:1;padding:10px;border:1px solid var(--b);border-radius:6px;background:var(--c);color:var(--tm);font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;text-align:center}
 .go-btn.pri{border-color:var(--cy);color:var(--cy);background:rgba(0,221,255,.06)}
 
-.pa-t{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:6px;color:var(--cy);margin-bottom:14px;animation:pp 2s infinite}
 @keyframes pp{0%,100%{opacity:1}50%{opacity:.35}}
-.pa-btn{padding:12px 32px;border:1px solid var(--cy);border-radius:6px;background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:13px;letter-spacing:3px;cursor:pointer}
 .pause-menu{display:flex;flex-direction:column;align-items:center}
 .pause-title{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:6px;color:var(--cy);margin-bottom:14px;animation:pp 2s infinite}
 .pause-btn{padding:12px 32px;margin:8px 0;border:1px solid var(--cy);background:rgba(0,221,255,.06);color:var(--cy);font-family:var(--fd);font-size:12px;letter-spacing:2px;cursor:pointer;border-radius:6px;transition:all .2s;width:160px;-webkit-user-select:none;user-select:none;min-height:44px}
@@ -175,7 +186,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .modal-val{font-family:var(--fd);font-size:26px;font-weight:900;color:var(--g);text-align:center;line-height:1;margin:2px 0 6px}
 .modal-row{display:flex;gap:6px}
 .modal-row button{flex:1;min-width:0;padding:10px 4px}
-.modal button.wide{width:100%;margin-top:2px;font-family:var(--fm);font-weight:400;font-size:10px;padding:8px 6px}
+.modal button.wide{width:100%;margin-top:2px;font-family:var(--fm);font-weight:400;font-size:10px;padding:8px 6px;position:relative;overflow:hidden}
+.modal button.cd{opacity:.45;pointer-events:none}
+.modal button .co{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;font-family:var(--fd);font-size:11px;color:var(--cy);border-radius:4px}
+.modal button.cd .co{display:flex}
 </style>
 </head>
 <body>
@@ -193,6 +207,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   </div>
   <div class="mm-stats" id="mm-stats"></div>
   <button class="mm-btn" data-i18n="menu.play" onclick="G.showLevelSelect()">PLAY</button>
+  <div class="mm-modes">
+    <button class="mm-btn-sm" data-i18n="menu.survival" onclick="G.startSurvival()">SURVIVAL</button>
+    <button class="mm-btn-sm" data-i18n="menu.daily" onclick="G.startDaily()">DAILY CASE</button>
+  </div>
   <div class="mm-footer">
     <div class="mm-credit" data-i18n="menu.credit">Made by Christopher Godines</div>
     <div class="mm-disclaimer" data-i18n="menu.disclaimer">Medical simulation for educational purposes only. Not for clinical decision-making.</div>
@@ -212,6 +230,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <div class="hdr-left"><div class="hdr-lvl" id="hdr-lvl">LVL 1</div><div class="pb s" id="hdr-phase">STABLE</div></div>
     <div class="hdr-right">
       <div class="hdr-timer" id="hdr-timer">00:00</div>
+      <button class="pfab" id="sfab" onclick="G.toggleSound()">🔊</button>
       <button class="pfab" id="pfab" onclick="G.togglePause()">⏸</button>
     </div>
   </div>
@@ -245,9 +264,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <div class="modal-backdrop" id="modal-backdrop" onclick="G.dismissModals()"></div>
 <div class="modal diag" id="modal-diag">
   <div class="modal-title" data-i18n="modal.diagnostics">Diagnostics</div>
-  <button class="wide" data-i18n="modal.pocus" onclick="G.runDiagFromMenu('pocus')">🩺 Lung POCUS</button>
-  <button class="wide" data-i18n="modal.echo" onclick="G.runDiagFromMenu('echo')">❤️ Echo</button>
-  <button class="wide" data-i18n="modal.labs" onclick="G.runDiagFromMenu('labs')">🧪 Labs</button>
+  <button class="wide" id="db-pocus" onclick="G.runDiagFromMenu('pocus')"><span data-i18n="modal.pocus">🩺 Lung POCUS</span><div class="co" id="dc-pocus"></div></button>
+  <button class="wide" id="db-echo" onclick="G.runDiagFromMenu('echo')"><span data-i18n="modal.echo">❤️ Echo</span><div class="co" id="dc-echo"></div></button>
+  <button class="wide" id="db-labs" onclick="G.runDiagFromMenu('labs')"><span data-i18n="modal.labs">🧪 Labs</span><div class="co" id="dc-labs"></div></button>
+  <button class="wide" id="db-vexus" onclick="G.runDiagFromMenu('vexus')"><span data-i18n="modal.vexus">🫀 VExUS</span><div class="co" id="dc-vexus"></div></button>
+</div>
+<div class="modal meds" id="modal-meds">
+  <div class="modal-title" data-i18n="modal.meds">Medications</div>
+  <button class="wide" id="mb-diuretic" onclick="G.runMedFromMenu('diuretic')"><span data-i18n="modal.medDiuretic">💊 Diuretic</span><div class="co" id="mc-diuretic"></div></button>
+  <button class="wide" id="mb-abx" onclick="G.runMedFromMenu('abx')"><span data-i18n="modal.medAbx">🦠 Antibiotics</span><div class="co" id="mc-abx"></div></button>
+  <button class="wide" id="mb-bronch" onclick="G.runMedFromMenu('bronch')"><span data-i18n="modal.medBronch">🌬️ Bronchodilator</span><div class="co" id="mc-bronch"></div></button>
+  <button class="wide" id="mb-anticoag" onclick="G.runMedFromMenu('anticoag')"><span data-i18n="modal.medAnticoag">🩸 Anticoagulation</span><div class="co" id="mc-anticoag"></div></button>
 </div>
 <div class="modal fio2" id="modal-fio2">
   <div class="modal-title">FiO₂</div>
@@ -263,6 +290,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <div class="modal-row">
     <button onclick="G.adjustPeep(-1)">−2</button>
     <button onclick="G.adjustPeep(1)">+2</button>
+  </div>
+</div>
+<div class="modal vt" id="modal-vt">
+  <div class="modal-title">VT ml/kg</div>
+  <div class="modal-val" id="modal-vt-val">6</div>
+  <div class="modal-row">
+    <button onclick="G.adjustVt(-1)">−1</button>
+    <button onclick="G.adjustVt(1)">+1</button>
   </div>
 </div>
 </div>
@@ -429,6 +464,8 @@ class Patient {
     this.stableT=0;this.stabilized=false;this.stabAnnounced=false;
     this._mapB=[];this._perfB=[];this._oxyB=[];
     this._neJust=false;this._mapAtF=0;this._mapAtN=0;
+    this.abxGiven=false;this.abxT=0;this.abxApplied=false;this._abxWorks=false;
+    this.bronchT=0;this.anticoagOn=false;
   }
 
   initLevel1(){
@@ -535,6 +572,12 @@ class Patient {
     if(this.rvStrain>0&&this.peep>10)this.rvStrain+=.02*M;
     if(this.rvStrain>0&&this.totalFluids>2000)this.rvStrain+=.01;
 
+    // Medications
+    if(this.abxGiven&&!this.abxApplied){this.abxT-=dt;if(this.abxT<=0&&this._abxWorks){this.abxApplied=true;this.rates.inf*=0.15;}}
+    if(this.abxApplied)this.infection=Math.max(0,this.infection-.12);
+    if(this.bronchT>0){this.bronchT-=dt;this.autoPeep=Math.max(0,this.autoPeep-.06);this.co2bias=Math.max(0,this.co2bias-.05);}
+    if(this.anticoagOn)this.rvStrain=Math.max(0,this.rvStrain-.05);
+
     // Pneumothorax
     if(this._hasPneumo){this._pneumoT+=dt;if(this._pneumoT>90){this._hasPneumo=false;this.compliance+=10;this.cardiacOutput+=10;}}
 
@@ -578,6 +621,44 @@ class Patient {
 }
 
 // ================================================================
+//  SOUND ENGINE  -  Web Audio, no assets
+// ================================================================
+class Snd {
+  constructor(){
+    let pref='on';
+    try{pref=localStorage.getItem('icuSound')||'on';}catch(e){}
+    this.on=pref!=='off';
+    this.ctx=null;
+  }
+  _c(){
+    if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
+    if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();
+    return this.ctx;
+  }
+  toggle(){
+    this.on=!this.on;
+    try{localStorage.setItem('icuSound',this.on?'on':'off');}catch(e){}
+    return this.on;
+  }
+  tone(f,dur,vol,type){
+    if(!this.on)return;
+    const c=this._c();if(!c)return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(vol||.06,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+dur);
+    o.connect(g);g.connect(c.destination);
+    o.start();o.stop(c.currentTime+dur);
+  }
+  beep(spo2){const f=520+Math.max(0,Math.min(20,spo2-80))*18;this.tone(f,.06,.035,'square');}
+  alarm(){this.tone(880,.12,.05,'square');setTimeout(()=>this.tone(660,.12,.05,'square'),150);}
+  good(){this.tone(660,.08,.05);setTimeout(()=>this.tone(880,.1,.05),80);}
+  bad(){this.tone(220,.16,.06,'sawtooth');}
+  win(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.16,.06),i*120));}
+  lose(){[440,330,220].forEach((f,i)=>setTimeout(()=>this.tone(f,.3,.07,'sawtooth'),i*250));}
+}
+
+// ================================================================
 //  GAME ENGINE
 // ================================================================
 class Game {
@@ -586,11 +667,23 @@ class Game {
     this.at={};this.abgPend=false;this._cd={};this.evts=[];this.fEvts=[];
     this._stabM1=false;this._stabM2=false;this._abgUntil=0;this._abgN=0;
     this.lt=0;this.acc=0;
+    this.mode='campaign';this.survN=0;this.survTotal=0;
+    this._forcedCaseIdx=null;this._forcedEvts=null;
+    this.snd=new Snd();
     this.$ = id => document.getElementById(id);
     this.applyStaticUI();
+    const sf=this.$('sfab');if(sf)sf.textContent=this.snd.on?'🔊':'🔇';
     this.showMainMenu();
     this.renderLoop();
   }
+
+  toggleSound(){
+    const on=this.snd.toggle();
+    this.$('sfab').textContent=on?'🔊':'🔇';
+    if(on)this.snd.good();
+  }
+
+  _vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 
   setLang(code){
     if(this.running&&!this.over)return;
@@ -617,8 +710,10 @@ class Game {
     const scores=Object.keys(stats).filter(k=>k.startsWith('l')).map(k=>stats[k].score||0);
     const bestScore=scores.length?Math.max(...scores):0;
     const statsDiv=this.$('mm-stats');
-    if(completed>0)statsDiv.innerHTML=t('menu.levelsDone',{n:completed})+'<br>'+t('menu.bestScore',{n:bestScore});
-    else statsDiv.textContent=t('menu.ready');
+    let html=completed>0?t('menu.levelsDone',{n:completed})+'<br>'+t('menu.bestScore',{n:bestScore}):t('menu.ready');
+    if(stats.survBest&&stats.survBest.p>0)html+='<br>'+t('menu.survBest',{p:stats.survBest.p,s:stats.survBest.s});
+    if(stats.daily&&stats.daily.date===this._dailyStr())html+='<br>'+t('menu.dailyDone',{n:stats.daily.score});
+    statsDiv.innerHTML=html;
     this.applyStaticUI();
   }
 
@@ -657,22 +752,65 @@ class Game {
 
   // -- Start Level --
   startLevel(n){
+    this.mode='campaign';this._forcedCaseIdx=null;this._forcedEvts=null;
     this.lvl=LEVELS[n-1];if(!this.lvl)return;
+    this._brief(t('brief.title',{n:n}));
+  }
+
+  _brief(title){
     this.hideOv('ov-end');
     this.over=false;
     this.closeModals();
     this.showScreen('scr-gs');
-    const pk=this.lvl.paths[0];const pr=getPathEntry(pk,PATH);
-    const cs=(n===1)?getLevel1Brief():pr.cases[Math.floor(Math.random()*pr.cases.length)];
+    const lv=this.lvl;
+    const pk=lv.paths[0];const pr=getPathEntry(pk,PATH);
+    const cs=(lv.id===1)?getLevel1Brief():pr.cases[this._forcedCaseIdx!=null?this._forcedCaseIdx:Math.floor(Math.random()*pr.cases.length)];
 
     const bb=this.$('pbb');
-    bb.innerHTML='<div class="pbb-h">'+t('brief.title',{n:n})+'</div>'+
+    bb.innerHTML='<div class="pbb-h">'+title+'</div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.patient')+'</div><div class="pbb-t">'+cs.pt+'<br><span style="color:var(--tm);font-size:9px">'+cs.hx+'</span></div></div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.status')+'</div><div class="pbb-v">'+cs.vitals.map(v=>'<div class="pbb-vi '+(v.c||'')+'">'+v.t+'</div>').join('')+'</div></div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.exam')+'</div><div class="pbb-ex">'+cs.exam+'</div></div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.concern')+'</div><div class="pbb-cn">'+cs.concern+'</div></div>'+
       '<button class="obtn" onclick="G.acceptCase()">'+t('brief.accept')+'</button>';
     this.showOv('ov-brief');
+  }
+
+  // -- Survival Mode --
+  startSurvival(){
+    this.mode='survival';this.survN=1;this.survTotal=0;
+    this._survCase();
+  }
+
+  nextSurvival(){this.survN++;this._survCase();}
+
+  _survCase(){
+    const n=this.survN;
+    const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail'];
+    const count=n<=2?1:n<=5?2:3;
+    const pool=singles.slice();const paths=[];
+    for(let i=0;i<count;i++){const idx=Math.floor(Math.random()*pool.length);paths.push(pool.splice(idx,1)[0]);}
+    const usesMixed=n>=8&&Math.random()<0.3;
+    this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult:Math.min(1.6,0.7+n*0.1),stabReq:Math.min(28,12+n*2),events:n>=3?(n>=6?2:1):0,desc:'Survival'};
+    this._forcedCaseIdx=null;this._forcedEvts=null;
+    this._brief(t('brief.survTitle',{n:n}));
+  }
+
+  // -- Daily Case --
+  _dailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+  _dailyStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _rng(seed){let a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296;};}
+
+  startDaily(){
+    this.mode='daily';
+    const rng=this._rng(this._dailySeed());
+    const pool=[['sepsis'],['cardiogenic'],['pe'],['rvfail'],['copd'],['edema'],['hypovolemic'],['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema'],['hypovolemic','sepsis'],['sepsis','airway','edema'],['mixed']];
+    const paths=pool[Math.floor(rng()*pool.length)];
+    this.lvl={id:999,paths:paths,mult:1.0+Math.floor(rng()*4)*0.1,stabReq:20,events:1,desc:'Daily'};
+    const pr=getPathEntry(paths[0],PATH);
+    this._forcedCaseIdx=Math.floor(rng()*pr.cases.length);
+    this._forcedEvts=[{time:110+Math.floor(rng()*70),evtIdx:Math.floor(rng()*EVENTS.length)}];
+    this._brief(t('brief.dailyTitle',{d:this._dailyStr()}));
   }
 
   acceptCase(){
@@ -682,20 +820,32 @@ class Game {
     this.running=true;this.paused=false;this.over=false;
     this._cd={};this.at={};this.abgPend=false;this.fEvts=[];
     this._stabM1=false;this._stabM2=false;this._abgUntil=0;this._abgN=0;
+    // Clear stale cooldown/lock state on static modal buttons
+    document.querySelectorAll('.modal button.cd').forEach(b=>b.classList.remove('cd'));
+    document.querySelectorAll('.modal button .co').forEach(c=>c.textContent='');
+    this._syncPauseIcon();
 
     this.p.reset(lv.paths,lv.mult);
     if(lv.id===1)this.p.initLevel1();
 
-    // Schedule events — Level 1+ never fires acute events when events < 1
+    // Schedule events — forced (daily) or random
     this.evts=[];
-    if(lv.events>=1){const t1=100+Math.floor(Math.random()*80);const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];this.evts.push({time:t1,evt:e,fired:false});}
-    if(lv.events>=2){const t2=280+Math.floor(Math.random()*100);const pool=EVENTS.filter(e=>!this.evts.some(x=>x.evt.id===e.id));const e2=pool[Math.floor(Math.random()*pool.length)]||EVENTS[0];this.evts.push({time:t2,evt:e2,fired:false});}
-    if(lv.events<1)this.evts=[];
+    if(this._forcedEvts&&lv.events>=1){
+      this.evts=this._forcedEvts.map(f=>({time:f.time,evt:EVENTS[f.evtIdx],fired:false}));
+    }else{
+      if(lv.events>=1){const t1=100+Math.floor(Math.random()*80);const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];this.evts.push({time:t1,evt:e,fired:false});}
+      if(lv.events>=2){const t2=280+Math.floor(Math.random()*100);const pool=EVENTS.filter(e=>!this.evts.some(x=>x.evt.id===e.id));const e2=pool[Math.floor(Math.random()*pool.length)]||EVENTS[0];this.evts.push({time:t2,evt:e2,fired:false});}
+      if(lv.events<1)this.evts=[];
+    }
 
     // UI
     this._wCtx=null;
     this._waveLt=0;
-    this.$('hdr-lvl').textContent=t('lvl.header',{n:lv.id});
+    this._wPrevPhase=undefined;
+    const hl=this.$('hdr-lvl');
+    if(this.mode==='survival')hl.textContent=t('lvl.surv',{n:this.survN});
+    else if(this.mode==='daily')hl.textContent=t('lvl.daily');
+    else hl.textContent=t('lvl.header',{n:lv.id});
     this.$('log').innerHTML='<span class="lx" id="lx" onclick="G.toggleLog()">▼</span>';
     this.$('app').classList.remove('alarm');
     this.buildActions();
@@ -722,9 +872,10 @@ class Game {
     let h='';
     h+=ab('ah','💧',t('action.fluids'),t('action.fluidsSub'),'G.doFluids()','bf','cf');
     h+=ab('ah','⚡',t('action.norepi'),t('action.norepiSub'),'G.toggleNE()','bn');
-    h+=ab('ah','💊',t('action.diuretic'),t('action.diureticSub'),'G.doDiuretic()','bd','cdi');
+    h+=ab('ah','💊',t('action.meds'),t('action.medsSub'),'G.showMedsMenu()','bmeds');
     h+=ab('av','O₂',t('action.fio2'),'40%','G.showFio2Modal()','bfio2',null,'bfio2-sub');
     h+=ab('av','P',t('action.peep'),'8','G.showPeepModal()','bpeep',null,'bpeep-sub');
+    h+=ab('av','🫁',t('action.vt'),'6','G.showVtModal()','bvt',null,'bvt-sub');
     h+=ab('av','🫧',t('action.suction'),t('action.suctionSub'),'G.doSuction()','bs','cs');
     h+=ab('al','🩸',t('action.abg'),t('action.abgSub'),'G.orderABG()','ba','ca');
     h+=ab('ad','🔬',t('action.diagnostics'),null,'G.showDiagMenu()','bdiag');
@@ -739,10 +890,10 @@ class Game {
   }
 
   updateModalButtons(){
-    const f=this.$('bfio2'),p=this.$('bpeep'),d=this.$('bdiag');
-    if(f)f.classList.toggle('to',!!this.$('modal-fio2')?.classList.contains('v'));
-    if(p)p.classList.toggle('to',!!this.$('modal-peep')?.classList.contains('v'));
-    if(d)d.classList.toggle('to',!!this.$('modal-diag')?.classList.contains('v'));
+    [['bfio2','modal-fio2'],['bpeep','modal-peep'],['bvt','modal-vt'],['bdiag','modal-diag'],['bmeds','modal-meds']].forEach(([bid,mid])=>{
+      const b=this.$(bid);
+      if(b)b.classList.toggle('to',!!this.$(mid)?.classList.contains('v'));
+    });
   }
 
   _showBackdrop(){
@@ -760,7 +911,7 @@ class Game {
     if(!modal||!btn||!app)return;
     const appR=app.getBoundingClientRect();
     const br=btn.getBoundingClientRect();
-    const mw=modal.classList.contains('diag')?180:152;
+    const mw=(modal.classList.contains('diag')||modal.classList.contains('meds'))?180:152;
     modal.style.width=Math.min(mw,appR.width-16)+'px';
     const mW=modal.offsetWidth||mw;
     let left=br.left+br.width/2-mW/2;
@@ -782,6 +933,7 @@ class Game {
   dismissModals(){
     if(this.$('modal-fio2')?.classList.contains('v')){this.confirmFio2();return;}
     if(this.$('modal-peep')?.classList.contains('v')){this.confirmPeep();return;}
+    if(this.$('modal-vt')?.classList.contains('v')){this.confirmVt();return;}
     this.closeModals();
   }
 
@@ -792,6 +944,30 @@ class Game {
     this.closeModals();
     this._openModal('modal-diag','bdiag');
   }
+
+  showMedsMenu(){
+    if(this._bl())return;
+    const m=this.$('modal-meds');
+    if(m.classList.contains('v')){this.closeModals();return;}
+    this.closeModals();
+    this._openModal('modal-meds','bmeds');
+  }
+
+  showVtModal(){
+    if(this._bl())return;
+    const m=this.$('modal-vt');
+    if(m.classList.contains('v')){this.confirmVt();return;}
+    this.closeModals();
+    this._modalVtStart=this.p.tidalVolume;
+    this.$('modal-vt-val').textContent=this.p.tidalVolume;
+    this._openModal('modal-vt','bvt');
+  }
+
+  adjustVt(dir){if(dir>0&&this.p.tidalVolume>=10)return;if(dir<0&&this.p.tidalVolume<=4)return;this.p.tidalVolume=Math.max(4,Math.min(10,this.p.tidalVolume+dir));this.$('modal-vt-val').textContent=this.p.tidalVolume;}
+
+  confirmVt(){if(this.p.tidalVolume!==this._modalVtStart){this.log(t('game.vtSet',{n:this.p.tidalVolume})+(this.p.tidalVolume>8?t('game.vtTox'):''),this.p.tidalVolume>8?'w':'i');}this.closeModals();}
+
+  runMedFromMenu(key){this.closeModals();this.giveMed(key);}
 
   showFio2Modal(){
     if(this._bl())return;
@@ -846,7 +1022,10 @@ class Game {
     this.$('app').classList.toggle('alarm',this.p.MAP<50||this.p.SpO2<80);
 
     // Events
-    for(const se of this.evts){if(!se.fired&&this.gt>=se.time){se.fired=true;this.fEvts.push(se.evt.id);se.evt.apply(this.p);this.log(getEventMsg(se.evt.id),'e');setTimeout(()=>{if(!this.over)this.log(getEventClue(se.evt.id),'w');},4000);}}
+    for(const se of this.evts){if(!se.fired&&this.gt>=se.time){se.fired=true;this.fEvts.push(se.evt.id);se.evt.apply(this.p);this.snd.alarm();this._vib(100);this.log(getEventMsg(se.evt.id),'e');setTimeout(()=>{if(!this.over)this.log(getEventClue(se.evt.id),'w');},4000);}}
+
+    // Critical alarm tone
+    if((this.p.MAP<50||this.p.SpO2<80)&&this.gt%3===0)this.snd.alarm();
 
     if(this.p.stabAnnounced&&!this._stabM1){this._stabM1=true;this.log(t('game.stabTrend'),'s');}
     if(this.p.stableT>=12&&!this._stabM2){this._stabM2=true;this.log(t('game.stabilizing'),'s');}
@@ -894,6 +1073,7 @@ class Game {
     if(this.$('bn'))this.$('bn').classList.toggle('to',p.norepiOn);
     const fs=this.$('bfio2-sub');if(fs)fs.textContent=p.fio2+'%';
     const ps=this.$('bpeep-sub');if(ps)ps.textContent=String(p.peep);
+    const ts=this.$('bvt-sub');if(ts)ts.textContent=String(p.tidalVolume);
     this.updateModalButtons();
   }
 
@@ -937,27 +1117,80 @@ class Game {
   _toast(id,t,c){const el=this.$(id);if(!el)return;const s=document.createElement('span');s.className='mt '+(c||'pos');s.textContent=t;el.appendChild(s);el.classList.add('gw');setTimeout(()=>{el.classList.remove('gw');if(s.parentNode)s.remove();},1200);}
   _setCD(key,id,cdid,sec){this._cd[key]=true;const b=id?this.$(id):null,c=cdid?this.$(cdid):null;if(b)b.classList.add('cd');let r=sec;if(c)c.textContent=r+'s';const iv=setInterval(()=>{r--;if(c)c.textContent=r>0?r+'s':'';if(r<=0){clearInterval(iv);if(b)b.classList.remove('cd');this._cd[key]=false;}},1000);}
 
-  doFluids(){if(this._bl()||this._cd.f)return;const r=this.p.giveFluids();this._toast('bf',r?'+MAP':'~','pos');this.log(t('game.fluidBolus',{n:this.p.totalFluids}),'i');setTimeout(()=>{if(this.over)return;if(r)this.log(t('game.preloadOk'),'s');else this.log(t('game.preloadMin'),'w');},2000);this._setCD('f','bf','cf',8);}
-  toggleNE(){if(this._bl())return;this.p.norepiOn=!this.p.norepiOn;if(this.p.norepiOn){this.p._neJust=true;this.p._mapAtN=this.p.MAP;this.p._mapB.push({a:5,r:8,d:5/8});this._toast('bn','+MAP','pos');this.log(t('game.neStart'),'i');setTimeout(()=>{if(!this.over&&this.p.norepiOn){const d=this.p.MAP-this.p._mapAtN;this.log(d>=5?t('game.neRespond',{n:d}):t('game.neTrend'),'s');}},4000);}else{this.log(t('game.neStop'),'i');}}
-  doSuction(){if(this._bl()||this._cd.s)return;const r=this.p.doSuction();this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');this.log(r?t('game.suctionOk'):t('game.suctionMin'),r?'s':'');this._setCD('s','bs','cs',12);}
-  doDiuretic(){if(this._bl()||this._cd.di)return;if(this.p.diureticActive){this.log(t('game.diureticInfusing'),'');return;}this.p.giveDiuretic();this.log(t('game.diureticGiven'),'i');const fb=this.p._tutorial?5000:10000;setTimeout(()=>{if(!this.over){if(this.p.pulmonaryEdema>15||this.p._tutorial)this.log(t('game.diureticOk'),'s');else this.log(t('game.diureticMin'),'w');}},fb);this._setCD('di','bd','cdi',30);}
-  fio2(dir){if(this._bl())return;if(dir>0&&this.p.fio2>=100){this.log(t('game.fio2Max'),'');return;}if(dir<0&&this.p.fio2<=21){this.log(t('game.fio2Ra'),'');return;}this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}
-  peep(dir){if(this._bl())return;if(dir>0&&this.p.peep>=18){this.log(t('game.peepMax'),'');return;}if(dir<0&&this.p.peep<=4){this.log(t('game.peepMin'),'');return;}this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.log(t('game.peepSet',{n:this.p.peep})+(this.p.peep>12?t('game.peepWatch'):''),'i');if(this.p._hasPneumo&&this.p.peep<=8&&dir<0){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log(t('game.chestDecomp'),'s');}}
+  _judge(id,good){
+    this._toast(id,good?'✓':'✗',good?'pos':'neg');
+    if(good)this.snd.good();else{this.snd.bad();this._vib(60);}
+  }
 
-  orderABG(){if(this._bl()||this.abgPend)return;this.abgPend=true;this._abgN++;this.log(t('game.abgDrawn'),'i');this._setCD('abg','ba','ca',15);
-    setTimeout(()=>{if(this.over)return;const a=this.p.getABG();const sev=a.Lac>4?'d':a.Lac>2?'w':'s';this.log(t('game.abgResult',{ph:a.pH.toFixed(2),pao2:a.PaO2,paco2:a.PaCO2,lac:a.Lac.toFixed(1),pf:a.PF}),sev);this.log(a.interp,a.PF<200||a.Lac>2.5?'w':'s');this._abgUntil=this.gt+20;this.abgPend=false;},10000);}
+  _lock(key,id,cdid){this._cd[key]=true;const b=this.$(id);if(b)b.classList.add('cd');const c=this.$(cdid);if(c)c.textContent='✓';}
+
+  doFluids(){if(this._bl()||this._cd.f)return;const p=this.p;const r=p.giveFluids();
+    if(p.pulmonaryEdema>40||p.pathKeys.includes('rvfail')){p.wrongAct++;this._judge('bf',false);}
+    else if(p.MAP<65&&(p.pathKeys.includes('sepsis')||p.pathKeys.includes('hypovolemic'))){p.correctAct++;this._judge('bf',true);}
+    else this._toast('bf',r?'+MAP':'~','pos');
+    this.log(t('game.fluidBolus',{n:p.totalFluids}),'i');setTimeout(()=>{if(this.over)return;if(r)this.log(t('game.preloadOk'),'s');else this.log(t('game.preloadMin'),'w');},2000);this._setCD('f','bf','cf',8);}
+  toggleNE(){if(this._bl())return;const p=this.p;p.norepiOn=!p.norepiOn;if(p.norepiOn){p._neJust=true;p._mapAtN=p.MAP;p._mapB.push({a:5,r:8,d:5/8});
+    if(p.vascularTone<50&&p.MAP<65){p.correctAct++;this._judge('bn',true);}else this._toast('bn','+MAP','pos');
+    this.log(t('game.neStart'),'i');setTimeout(()=>{if(!this.over&&p.norepiOn){const d=p.MAP-p._mapAtN;this.log(d>=5?t('game.neRespond',{n:d}):t('game.neTrend'),'s');}},4000);}else{this.log(t('game.neStop'),'i');}}
+  doSuction(){if(this._bl()||this._cd.s)return;const p=this.p;const r=p.doSuction();
+    if(r&&p.pathKeys.includes('airway')){p.correctAct++;this._judge('bs',true);}
+    else this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');
+    this.log(r?t('game.suctionOk'):t('game.suctionMin'),r?'s':'');this._setCD('s','bs','cs',12);}
+  doDiuretic(){if(this._bl()||this._cd.di)return;const p=this.p;if(p.diureticActive){this.log(t('game.diureticInfusing'),'');return;}
+    const wrong=p.bleed>15||(p.pathKeys.includes('hypovolemic')&&p.totalFluids<500);
+    const right=p.pulmonaryEdema>30;
+    p.giveDiuretic();this.log(t('game.diureticGiven'),'i');
+    if(wrong){p.wrongAct++;this._judge('bmeds',false);}
+    else if(right){p.correctAct++;this._judge('bmeds',true);}
+    const fb=p._tutorial?5000:10000;setTimeout(()=>{if(!this.over){if(p.pulmonaryEdema>15||p._tutorial)this.log(t('game.diureticOk'),'s');else this.log(t('game.diureticMin'),'w');}},fb);this._setCD('di','mb-diuretic','mc-diuretic',30);}
+
+  giveMed(key){
+    if(this._bl()||this._cd['m_'+key])return;
+    const p=this.p;
+    if(key==='diuretic'){this.doDiuretic();return;}
+    if(key==='abx'){
+      if(p.abxGiven){this.log(t('game.abxAlready'),'');return;}
+      p.abxGiven=true;p.abxT=60;
+      p._abxWorks=p.pathKeys.includes('sepsis')||p.pathKeys.includes('mixed')||p.infection>30;
+      this.log(t('game.abxGiven'),'i');
+      this._lock('m_abx','mb-abx','mc-abx');
+      if(p._abxWorks){p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over&&p.abxApplied)this.log(t('game.abxWorking'),'s');},70000);}
+      else{p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.abxNoSource'),'w');},8000);}
+      return;
+    }
+    if(key==='bronch'){
+      this.log(t('game.bronchGiven'),'i');
+      this._setCD('m_bronch','mb-bronch','mc-bronch',45);
+      if(p.pathKeys.includes('copd')){p.bronchT=60;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.bronchOk'),'s');},8000);}
+      else{p._dHR+=8;p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.bronchNo'),'w');},5000);}
+      return;
+    }
+    if(key==='anticoag'){
+      this.log(t('game.anticoagGiven'),'i');
+      this._lock('m_anticoag','mb-anticoag','mc-anticoag');
+      if(p.bleed>5||p.pathKeys.includes('hypovolemic')){p.bleed=Math.min(95,p.bleed+25);p.perfusion=Math.max(0,p.perfusion-5);p.wrongAct++;this._judge('bmeds',false);this._vib(80);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagBleed'),'d');},5000);}
+      else if(p.pathKeys.includes('pe')||p.rvStrain>30){p.anticoagOn=true;p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagOk'),'s');},10000);}
+      else{p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.anticoagNo'),'w');},5000);}
+      return;
+    }
+  }
+
+  orderABG(){if(this._bl()||this.abgPend)return;this.abgPend=true;this._abgN++;this.log(t('game.abgDrawn'),'i');this._setCD('abg','ba','ca',12);
+    setTimeout(()=>{if(this.over)return;const a=this.p.getABG();const sev=a.Lac>4?'d':a.Lac>2?'w':'s';this.log(t('game.abgResult',{ph:a.pH.toFixed(2),pao2:a.PaO2,paco2:a.PaCO2,lac:a.Lac.toFixed(1),pf:a.PF}),sev);this.log(a.interp,a.PF<200||a.Lac>2.5?'w':'s');this._abgUntil=this.gt+20;this.abgPend=false;},12000);}
 
   runDiag(key){const tool=DIAG_TOOLS[key];if(!tool||this._bl()||this._cd['d_'+key])return;
-    this.log(t('diag.'+key+'.ordered'),'i');this._setCD('d_'+key,null,null,tool.cd);
+    this.log(t('diag.'+key+'.ordered'),'i');this._setCD('d_'+key,'db-'+key,'dc-'+key,tool.cd);
     setTimeout(()=>{if(this.over)return;const r=tool.run(this.p);this.log(r,'i');this._abgUntil=Math.max(this._abgUntil,this.gt+12);},tool.delay*1000);}
 
-  togglePause(){if(this.over||!this.running)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');}}
+  _syncPauseIcon(){const b=this.$('pfab');if(b)b.textContent=this.paused?'▶':'⏸';}
 
-  unpause(){if(this.over||!this.running||!this.paused)return;this.paused=false;this.hideOv('ov-pause');this.lt=performance.now();this.acc=0;}
+  togglePause(){if(this.over||!this.running)return;if(this.paused)this.unpause();else{this.paused=true;this.closeModals();this.showOv('ov-pause');this._syncPauseIcon();}}
 
-  resetLevel(){if(!this.lvl)return;this.paused=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this.showScreen('scr-gs');this.acceptCase();}
+  unpause(){if(this.over||!this.running||!this.paused)return;this.paused=false;this.hideOv('ov-pause');this.lt=performance.now();this.acc=0;this._syncPauseIcon();}
 
-  quitToLevels(){this.paused=false;this.running=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this.showLevelSelect();}
+  resetLevel(){if(!this.lvl)return;this.paused=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this.showScreen('scr-gs');this._syncPauseIcon();this.acceptCase();}
+
+  quitToLevels(){this.paused=false;this.running=false;this.over=false;this.hideOv('ov-pause');this.closeModals();this.$('app').classList.remove('alarm');this._syncPauseIcon();if(this.mode==='campaign')this.showLevelSelect();else this.showMainMenu();}
   toggleLog(){const l=this.$('log');l.classList.toggle('exp');this.$('lx').textContent=l.classList.contains('exp')?'▲':'▼';}
 
   log(t,type){const d=document.createElement('div');d.className='lm '+(type||'');d.textContent='▸ '+t;const l=this.$('log');l.appendChild(d);l.scrollTop=l.scrollHeight;while(l.children.length>50)l.removeChild(l.children[1]);}
@@ -967,39 +1200,110 @@ class Game {
     this.closeModals();this.over=true;this.running=false;this.$('app').classList.remove('alarm');
     const p=this.p,lv=this.lvl,mins=Math.floor(this.gt/60),secs=this.gt%60;
     let reason=!win?p.arrestReason:winType==='stabilized'?t('win.stabilized'):t('win.survived');
+    if(win){this.snd.win();this._vib([40,40,40]);}else{this.snd.lose();this._vib([120,60,240]);}
 
     const tt=this.gt||1;const mapPct=Math.round((1-p.goalMapF/tt)*100);const spoPct=Math.round((1-p.goalSpoF/tt)*100);
+    const lacPts=(p.lacTrend==='↓'||p.lactate<2)?15:(p.lactate<2.5?8:0);
+    const speedPts=win?Math.max(0,Math.round((300-this.gt)/30)):0;
     let score=0;
-    if(win){score=Math.round(mapPct*.3+spoPct*.3+(p.lacTrend==='↓'||p.lactate<2?15:0)+(winType==='stabilized'?15:0)+Math.max(0,Math.round((300-this.gt)/30)));if(p.peakLI>40)score-=10;if(p.wrongAct>3)score-=10;}
+    if(win){score=Math.round(mapPct*.3+spoPct*.3+lacPts+(winType==='stabilized'?15:0)+speedPts);if(p.peakLI>40)score-=10;if(p.wrongAct>3)score-=10;}
     else score=Math.max(0,Math.round(mapPct*.15+spoPct*.15));
     score=Math.max(0,Math.min(100,score));
     const stars=win?(score>=85?3:score>=60?2:1):0;
     const grade=score>=90?'A':score>=75?'B':score>=60?'C':score>=40?'D':'F';
 
-    if(win)this.setLvlData(lv.id,stars,score);
+    // Persistence & NEW BEST per mode
+    let newBest=false;
+    if(this.mode==='campaign'&&win){
+      const prev=this.getLvlData(lv.id).score||0;
+      newBest=prev>0&&score>prev;
+      this.setLvlData(lv.id,stars,score);
+    }else if(this.mode==='daily'&&win){
+      const s=this.getSave(),ds=this._dailyStr();
+      const prev=(s.daily&&s.daily.date===ds)?s.daily.score:0;
+      newBest=prev>0&&score>prev;
+      if(!s.daily||s.daily.date!==ds||score>s.daily.score){s.daily={date:ds,score:score};this.setSave(s);}
+    }else if(this.mode==='survival'){
+      if(win)this.survTotal+=score;
+      else{
+        const s=this.getSave();const cur={p:this.survN-1,s:this.survTotal};
+        if(!s.survBest||cur.p>s.survBest.p||(cur.p===s.survBest.p&&cur.s>s.survBest.s)){
+          if(cur.p>0)newBest=!!s.survBest;
+          s.survBest=cur;this.setSave(s);
+        }
+      }
+    }
 
     const names=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.name:k;}).join(' + ');
     const descs=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.desc:'';}).join('\n\n');
     const neStr=p.norepiCum>0?Math.round(p.norepiCum)+'s':t('end.neNone');
 
+    // Component bars
+    const lacPct=Math.round(lacPts/15*100),spdPct=Math.max(0,Math.min(100,speedPts*10));
+    const bar=(label,pct)=>{const cls=pct>=85?'':pct>=50?' mid':' low';return '<div class="go-bar"><span>'+label+'</span><div class="go-bar-t"><div class="go-bar-f'+cls+'" data-w="'+pct+'"></div></div><b>'+pct+'%</b></div>';};
+    const barsHtml='<div class="go-bars">'+bar('MAP',mapPct)+bar('SpO₂',spoPct)+bar('Lac',lacPct)+(win?bar('⏱',spdPct):'')+'</div>';
+
+    // 3-star hint
+    let hintHtml='';
+    if(win&&stars<3){
+      const comps=[{k:'hint.map',v:mapPct},{k:'hint.spo2',v:spoPct},{k:'hint.lac',v:lacPct},{k:'hint.speed',v:spdPct}];
+      comps.sort((a,b)=>a.v-b.v);
+      hintHtml='<div class="go-hint">'+t('end.hint3',{x:t(comps[0].k)})+'</div>';
+    }
+    const bestHtml=newBest?'<div class="go-best">'+t('end.newBest')+'</div>':'';
+
+    // Title & survival line
+    let title=win?t('end.win'):t('end.lose');
+    if(this.mode==='survival')title=win?t('end.survWin',{n:this.survN}):t('end.survOver');
+    let survLine='';
+    if(this.mode==='survival'){
+      survLine='<div class="go-sub" style="color:var(--cy)">'+(win?'':t('end.survSummary',{p:this.survN-1})+' | ')+t('end.survTotal',{s:this.survTotal})+'</div>';
+    }
+
+    // Buttons per mode
+    let btns;
+    if(this.mode==='survival'){
+      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+
+        (win?'<div class="go-btn pri" onclick="G.nextSurvival()">'+t('end.nextPatient')+'</div>'
+            :'<div class="go-btn pri" onclick="G.startSurvival()">'+t('end.retry')+'</div>');
+    }else if(this.mode==='daily'){
+      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.menu')+'</div>'+
+        '<div class="go-btn pri" onclick="G.startDaily()">'+t('end.retry')+'</div>';
+    }else{
+      btns='<div class="go-btn" onclick="G.goLS()">'+t('end.levels')+'</div>'+
+        (win&&lv.id<30?'<div class="go-btn pri" onclick="G.startLevel('+(lv.id+1)+')">'+t('end.next')+'</div>':
+          '<div class="go-btn pri" onclick="G.startLevel('+lv.id+')">'+t('end.retry')+'</div>');
+    }
+
     const c=this.$('ov-end-c');
-    c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+(win?t('end.win'):t('end.lose'))+'</div>'+
+    c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+title+'</div>'+
       '<div class="go-sub">'+reason+'</div>'+
-      '<div class="go-stars">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>'+
+      bestHtml+
+      (this.mode==='survival'?'':'<div class="go-stars">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
+      survLine+
+      barsHtml+
+      hintHtml+
       '<div class="go-diag"><strong>'+t('end.diagnosis')+'</strong> '+names+'<br><br>'+descs.replace(/\n/g,'<br>')+'</div>'+
-      '<div class="go-stats">'+t('end.time',{m:mins,s:secs,grade:grade,score:score})+'<br>'+
-      t('end.mapPct',{n:mapPct})+' | '+t('end.spoPct',{n:spoPct})+'<br>'+
+      '<div class="go-stats">'+t('end.time',{m:mins,s:secs,grade:grade,score:'<b id="go-score">0</b>'})+'<br>'+
       t('end.fluids',{n:p.totalFluids,ne:neStr})+'<br>'+
       t('end.suctions',{ok:p.goodSuctions,bad:p.badSuctions,n:p.diureticsGiven})+'<br>'+
       t('end.peak',{lac:p.peakLac.toFixed(1),li:Math.round(p.peakLI)})+'</div>'+
-      '<div class="go-btns">'+
-      '<div class="go-btn" onclick="G.goLS()">'+t('end.levels')+'</div>'+
-      (win&&lv.id<30?'<div class="go-btn pri" onclick="G.startLevel('+(lv.id+1)+')">'+t('end.next')+'</div>':
-        '<div class="go-btn pri" onclick="G.startLevel('+lv.id+')">'+t('end.retry')+'</div>')+'</div>';
+      '<div class="go-btns">'+btns+'</div>';
     this.showOv('ov-end');
+
+    // Animate: bars grow + score counts up
+    requestAnimationFrame(()=>{
+      c.querySelectorAll('.go-bar-f').forEach(el=>{el.style.width=el.dataset.w+'%';});
+      const se=this.$('go-score');
+      if(se){
+        const t0=performance.now();
+        const an=now=>{const k=Math.min(1,(now-t0)/900);se.textContent=Math.round(score*k);if(k<1&&this.over)requestAnimationFrame(an);};
+        requestAnimationFrame(an);
+      }
+    });
   }
 
-  goLS(){this.hideOv('ov-end');this.showLevelSelect();}
+  goLS(){this.hideOv('ov-end');if(this.mode==='campaign')this.showLevelSelect();else this.showMainMenu();}
 
   // -- Waveform (continuous scroll, HR-synced, P–QRS–T morphology) --
   _ecgSample(phase){
@@ -1045,6 +1349,8 @@ class Game {
 
     for(let i=0;i<steps;i++){
       const phase=(this._wX%samplesPerBeat)/samplesPerBeat;
+      if(this._wPrevPhase!==undefined&&this._wPrevPhase<0.21&&phase>=0.21)this.snd.beep(this.p.SpO2);
+      this._wPrevPhase=phase;
       let y=this._ecgSample(phase);
       y+=(Math.random()-0.5)*0.006;
       this._wD[this._wX%w]=y;
@@ -1083,7 +1389,7 @@ class Game {
 const G=new Game();
 window.addEventListener('resize',()=>{
   G._wCtx=null;
-  ['modal-fio2:bfio2','modal-peep:bpeep','modal-diag:bdiag'].forEach(pair=>{
+  ['modal-fio2:bfio2','modal-peep:bpeep','modal-vt:bvt','modal-diag:bdiag','modal-meds:bmeds'].forEach(pair=>{
     const [mid,bid]=pair.split(':');
     if(G.$(mid)?.classList.contains('v'))G.positionModal(mid,bid);
   });
