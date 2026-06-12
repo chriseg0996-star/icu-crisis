@@ -114,7 +114,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ag{padding:6px;background:var(--p);border-top:1px solid var(--b);display:grid;grid-template-columns:repeat(3,1fr);gap:4px;flex-shrink:0}
 .ab{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;border:1px solid var(--b);border-radius:6px;background:var(--c);color:var(--w);font-family:var(--fm);font-size:10px;cursor:pointer;transition:all .12s;-webkit-user-select:none;user-select:none;min-height:50px;position:relative;overflow:visible;text-align:center;line-height:1.2}
 .ab:active{transform:scale(.93)}
-.ab .bi{font-size:15px;margin-bottom:2px}.ab .bl{font-size:6px;color:var(--td);margin-top:2px}
+.ab .bi{font-size:15px;margin-bottom:2px}.ab .bl{font-size:8px;color:var(--tm);margin-top:2px;letter-spacing:.5px}
+.ab .bl.val{font-family:var(--fd);font-size:11px;font-weight:700;color:var(--cy)}
 .ab.ah{border-color:#1a3a4a}.ab.ah:active{border-color:var(--cy);background:rgba(0,221,255,.05)}
 .ab.av{border-color:#1a2a3a}.ab.av:active{border-color:var(--g);background:rgba(0,255,136,.05)}
 .ab.al{border-color:#2a2a1a}.ab.al:active{border-color:var(--o);background:rgba(255,136,51,.05)}
@@ -865,7 +866,7 @@ class Game {
     const ab=(cls,icon,label,sub,onclick,id,cdid,subid)=>{
       let h='<button class="ab '+cls+'"'+(id?' id="'+id+'"':'')+' onclick="'+onclick+'">';
       h+='<span class="bi">'+icon+'</span><span>'+label+'</span>';
-      if(sub||subid)h+='<span class="bl"'+(subid?' id="'+subid+'"':'')+'>'+(sub||'')+'</span>';
+      if(sub||subid)h+='<span class="bl'+(subid?' val':'')+'"'+(subid?' id="'+subid+'"':'')+'>'+(sub||'')+'</span>';
       if(cdid)h+='<div class="co" id="'+cdid+'"></div>';
       h+='</button>';return h;
     };
