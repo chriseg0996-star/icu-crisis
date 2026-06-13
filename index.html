@@ -106,6 +106,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ach-toast.v{transform:translateX(-50%) translateY(0)}
 .go-coins{font-size:11px;color:var(--y);margin:6px 0;letter-spacing:1px}
 
+/* === AVATAR (modular PNG layers) === */
+.avatar{position:relative;width:128px;height:160px;margin:0 auto 10px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#0d1722,#0a1019);border:1px solid var(--b)}
+.avatar.sm{width:46px;height:58px;margin:0;border-radius:6px}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.avatar .av-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;opacity:.5}
+.avatar.sm .av-fallback{font-size:24px}
+.avatar .av-frame{pointer-events:none}
+.av-picker{display:flex;flex-direction:column;gap:5px;margin:8px 0 2px}
+.av-row{display:flex;align-items:center;gap:8px}
+.av-row .av-lbl{flex:1;text-align:left;font-size:8px;letter-spacing:1.5px;color:var(--td);text-transform:uppercase}
+.av-row .av-val{min-width:88px;text-align:center;color:var(--w);font-size:9px}
+.av-row button{width:34px;height:34px;flex-shrink:0;border:1px solid var(--b);background:var(--c);color:var(--cy);border-radius:6px;cursor:pointer;font-size:13px;line-height:1}
+.av-row button:active{transform:scale(.94)}
+
 /* === LEVEL SELECT === */
 .ls{background:var(--bg);padding:16px;overflow-y:auto}
 .ls-title{font-family:var(--fd);font-size:16px;font-weight:900;letter-spacing:4px;color:var(--cy);text-align:center;margin-bottom:4px}
@@ -614,7 +628,35 @@ const COSMETICS=[
   {id:'frame_gold',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#ffcc00',rankReq:null,achReq:'streak_30'}
 ];
 const DEFAULT_OWNED=['scrubs_teal','badge_none','monitor_classic','frame_none'];
-const DEFAULT_COSMETICS={outfit:'scrubs_teal',badge:'badge_none',monitor:'monitor_classic',frame:'frame_none'};
+const DEFAULT_COSMETICS={base:'m_medium',hair:'short',facial:'none',glasses:'none',accessory:'none',head:'none',mask:'none',outfit:'scrubs_teal',badge:'badge_none',monitor:'monitor_classic',frame:'frame_none'};
+
+// ================================================================
+//  AVATAR  -  modular PNG layers in assets/avatar/ (see README there)
+//  Each layer resolves to a filename or null; missing PNGs degrade
+//  gracefully (onerror hides the <img>, fallback emoji shows behind).
+// ================================================================
+const AVATAR_DIR='assets/avatar/';
+const AVATAR_ALIAS={badge_legend:'badge_gold_star'};
+const AVATAR_STACK=[ // back -> front
+  av=>'base_'+(av.base||'m_medium')+'.png',
+  av=>av.outfit&&av.outfit!=='none'?'outfit_'+av.outfit+'.png':null,
+  av=>av.badge&&av.badge!=='badge_none'?(AVATAR_ALIAS[av.badge]||av.badge)+'.png':null,
+  av=>av.accessory&&av.accessory!=='none'?'acc_'+av.accessory+'.png':null,
+  av=>(av.facial&&av.facial!=='none'&&(av.base||'m')[0]==='m')?'facial_hair_'+av.facial+'.png':null,
+  av=>av.hair&&av.hair!=='bald'&&av.hair!=='none'?'hair_'+av.hair+'.png':null,
+  av=>av.glasses&&av.glasses!=='none'?'glasses_'+av.glasses+'.png':null,
+  av=>av.head&&av.head!=='none'?'head_'+av.head+'.png':null,
+  av=>av.mask&&av.mask!=='none'?'mask_'+av.mask+'.png':null
+];
+const AVATAR_FRAME=av=>av.frame&&av.frame!=='frame_none'?av.frame+'.png':null;
+// Free identity options for the profile picker (cosmetics for sale live in COSMETICS)
+const AV_BODY=['m','f'],AV_SKIN=['light','medium','dark'];
+const AV_OPTS={
+  hair:['none','short','buzz','ponytail','long','curly','bun','mohawk','sidepart','senior_gray','blonde','blonde_long'],
+  facial:['none','stache','stubble','beard','goatee'],
+  glasses:['none','round','square','aviator','goggles','monocle'],
+  accessory:['none','stethoscope','id_badge','clipboard','coffee','watch']
+};
 const MISSION_POOL=[
   {id:'daily_play',check:(g,r)=>r.mode==='daily',reward:15},
   {id:'daily_win',check:(g,r)=>r.mode==='daily'&&r.win,reward:25},
@@ -1056,6 +1098,8 @@ class Game {
     const achCount=(s.achievements||[]).length;
     const p=this.$('profile-panel');
     p.innerHTML='<div class="meta-panel-h">'+t('menu.profile')+'</div>'+
+      '<div class="avatar" id="prof-avatar"></div>'+
+      this._avPickerHtml(s.avatar)+
       '<div class="meta-row"><span>'+t('profile.rank')+'</span><b>'+rank+'</b></div>'+
       '<div class="meta-row"><span>XP</span><b>'+(s.xp||0)+(nextRk?' / '+nextRk.xp:'')+' ('+xpBar+'%)</b></div>'+
       '<div class="meta-row"><span>'+t('profile.coins')+'</span><b>🪙 '+s.coins+'</b></div>'+
@@ -1064,6 +1108,49 @@ class Game {
       '<div class="meta-row"><span>'+t('profile.survBest')+'</span><b>'+(bests.survival&&bests.survival.p?bests.survival.p+' '+t('profile.patients')+' ('+bests.survival.score+' pts)':'—')+'</b></div>'+
       '<div class="meta-row"><span>'+t('profile.topLevels')+'</span><b style="text-align:right;line-height:1.4">'+recHtml+'</b></div>'+
       '<button class="meta-close" onclick="G.hideProfile()">'+t('profile.close')+'</button>';
+    this._renderAvatar(this.$('prof-avatar'),s.avatar);
+  }
+
+  // -- Avatar rendering & customization --
+  _renderAvatar(el,av,small){
+    if(!el)return;
+    av=av||this.ensureMeta().avatar;
+    el.className='avatar'+(small?' sm':'');
+    let h='<div class="av-fallback">🧑‍⚕️</div>';
+    AVATAR_STACK.forEach(fn=>{const f=fn(av);if(f)h+='<img src="'+AVATAR_DIR+f+'" alt="" onerror="this.style.display=\'none\'">';});
+    const fr=AVATAR_FRAME(av);
+    if(fr)h+='<img class="av-frame" src="'+AVATAR_DIR+fr+'" alt="" onerror="this.style.display=\'none\'">';
+    el.innerHTML=h;
+  }
+  _avValLabel(part,val){const k='av.'+part+'_'+val;let s=t(k);if(s===k)s=val.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return s;}
+  _avPickerHtml(av){
+    const body=(av.base||'m_medium').split('_')[0],skin=(av.base||'m_medium').split('_')[1]||'medium';
+    const row=(part,lbl,val)=>'<div class="av-row"><span class="av-lbl">'+lbl+'</span>'+
+      '<button onclick="G._avCycle(\''+part+'\',-1)">◀</button>'+
+      '<span class="av-val">'+val+'</span>'+
+      '<button onclick="G._avCycle(\''+part+'\',1)">▶</button></div>';
+    return '<div class="av-picker">'+
+      row('body',t('av.body'),this._avValLabel('body',body))+
+      row('skin',t('av.skin'),this._avValLabel('skin',skin))+
+      row('hair',t('av.hair'),this._avValLabel('hair',av.hair||'short'))+
+      ((av.base||'m')[0]==='m'?row('facial',t('av.facial'),this._avValLabel('facial',av.facial||'none')):'')+
+      row('glasses',t('av.glasses'),this._avValLabel('glasses',av.glasses||'none'))+
+      row('accessory',t('av.accessory'),this._avValLabel('accessory',av.accessory||'none'))+
+      '</div>';
+  }
+  _avCycle(part,dir){
+    const s=this.ensureMeta(),av=s.avatar;
+    if(part==='body'||part==='skin'){
+      let body=(av.base||'m_medium').split('_')[0],skin=(av.base||'m_medium').split('_')[1]||'medium';
+      if(part==='body'){const a=AV_BODY,i=(a.indexOf(body)+dir+a.length)%a.length;body=a[i];}
+      else{const a=AV_SKIN,i=(a.indexOf(skin)+dir+a.length)%a.length;skin=a[i];}
+      av.base=body+'_'+skin;
+      if(body==='f')av.facial='none';
+    }else{
+      const a=AV_OPTS[part];if(!a)return;const i=(a.indexOf(av[part])+dir+a.length)%a.length;av[part]=a[i];
+    }
+    this.setSave(s);
+    this._renderProfile();
   }
 
   hideProfile(){this.hideOv('ov-profile');}
@@ -1100,8 +1187,10 @@ class Game {
         '<div class="shop-item-price">'+price+(equipped?' ✓':'')+'</div></div>';
     });
     p.innerHTML='<div class="meta-panel-h">'+t('menu.shop')+' · 🪙 '+s.coins+'</div>'+
+      '<div class="avatar" id="shop-avatar"></div>'+
       '<div class="shop-tabs">'+tabs+'</div><div class="shop-grid">'+items+'</div>'+
       '<button class="meta-close" onclick="G.hideShop()">'+t('profile.close')+'</button>';
+    this._renderAvatar(this.$('shop-avatar'),s.avatar);
   }
 
   _rankIdx(id){return RANKS.findIndex(r=>r.id===id);}
