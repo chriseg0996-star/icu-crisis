@@ -34,7 +34,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-top{display:none;position:absolute;top:0;left:0;right:0;justify-content:flex-end;padding:10px 12px;z-index:3;pointer-events:none}
 #scr-mm.active .mm-top{display:flex}
 .mm-lang{display:flex;gap:2px;background:rgba(10,16,25,.92);border:1px solid var(--b);border-radius:20px;padding:3px;pointer-events:auto;backdrop-filter:blur(6px)}
-.lang-btn{padding:5px 11px;border:none;background:transparent;color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:14px;transition:all .15s;-webkit-user-select:none;user-select:none;min-height:28px;line-height:1}
+.lang-btn{padding:5px 11px;border:none;background:transparent;color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:14px;transition:all .15s;-webkit-user-select:none;user-select:none;min-height:44px;min-width:44px;line-height:1;display:flex;align-items:center;justify-content:center}
 .lang-btn.on{color:var(--cy);background:rgba(0,221,255,.12);box-shadow:0 0 8px rgba(0,221,255,.08)}
 .lang-btn:active{transform:scale(.95)}
 .mm-scroll{flex:1;overflow-y:auto;overflow-x:hidden;width:100%;max-width:400px;margin:0 auto;padding:44px 16px 8px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;justify-content:center}
@@ -59,7 +59,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-mode-card .mmc-icon{font-size:18px;line-height:1}
 .mm-mode-card .mmc-label{font-family:var(--fd);font-size:7px;letter-spacing:2px;color:var(--tm)}
 .mm-links{display:flex;align-items:center;justify-content:center;gap:16px;padding:2px 0}
-.mm-link{background:none;border:none;color:var(--td);font-family:var(--fd);font-size:8px;letter-spacing:2px;cursor:pointer;padding:4px 2px;transition:color .15s;-webkit-user-select:none;user-select:none}
+.mm-link{background:none;border:none;color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:2px;cursor:pointer;padding:12px 8px;min-height:44px;display:inline-flex;align-items:center;transition:color .15s;-webkit-user-select:none;user-select:none}
 .mm-link:hover{color:var(--cy)}
 .mm-extra-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border:1px solid var(--b);border-radius:10px;background:rgba(10,16,25,.35);cursor:pointer;color:var(--td);font-family:var(--fd);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;-webkit-user-select:none;user-select:none;transition:border-color .15s,background .15s}
 .mm-extra-toggle:hover{border-color:rgba(0,221,255,.25);background:rgba(0,221,255,.03)}
@@ -629,8 +629,8 @@ const ACHIEVEMENTS=[
   {id:'first_daily',check:(g,s,r)=>r.mode==='daily'&&r.win,reward:0,coins:40},
   {id:'streak_7',check:(g,s)=>s.dailyStreak&&s.dailyStreak.n>=7,reward:0,coins:75},
   {id:'streak_30',check:(g,s)=>s.dailyStreak&&s.dailyStreak.n>=30,reward:0,coins:200},
-  {id:'surv_5',check:(g,s)=>s.survBest&&s.survBest.p>=5,reward:0,coins:60},
-  {id:'surv_10',check:(g,s)=>s.survBest&&s.survBest.p>=10,reward:0,coins:100},
+  {id:'surv_5',check:(g,s)=>s.bests.survival&&s.bests.survival.p>=5,reward:0,coins:60},
+  {id:'surv_10',check:(g,s)=>s.bests.survival&&s.bests.survival.p>=10,reward:0,coins:100},
   {id:'perfect_l1',check:(g,s)=>s['l1']&&s['l1'].stars>=3,reward:0,coins:40},
   {id:'perfect_10',check:(g,s)=>{let n=0;for(let i=1;i<=10;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=10;},reward:0,coins:150},
   {id:'win_streak_5',check:(g,s)=>s.winStreak>=5,reward:0,coins:80},
@@ -1250,6 +1250,8 @@ class Game {
     if(!s.achievements)s.achievements=[];
     if(!s.bests)s.bests={daily:0,survival:{p:0,score:0},levels:{}};
     if(s.bests.survival&&s.bests.survival.patients!=null&&!s.bests.survival.p){s.bests.survival.p=s.bests.survival.patients;}
+    // Migrate legacy s.survBest {p,s} into the single source s.bests.survival {p,score}
+    if(s.survBest){if(!s.bests.survival||(s.survBest.p||0)>(s.bests.survival.p||0))s.bests.survival={p:s.survBest.p||0,score:s.survBest.s||0};delete s.survBest;}
     if(!s.dailyHistory)s.dailyHistory=[];
     if(s.gamesPlayed==null)s.gamesPlayed=0;
     if(s.dailyWins==null)s.dailyWins=0;
@@ -1293,7 +1295,8 @@ class Game {
       for(let i=t.l;i<=t.r;i++){
         const d=this.getLvlData(i);const locked=i>mx;const done=d.stars>0;
         const stars=d.stars>=3?'★★★':d.stars>=2?'★★☆':d.stars>=1?'★☆☆':'';
-        h+='<div class="ls-btn'+(locked?' locked':'')+(d.stars>=3?' perfect':done?' completed':'')+'" onclick="G.startLevel('+i+')"><div class="ls-num">'+i+'</div><div class="ls-stars">'+stars+'</div></div>';
+        const aria=locked?t('aria.levelLocked',{n:i}):t('aria.level',{n:i,s:d.stars});
+        h+='<div class="ls-btn'+(locked?' locked':'')+(d.stars>=3?' perfect':done?' completed':'')+'" role="button" aria-label="'+aria+'"'+(locked?' aria-disabled="true"':'')+' onclick="G.startLevel('+i+')"><div class="ls-num">'+i+'</div><div class="ls-stars">'+stars+'</div></div>';
       }
       h+='</div></div>';c.innerHTML+=h;
     });
@@ -2110,11 +2113,9 @@ class Game {
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
       else{
-        const s=this.ensureMeta();const cur={p:this.survN-1,s:this.survTotal};
-        if(!s.survBest||cur.p>s.survBest.p||(cur.p===s.survBest.p&&cur.s>s.survBest.s)){
-          if(cur.p>0)newBest=!!s.survBest;
-          s.survBest=cur;this.setSave(s);
-        }
+        // best is written by _awardMeta into s.bests.survival (single source); detect a new record here
+        const s=this.ensureMeta(),prev=s.bests.survival,cur={p:this.survN-1,s:this.survTotal};
+        if(cur.p>0&&prev&&prev.p>0&&(cur.p>prev.p||(cur.p===prev.p&&cur.s>(prev.score||0))))newBest=true;
       }
     }
 

@@ -1,7 +1,10 @@
 {
+  "id": "/icu-crisis/",
   "name": "ICU Crisis",
   "short_name": "ICU Crisis",
   "description": "Diagnose and stabilize ICU patients in real time. Pure clinical reasoning under pressure.",
+  "lang": "en",
+  "categories": ["games", "education", "medical"],
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
@@ -10,6 +13,7 @@
   "theme_color": "#030608",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
