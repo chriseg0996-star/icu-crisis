@@ -305,7 +305,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <!-- === MAIN MENU === -->
 <div class="screen mm active" id="scr-mm">
   <div class="mm-top">
-    <div class="mm-lang">
+    <div class="mm-lang" role="group" data-i18n-aria="aria.langGroup" aria-label="Language">
       <button class="lang-btn" id="lang-en" onclick="G.setLang('en')">EN</button>
       <button class="lang-btn" id="lang-es" onclick="G.setLang('es')">ES</button>
     </div>
@@ -372,8 +372,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     </div>
     <div class="hdr-right">
       <div class="hdr-timer" id="hdr-timer">00:00</div>
-      <button class="pfab" id="sfab" onclick="G.toggleSound()">🔊</button>
-      <button class="pfab" id="pfab" onclick="G.togglePause()">⏸</button>
+      <button class="pfab" id="sfab" data-i18n-aria="aria.sound" aria-label="Sound" onclick="G.toggleSound()">🔊</button>
+      <button class="pfab" id="pfab" data-i18n-aria="aria.pause" aria-label="Pause" onclick="G.togglePause()">⏸</button>
     </div>
   </div>
 
@@ -389,7 +389,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <div class="mon-tags" id="ast"></div>
   </div>
 
-  <div class="log" id="log"><span class="lx" id="lx" onclick="G.toggleLog()">▼</span></div>
+  <div class="log" id="log" role="log" aria-live="polite" aria-relevant="additions"><span class="lx" id="lx" onclick="G.toggleLog()">▼</span></div>
   </div>
   <div class="ag" id="ag"></div>
 </div>
@@ -972,10 +972,13 @@ class Game {
     document.querySelectorAll('[data-i18n]').forEach(el=>{
       el.textContent=t(el.dataset.i18n);
     });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el=>{
+      el.setAttribute('aria-label',t(el.dataset.i18nAria));
+    });
     const lang=getLang();
     const en=this.$('lang-en'),es=this.$('lang-es');
-    if(en){en.classList.toggle('on',lang==='en');}
-    if(es){es.classList.toggle('on',lang==='es');}
+    if(en){en.classList.toggle('on',lang==='en');en.setAttribute('aria-pressed',lang==='en');}
+    if(es){es.classList.toggle('on',lang==='es');es.setAttribute('aria-pressed',lang==='es');}
   }
 
   showMainMenu(){
