@@ -2077,6 +2077,7 @@ class Game {
     const tt=this.gt||1;const mapPct=Math.round((1-p.goalMapF/tt)*100);const spoPct=Math.round((1-p.goalSpoF/tt)*100);
     const lacPts=(p.lacTrend==='↓'||p.lactate<2)?15:(p.lactate<2.5?8:0);
     const speedPts=win?Math.max(0,Math.round((300-this.gt)/30)):0;
+    const lacPct=Math.round(lacPts/15*100),spdPct=Math.max(0,Math.min(100,speedPts*10));
     let score=0;
     if(win){score=Math.round(mapPct*.3+spoPct*.3+lacPts+(winType==='stabilized'?15:0)+speedPts);if(p.peakLI>40)score-=10;if(p.wrongAct>3)score-=10;}
     else score=Math.max(0,Math.round(mapPct*.15+spoPct*.15));
@@ -2143,7 +2144,6 @@ class Game {
     const dbHtml=db.length?'<div class="go-debrief"><strong>'+t('db.title')+'</strong><br>'+db.slice(0,3).map(x=>'▸ '+x).join('<br>')+'</div>':'';
 
     // Component bars
-    const lacPct=Math.round(lacPts/15*100),spdPct=Math.max(0,Math.min(100,speedPts*10));
     const bar=(label,pct)=>{const cls=pct>=85?'':pct>=50?' mid':' low';return '<div class="go-bar"><span>'+label+'</span><div class="go-bar-t"><div class="go-bar-f'+cls+'" data-w="'+pct+'"></div></div><b>'+pct+'%</b></div>';};
     const barsHtml='<div class="go-bars">'+bar('MAP',mapPct)+bar('SpO₂',spoPct)+bar('Lac',lacPct)+(win?bar('⏱',spdPct):'')+'</div>';
 
