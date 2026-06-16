@@ -579,7 +579,9 @@ tamponade:{name:'Cardiac Tamponade',desc:'Pericardial fluid compressing the hear
 const LEVELS=[];
 // Tier 1: Single pathology (1-5)
 const t1=[['edema'],['airway'],['sepsis'],['hypovolemic'],['copd']];
-t1.forEach((p,i)=>LEVELS.push({id:i+1,tier:1,paths:p,mult:i===0?0.5:0.75,stabReq:i===0?12:14,events:0,desc:'Single pathology'}));
+// L1 tutorial is heavily assisted; ramp the next levels gently so new players
+// don't hit a cliff stepping into the full sim (mult scales deterioration rate).
+t1.forEach((p,i)=>LEVELS.push({id:i+1,tier:1,paths:p,mult:[0.5,0.6,0.68,0.75,0.75][i],stabReq:i===0?12:14,events:0,desc:'Single pathology'}));
 LEVELS[0]={id:1,tier:1,paths:['edema'],mult:0.5,stabReq:12,events:0,desc:'Tutorial: pulmonary edema'};
 // Tier 2: Single harder (6-10)
 const t2=[['cardiogenic'],['pe'],['rvfail'],['sepsis'],['anaphylaxis']];
