@@ -9,15 +9,30 @@
 
 **[Play ICU Crisis →](https://chriseg0996-star.github.io/icu-crisis)**
 
-Open on any modern browser (desktop, mobile, tablet). No installation needed.
+Open on any modern browser (desktop, mobile, tablet). No installation needed. Installable as a PWA on supported devices.
 
 ---
 
 ## About
 
-ICU Crisis is a single-file, vanilla JavaScript browser game that teaches critical care reasoning through play. You are an intensivist managing mechanically ventilated patients across 30 levels of increasing complexity.
+ICU Crisis is a vanilla JavaScript browser game that teaches critical care reasoning through play. You are an intensivist managing mechanically ventilated patients across 30 campaign levels, plus daily and survival modes.
 
 Unlike traditional medical simulations, ICU Crisis **never tells you the diagnosis**. You must synthesize clinical clues, order diagnostics, and manage competing physiological problems to stabilize your patients.
+
+The UI is available in **English and Spanish** (toggle in-game).
+
+---
+
+## Game Modes
+
+### Campaign (30 levels)
+Six tiers (I–VI) with progressive unlock. The campaign menu shows continue, overall progress, tier tabs, and a per-tier level grid with star ratings.
+
+### Daily Case
+One seeded case per calendar day. Same puzzle for all players. Daily streak tracking and shareable emoji score grids (MAP, SpO₂, Lac, time).
+
+### Survival
+Endless escalating cases. Score = patients stabilized and cumulative points. Share your run when it ends.
 
 ---
 
@@ -31,7 +46,15 @@ Unlike traditional medical simulations, ICU Crisis **never tells you the diagnos
 - **Tier 5 (Levels 21–25):** Diagnostic challenges; multiple acute events
 - **Tier 6 (Levels 26–30):** Master cases; rapid deterioration; true ICU reasoning
 
-Unlock progression via localStorage. Star ratings (1–3) for each level.
+Unlock progression via `localStorage` (`icu5` save key). Star ratings (1–3) for each level.
+
+### Meta-Game
+- **Coins & rank** — Earn coins from wins, missions, and achievements; rank up from Intern to Attending
+- **Daily missions** — Rotating objectives with coin rewards
+- **Achievements** — 20+ unlockable badges tracked in your profile
+- **Cosmetic shop** — Monitor themes, badges, frames, and scrubs visible in menu, profile, and in-game monitor
+- **Profile** — 6×5 campaign grid, achievement list, stats summary
+- **Share** — Copy or native-share results with emoji performance bars (campaign, daily, survival)
 
 ### 9+ Pathologies
 - **Pulmonary Edema** — PEEP-responsive, diuretic-dependent
@@ -83,10 +106,11 @@ No generic "risk warnings." Alerts only fire when they describe a meaningful cli
 - "No MAP response to fluids — consider alternate cause"
 
 ### Scoring & Star Ratings
-- **Win Conditions:** Stabilization (20–28s sustained stability) or survival (10 min)
+- **Win Conditions:** Stabilization (tier-dependent sustained stability window) or survival (10 min)
 - **Scoring:** MAP/SpO₂ goal achievement (30% each), lactate trend (15%), stabilization bonus (15%), speed bonus
 - **Stars:** 1–3 based on grade (A/B/C/D/F)
 - **Penalties:** Lung injury >40 (-10), >3 wrong interventions (-10)
+- **Stabilization bar:** In-game progress toward the required stable seconds
 
 ### Mobile-First Design
 - Touch-friendly buttons and spacing
@@ -114,7 +138,7 @@ You receive an admission brief with:
 5. Order diagnostics (POCUS, Echo, Labs, VExUS)
 6. Manage treatments (fluids, vasopressors, diuretics, suction, ABG)
 7. Titrate ventilation (PEEP, FiO₂, VT)
-8. Stabilize the patient (goals: MAP ≥65, SpO₂ ≥90, lactate <2.5, sustained 20s+)
+8. Stabilize the patient (goals: MAP ≥65, SpO₂ ≥90, lactate <2.5, sustained stability per level)
 
 ### Win
 Patient stabilizes OR survives 10 minutes.
@@ -135,9 +159,11 @@ No prompts. No hints. Pure clinical synthesis.
 ## Technical Details
 
 ### Stack
-- Single HTML file (~800 lines)
-- Vanilla JavaScript (ES6)
-- No dependencies
+- `index.html` — game logic, UI, styles (~2,400 lines)
+- `i18n.js` — English/Spanish strings (~900 lines)
+- `fonts.css` + `fonts/` — bundled Orbitron & Share Tech Mono (offline)
+- `manifest.json` — PWA install metadata
+- Vanilla JavaScript (ES6), no npm dependencies
 - CSS Grid + Flexbox layout
 - Canvas-based ECG waveform
 
@@ -148,10 +174,10 @@ No prompts. No hints. Pure clinical synthesis.
 - Mobile WebView (iOS 14+, Android 9+)
 
 ### Performance
-- 60 FPS game loop via requestAnimationFrame
+- 60 FPS game loop via `requestAnimationFrame`
 - Deterministic physics (portable to server/multiplayer)
-- localStorage for progression persistence
-- <100KB uncompressed; <30KB gzipped
+- `localStorage` for progression persistence
+- Core game assets ~200 KB (HTML + i18n); full repo includes icons and OG image
 
 ---
 
@@ -159,16 +185,14 @@ No prompts. No hints. Pure clinical synthesis.
 
 ### Option 1: Direct (No Server)
 ```bash
-# Clone the repo
 git clone https://github.com/chriseg0996-star/icu-crisis.git
 cd icu-crisis
-
-# Open in browser
-open index.html  # macOS
-# or just drag index.html into your browser
+# Open index.html in your browser (drag-and-drop works)
 ```
 
 ### Option 2: Local Server (Recommended)
+Service worker and PWA features work best over HTTP:
+
 ```bash
 # Python 3
 python -m http.server 8000
@@ -183,11 +207,11 @@ npx http-server
 
 ## GitHub Pages Deployment
 
-This repo is already set up for GitHub Pages. The game is live at:
+This repo is set up for GitHub Pages. The game is live at:
 
 **https://chriseg0996-star.github.io/icu-crisis**
 
-Changes to `index.html` automatically deploy within seconds.
+Push to `main` to deploy. After updates, users may need a hard refresh once for the service worker cache to roll forward.
 
 To enable on your own fork:
 1. Go to Settings → Pages
@@ -255,16 +279,24 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 
 ---
 
-## Future Roadmap
+## Roadmap
 
-- [ ] Multilingual support (Spanish, Portuguese)
+**Shipped**
+- [x] English + Spanish UI
+- [x] Daily Case with streaks and share grids
+- [x] Survival mode
+- [x] Meta-game (coins, missions, achievements, shop, profile)
+- [x] Campaign menu redesign with tier tabs and progress
+- [x] PWA + service worker offline cache
+- [x] Bundled web fonts (no Google Fonts CDN)
+
+**Planned**
+- [ ] Portuguese localization
+- [ ] Player avatar (full chibi character)
+- [ ] Pause menu → main menu shortcut
+- [ ] Tutorial hints for early levels (e.g. airway/suction)
 - [ ] Custom case builder (create and share cases)
-- [ ] Multiplayer competitive modes
 - [ ] Advanced ventilation modes (HFOV, ECMO)
-- [ ] Renal replacement therapy
-- [ ] Extended ICU procedures (central lines, IABP)
-- [ ] Detailed physiology visualization
-- [ ] Mobile app (React Native)
 
 ---
 
