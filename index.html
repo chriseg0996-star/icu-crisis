@@ -27,6 +27,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* === SCREENS === */
 .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
+.screen:not(.active){display:none!important}
 
 /* === MAIN MENU === */
 .mm{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:100vh}
@@ -106,21 +107,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ach-toast.v{transform:translateX(-50%) translateY(0)}
 .go-coins{font-size:11px;color:var(--y);margin:6px 0;letter-spacing:1px}
 
-/* === LEVEL SELECT === */
-.ls{background:var(--bg);padding:16px;overflow-y:auto}
-.ls-title{font-family:var(--fd);font-size:16px;font-weight:900;letter-spacing:4px;color:var(--cy);text-align:center;margin-bottom:4px}
-.ls-sub{font-size:9px;color:var(--td);text-align:center;letter-spacing:2px;margin-bottom:16px}
-.ls-tier{margin-bottom:12px}
-.ls-tier-title{font-size:8px;letter-spacing:2px;color:var(--td);text-transform:uppercase;margin-bottom:6px;padding-left:4px}
-.ls-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.ls-btn{aspect-ratio:1;border:1px solid var(--b);border-radius:6px;background:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative}
+/* === LEVEL SELECT (campaign map) === */
+.ls{display:flex;flex-direction:column;height:100%;overflow:hidden;background:var(--bg);position:relative}
+.ls::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 24px,rgba(0,221,255,.015) 24px,rgba(0,221,255,.015) 25px);pointer-events:none}
+.ls-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:var(--p);border-bottom:1px solid var(--b);flex-shrink:0;position:relative;z-index:1}
+.ls-back{display:flex;align-items:center;gap:4px;min-height:44px;padding:0 10px;border:1px solid var(--b);border-radius:8px;background:var(--c);color:var(--tm);font-family:var(--fd);font-size:8px;letter-spacing:1px;cursor:pointer;flex-shrink:0;-webkit-user-select:none;user-select:none}
+.ls-back:active{transform:scale(.96);border-color:var(--cy);color:var(--cy)}
+.ls-heading{flex:1;font-family:var(--fd);font-size:10px;letter-spacing:3px;color:var(--y);text-transform:uppercase;text-align:center}
+.ls-stars-total{font-family:var(--fd);font-size:9px;color:var(--y);letter-spacing:1px;flex-shrink:0;min-width:52px;text-align:right}
+.ls-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 14px 16px;position:relative;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ls-continue{width:100%;padding:13px 16px;border:1px solid rgba(255,204,0,.45);border-radius:10px;background:linear-gradient(180deg,rgba(255,204,0,.12) 0%,rgba(255,204,0,.04) 100%);color:var(--y);font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;flex-shrink:0;-webkit-user-select:none;user-select:none;min-height:46px;box-shadow:0 4px 14px rgba(255,204,0,.08)}
+.ls-continue:active{transform:scale(.98)}
+.ls-continue.hide{display:none}
+.ls-progress-wrap{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ls-progress-bar{flex:1;height:6px;border-radius:3px;background:var(--c);border:1px solid var(--b);overflow:hidden}
+.ls-progress-fill{height:100%;width:0;background:linear-gradient(90deg,rgba(255,204,0,.5),var(--y));border-radius:2px;transition:width .35s ease}
+.ls-progress-label{font-family:var(--fd);font-size:8px;color:var(--td);letter-spacing:1px;flex-shrink:0;min-width:36px;text-align:right}
+.ls-tabs{display:flex;gap:4px;overflow-x:auto;flex-shrink:0;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ls-tabs::-webkit-scrollbar{display:none}
+.ls-tab{flex:1;min-width:42px;padding:8px 4px;border:1px solid var(--b);border-radius:8px;background:var(--c);color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:1px;cursor:pointer;text-align:center;-webkit-user-select:none;user-select:none;transition:border-color .15s,background .15s}
+.ls-tab.on{border-color:var(--cy);color:var(--cy);background:rgba(0,221,255,.06)}
+.ls-tab.locked{opacity:.4}
+.ls-tab:active{transform:scale(.96)}
+.ls-hint{font-size:9px;color:var(--cy);text-align:center;padding:10px 12px;border:1px solid rgba(0,221,255,.35);border-radius:8px;background:rgba(0,221,255,.07);line-height:1.45;flex-shrink:0;letter-spacing:.3px}
+.ls-hint.hide{display:none}
+.ls-panel{flex-shrink:0}
+.ls-tier-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
+.ls-tier-name{font-size:8px;letter-spacing:2px;color:var(--tm);text-transform:uppercase}
+.ls-tier-meta{font-size:7px;color:var(--td);letter-spacing:1px;flex-shrink:0}
+.ls-tier-locked{font-size:9px;color:var(--td);text-align:center;padding:24px 12px;border:1px dashed var(--b);border-radius:8px}
+.ls-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.ls-btn{aspect-ratio:1;min-height:52px;border:1px solid var(--b);border-radius:8px;background:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative;-webkit-user-select:none;user-select:none}
 .ls-btn:active{transform:scale(.94)}
-.ls-btn .ls-num{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w)}
-.ls-btn .ls-stars{font-size:8px;color:var(--y);margin-top:2px;height:10px}
-.ls-btn.locked{opacity:.3;pointer-events:none}
-.ls-btn.locked .ls-num{color:var(--td)}
+.ls-btn .ls-num{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);line-height:1}
+.ls-btn .ls-stars{font-size:7px;color:var(--y);margin-top:3px;height:10px;line-height:1}
+.ls-btn.locked{opacity:.45}
+.ls-btn.locked .ls-num{font-size:12px;color:var(--td)}
 .ls-btn.completed{border-color:var(--gd)}
 .ls-btn.perfect{border-color:var(--y);box-shadow:0 0 8px rgba(255,204,0,.15)}
+.ls-btn.next{border-color:var(--cy);box-shadow:0 0 10px rgba(0,221,255,.2);animation:lsPulse 2s ease-in-out infinite}
+@keyframes lsPulse{0%,100%{box-shadow:0 0 6px rgba(0,221,255,.15)}50%{box-shadow:0 0 14px rgba(0,221,255,.35)}}
+.ach-toast.ls{border-color:var(--cy);color:var(--cy)}
 
 /* === GAME SCREEN === */
 .gs{background:var(--bg);height:100%;overflow:hidden}
@@ -354,9 +381,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
 <!-- === LEVEL SELECT SCREEN === -->
 <div class="screen ls" id="scr-ls">
-  <div class="ls-title">ICU CRISIS</div>
-  <div class="ls-sub" data-i18n="menu.sub">CLINICAL SIMULATION</div>
-  <div id="ls-tiers"></div>
+  <header class="ls-bar">
+    <button type="button" class="ls-back" onclick="G.showMainMenu()"><span data-i18n="ls.back">Home</span></button>
+    <span class="ls-heading" data-i18n="ls.campaign">CAMPAIGN</span>
+    <span class="ls-stars-total" id="ls-stars-total"></span>
+  </header>
+  <div class="ls-body">
+    <button type="button" class="ls-continue" id="ls-continue"></button>
+    <div class="ls-progress-wrap">
+      <div class="ls-progress-bar"><div class="ls-progress-fill" id="ls-progress-fill"></div></div>
+      <span class="ls-progress-label" id="ls-progress-label"></span>
+    </div>
+    <div class="ls-tabs" id="ls-tabs"></div>
+    <div class="ls-hint hide" id="ls-hint" role="status"></div>
+    <div class="ls-panel" id="ls-panel"></div>
+  </div>
 </div>
 
 <!-- === GAME SCREEN === -->
@@ -588,6 +627,15 @@ t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:1.5,stabReq:28,events
 const UNLOCKS={
   pocus:4,labs:6,bronch:6,abx:7,transfusion:9,echo:10,epi:11,dobu:12,anticoag:14,vexus:16,vaso:18,advlabs:22,pericardio:24
 };
+const LS_TIERS=[
+  {l:1,r:5,i18n:'tier.foundations'},
+  {l:6,r:10,i18n:'tier.intermediate'},
+  {l:11,r:15,i18n:'tier.overlap'},
+  {l:16,r:20,i18n:'tier.complex'},
+  {l:21,r:25,i18n:'tier.challenge'},
+  {l:26,r:30,i18n:'tier.master'}
+];
+const LS_ROMAN=['I','II','III','IV','V','VI'];
 
 const RANKS=[{id:'intern',xp:0},{id:'resident',xp:500},{id:'fellow',xp:1500},{id:'attending',xp:4000}];
 const RANK_I18N={intern:'rank.intern',resident:'rank.resident',fellow:'rank.fellow',attending:'rank.attending'};
@@ -964,7 +1012,7 @@ class Game {
     if(this.running&&!this.over)return;
     setLang(code);
     this.applyStaticUI();
-    if(this.$('scr-ls').classList.contains('active'))this.initLS();
+    if(this.$('scr-ls')?.classList.contains('active'))this.initLS();
     else this.showMainMenu();
   }
 
@@ -1223,6 +1271,7 @@ class Game {
   _toastAch(id){
     const el=this.$('ach-toast');
     if(!el)return;
+    el.classList.remove('ls');
     el.textContent='🏆 '+t('ach.'+id);
     el.classList.add('v');
     setTimeout(()=>el.classList.remove('v'),2800);
@@ -1230,8 +1279,10 @@ class Game {
 
   showLevelSelect(){
     this.applyStaticUI();
-    this.initLS();
+    const next=this._lsNextLevel();
+    this._lsTab=this._lsTierIndexForLevel(next||1);
     this.showScreen('scr-ls');
+    try{this.initLS();}catch(e){console.error('initLS',e);}
   }
 
   // -- Save/Load --
@@ -1281,22 +1332,113 @@ class Game {
   getMaxUnlocked(){return this.getSave().maxUnlocked||1;}
 
   // -- Level Select --
-  initLS(){
-    const c=this.$('ls-tiers');c.innerHTML='';
-    const tiers=[{n:t('tier.foundations'),l:1,r:5},{n:t('tier.intermediate'),l:6,r:10},{n:t('tier.overlap'),l:11,r:15},{n:t('tier.complex'),l:16,r:20},{n:t('tier.challenge'),l:21,r:25},{n:t('tier.master'),l:26,r:30}];
+  _lsTotalStars(){let n=0;for(let i=1;i<=30;i++)n+=this.getLvlData(i).stars||0;return n;}
+  _lsLevelsCleared(){let n=0;for(let i=1;i<=30;i++)if(this.getLvlData(i).stars>0)n++;return n;}
+  _lsNextLevel(){
     const mx=this.getMaxUnlocked();
-    tiers.forEach(t=>{
-      let h='<div class="ls-tier"><div class="ls-tier-title">'+t.n+' ('+t.l+'-'+t.r+')</div><div class="ls-grid">';
-      for(let i=t.l;i<=t.r;i++){
-        const d=this.getLvlData(i);const locked=i>mx;const done=d.stars>0;
-        const stars=d.stars>=3?'★★★':d.stars>=2?'★★☆':d.stars>=1?'★☆☆':'';
-        h+='<div class="ls-btn'+(locked?' locked':'')+(d.stars>=3?' perfect':done?' completed':'')+'" onclick="G.startLevel('+i+')"><div class="ls-num">'+i+'</div><div class="ls-stars">'+stars+'</div></div>';
+    for(let i=1;i<=30;i++)if(this.getLvlData(i).stars<1&&i<=mx)return i;
+    return null;
+  }
+  _lsTierIndexForLevel(n){for(let i=0;i<LS_TIERS.length;i++)if(n>=LS_TIERS[i].l&&n<=LS_TIERS[i].r)return i;return 0;}
+  _lsTierProgress(tier){let done=0;for(let i=tier.l;i<=tier.r;i++)if(this.getLvlData(i).stars>0)done++;return{done,total:5};}
+  _lsIsTierUnlocked(idx){return idx===0||this.getMaxUnlocked()>=LS_TIERS[idx].l;}
+
+  initLS(){
+    const next=this._lsNextLevel();
+    const cleared=this._lsLevelsCleared();
+    const starsEl=this.$('ls-stars-total');
+    if(starsEl)starsEl.textContent=this._lsTotalStars()+'/90 ★';
+    const fill=this.$('ls-progress-fill');
+    if(fill)fill.style.width=Math.round(cleared/30*100)+'%';
+    const progLbl=this.$('ls-progress-label');
+    if(progLbl)progLbl.textContent=t('ls.progress',{done:cleared});
+    const cont=this.$('ls-continue');
+    if(cont){
+      if(next){
+        cont.classList.remove('hide');
+        cont.textContent=t('ls.continue',{n:next});
+        cont.onclick=()=>this.startLevel(next);
+      }else{
+        cont.classList.add('hide');
+        cont.onclick=null;
       }
-      h+='</div></div>';c.innerHTML+=h;
-    });
+    }
+    if(!this.$('ls-tabs')||!this.$('ls-panel'))return;
+    if(!this._lsIsTierUnlocked(this._lsTab))this._lsTab=this._lsTierIndexForLevel(next||1);
+    this._lsHideHint();
+    this._renderLSTabs();
+    this._renderLSPanel(this._lsTab==null?0:this._lsTab);
   }
 
-  showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));this.$(id).classList.add('active');}
+  selectLSTier(idx){
+    if(!this._lsIsTierUnlocked(idx)){this._lsShowHint(t('ls.tierLocked'));return;}
+    this._lsHideHint();
+    this._lsTab=idx;
+    this._renderLSTabs();
+    this._renderLSPanel(idx);
+  }
+
+  _renderLSTabs(){
+    const tabs=this.$('ls-tabs');
+    if(!tabs)return;
+    let h='';
+    LS_TIERS.forEach((tier,idx)=>{
+      const unlocked=this._lsIsTierUnlocked(idx);
+      const active=idx===(this._lsTab==null?0:this._lsTab);
+      h+='<button type="button" class="ls-tab'+(active?' on':'')+(unlocked?'':' locked')+'" onclick="G.selectLSTier('+idx+')">'+LS_ROMAN[idx]+'</button>';
+    });
+    tabs.innerHTML=h;
+  }
+
+  _renderLSPanel(tierIdx){
+    const panel=this.$('ls-panel');
+    if(!panel)return;
+    const tier=LS_TIERS[tierIdx];
+    if(!tier)return;
+    if(!this._lsIsTierUnlocked(tierIdx))return;
+    const mx=this.getMaxUnlocked();
+    const next=this._lsNextLevel();
+    const prog=this._lsTierProgress(tier);
+    let h='<div class="ls-tier-head"><span class="ls-tier-name">'+t(tier.i18n)+'</span><span class="ls-tier-meta">'+t('ls.tierDone',{done:prog.done})+'</span></div><div class="ls-grid">';
+    for(let i=tier.l;i<=tier.r;i++){
+      const d=this.getLvlData(i);
+      const locked=i>mx;
+      let cls='ls-btn';
+      if(locked)cls+=' locked';
+      else if(d.stars>=3)cls+=' perfect';
+      else if(d.stars>0)cls+=' completed';
+      if(next===i)cls+=' next';
+      const stars=d.stars>=3?'★★★':d.stars>=2?'★★☆':d.stars>=1?'★☆☆':'';
+      const num=locked?'🔒':String(i);
+      const click=locked?'G._lsToastLocked('+i+')':'G.startLevel('+i+')';
+      h+='<div class="'+cls+'" onclick="'+click+'"><div class="ls-num">'+num+'</div><div class="ls-stars">'+stars+'</div></div>';
+    }
+    h+='</div>';
+    panel.innerHTML=h;
+  }
+
+  _lsToastLocked(i){
+    const mx=this.getMaxUnlocked();
+    this._lsShowHint(t('ls.locked',{n:mx}));
+  }
+
+  _lsShowHint(msg){
+    const el=this.$('ls-hint');
+    if(!el)return;
+    el.textContent=msg;
+    el.classList.remove('hide');
+  }
+
+  _lsHideHint(){
+    const el=this.$('ls-hint');
+    if(el)el.classList.add('hide');
+  }
+
+  showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el=this.$(id);
+    if(el)el.classList.add('active');
+  }
   showOv(id){this.$(id).classList.add('v');}
   hideOv(id){this.$(id).classList.remove('v');}
 
@@ -2070,7 +2212,9 @@ class Game {
   // -- End Game --
   endGame(win,winType){
     this.closeModals();this.over=true;this.running=false;this.$('app').classList.remove('alarm');
-    const p=this.p,lv=this.lvl,mins=Math.floor(this.gt/60),secs=this.gt%60;
+    const p=this.p,lv=this.lvl;
+    if(!p||!lv)return;
+    const mins=Math.floor(this.gt/60),secs=this.gt%60;
     let reason=!win?p.arrestReason:winType==='stabilized'?t('win.stabilized'):t('win.survived');
     if(win){this.snd.win();this._vib([40,40,40]);}else{this.snd.lose();this._vib([120,60,240]);}
 
@@ -2083,6 +2227,8 @@ class Game {
     score=Math.max(0,Math.min(100,score));
     const stars=win?(score>=85?3:score>=60?2:1):0;
     const grade=score>=90?'A':score>=75?'B':score>=60?'C':score>=40?'D':'F';
+    const lacPct=Math.round(lacPts/15*100);
+    const spdPct=Math.max(0,Math.min(100,speedPts*10));
 
     // Persistence & NEW BEST per mode
     let newBest=false;
@@ -2143,7 +2289,6 @@ class Game {
     const dbHtml=db.length?'<div class="go-debrief"><strong>'+t('db.title')+'</strong><br>'+db.slice(0,3).map(x=>'▸ '+x).join('<br>')+'</div>':'';
 
     // Component bars
-    const lacPct=Math.round(lacPts/15*100),spdPct=Math.max(0,Math.min(100,speedPts*10));
     const bar=(label,pct)=>{const cls=pct>=85?'':pct>=50?' mid':' low';return '<div class="go-bar"><span>'+label+'</span><div class="go-bar-t"><div class="go-bar-f'+cls+'" data-w="'+pct+'"></div></div><b>'+pct+'%</b></div>';};
     const barsHtml='<div class="go-bars">'+bar('MAP',mapPct)+bar('SpO₂',spoPct)+bar('Lac',lacPct)+(win?bar('⏱',spdPct):'')+'</div>';
 
@@ -2184,6 +2329,7 @@ class Game {
     }
 
     const c=this.$('ov-end-c');
+    if(!c)return;
     c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+title+'</div>'+
       '<div class="go-sub">'+reason+'</div>'+
       bestHtml+
