@@ -1,5 +1,5 @@
 // ICU Crisis service worker — network-first with cache fallback
-const CACHE='icu-crisis-v2';
+const CACHE='icu-crisis-v3';
 const ASSETS=['./','./index.html','./i18n.js','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',e=>{
