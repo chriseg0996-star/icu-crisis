@@ -14,7 +14,21 @@ drop files in incrementally.
 - **Z-order** (back → front): base → outfit → badge → accessory → facial hair →
   hair → glasses → head wear → mask. The frame renders on top of everything.
 
-## Required filenames
+## Preset avatars (recommended — reliable with AI-generated art)
+A preset is a **single full-portrait PNG** that replaces the whole modular
+stack, so there is no layer-alignment problem. Selected in the profile via the
+"Style" row; the portrait frame still renders on top.
+
+`preset_{id}.png` (512 × 640, transparent background):
+- preset_trauma_surgeon.png
+- preset_night_resident.png
+- preset_icu_attending.png
+- preset_med_student.png
+
+Add more by extending `AVATAR_PRESETS` in `index.html` and adding `preset.{id}`
+labels in `i18n.js`.
+
+## Required filenames (modular "Custom" mode)
 Resolved in `index.html` by `AVATAR_STACK` / `AVATAR_FRAME`. `none` values use
 no file.
 

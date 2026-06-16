@@ -630,7 +630,7 @@ const COSMETICS=[
   {id:'frame_gold',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#ffcc00',rankReq:null,achReq:'streak_30'}
 ];
 const DEFAULT_OWNED=['scrubs_teal','badge_none','monitor_classic','frame_none'];
-const DEFAULT_COSMETICS={base:'m_medium',hair:'short',facial:'none',glasses:'none',accessory:'none',head:'none',mask:'none',outfit:'scrubs_teal',badge:'badge_none',monitor:'monitor_classic',frame:'frame_none'};
+const DEFAULT_COSMETICS={preset:null,base:'m_medium',hair:'short',facial:'none',glasses:'none',accessory:'none',head:'none',mask:'none',outfit:'scrubs_teal',badge:'badge_none',monitor:'monitor_classic',frame:'frame_none'};
 
 // ================================================================
 //  AVATAR  -  modular PNG layers in assets/avatar/ (see README there)
@@ -651,6 +651,9 @@ const AVATAR_STACK=[ // back -> front
   av=>av.mask&&av.mask!=='none'?'mask_'+av.mask+'.png':null
 ];
 const AVATAR_FRAME=av=>av.frame&&av.frame!=='frame_none'?av.frame+'.png':null;
+// Preset avatars: a single full portrait PNG (preset_{id}.png). When set,
+// it replaces the modular layer stack — the reliable path for AI-generated art.
+const AVATAR_PRESETS=['trauma_surgeon','night_resident','icu_attending','med_student'];
 // Free identity options for the profile picker (cosmetics for sale live in COSMETICS)
 const AV_BODY=['m','f'],AV_SKIN=['light','medium','dark'];
 const AV_OPTS={
@@ -1119,30 +1122,42 @@ class Game {
     av=av||this.ensureMeta().avatar;
     el.className='avatar'+(small?' sm':'');
     let h='<div class="av-fallback">🧑‍⚕️</div>';
-    AVATAR_STACK.forEach(fn=>{const f=fn(av);if(f)h+='<img src="'+AVATAR_DIR+f+'" alt="" onerror="this.style.display=\'none\'">';});
+    if(av.preset){
+      // Full-portrait preset replaces the modular stack
+      h+='<img src="'+AVATAR_DIR+'preset_'+av.preset+'.png" alt="" onerror="this.style.display=\'none\'">';
+    }else{
+      AVATAR_STACK.forEach(fn=>{const f=fn(av);if(f)h+='<img src="'+AVATAR_DIR+f+'" alt="" onerror="this.style.display=\'none\'">';});
+    }
     const fr=AVATAR_FRAME(av);
     if(fr)h+='<img class="av-frame" src="'+AVATAR_DIR+fr+'" alt="" onerror="this.style.display=\'none\'">';
     el.innerHTML=h;
   }
-  _avValLabel(part,val){const k='av.'+part+'_'+val;let s=t(k);if(s===k)s=val.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return s;}
+  _avValLabel(part,val){const k=part==='preset'?'preset.'+val:'av.'+part+'_'+val;let s=t(k);if(s===k)s=val.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return s;}
   _avPickerHtml(av){
     const body=(av.base||'m_medium').split('_')[0],skin=(av.base||'m_medium').split('_')[1]||'medium';
     const row=(part,lbl,val)=>'<div class="av-row"><span class="av-lbl">'+lbl+'</span>'+
       '<button onclick="G._avCycle(\''+part+'\',-1)">◀</button>'+
       '<span class="av-val">'+val+'</span>'+
       '<button onclick="G._avCycle(\''+part+'\',1)">▶</button></div>';
-    return '<div class="av-picker">'+
-      row('body',t('av.body'),this._avValLabel('body',body))+
-      row('skin',t('av.skin'),this._avValLabel('skin',skin))+
-      row('hair',t('av.hair'),this._avValLabel('hair',av.hair||'short'))+
-      ((av.base||'m')[0]==='m'?row('facial',t('av.facial'),this._avValLabel('facial',av.facial||'none')):'')+
-      row('glasses',t('av.glasses'),this._avValLabel('glasses',av.glasses||'none'))+
-      row('accessory',t('av.accessory'),this._avValLabel('accessory',av.accessory||'none'))+
-      '</div>';
+    // Style row toggles between a full preset portrait and the "custom" modular build
+    let h='<div class="av-picker">'+row('preset',t('av.style'),this._avValLabel('preset',av.preset||'custom'));
+    if(!av.preset){
+      h+=row('body',t('av.body'),this._avValLabel('body',body))+
+        row('skin',t('av.skin'),this._avValLabel('skin',skin))+
+        row('hair',t('av.hair'),this._avValLabel('hair',av.hair||'short'))+
+        ((av.base||'m')[0]==='m'?row('facial',t('av.facial'),this._avValLabel('facial',av.facial||'none')):'')+
+        row('glasses',t('av.glasses'),this._avValLabel('glasses',av.glasses||'none'))+
+        row('accessory',t('av.accessory'),this._avValLabel('accessory',av.accessory||'none'));
+    }
+    return h+'</div>';
   }
   _avCycle(part,dir){
     const s=this.ensureMeta(),av=s.avatar;
-    if(part==='body'||part==='skin'){
+    if(part==='preset'){
+      const opts=['custom',...AVATAR_PRESETS],cur=av.preset||'custom';
+      const i=(opts.indexOf(cur)+dir+opts.length)%opts.length;
+      av.preset=opts[i]==='custom'?null:opts[i];
+    }else if(part==='body'||part==='skin'){
       let body=(av.base||'m_medium').split('_')[0],skin=(av.base||'m_medium').split('_')[1]||'medium';
       if(part==='body'){const a=AV_BODY,i=(a.indexOf(body)+dir+a.length)%a.length;body=a[i];}
       else{const a=AV_SKIN,i=(a.indexOf(skin)+dir+a.length)%a.length;skin=a[i];}
