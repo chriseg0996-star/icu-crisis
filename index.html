@@ -191,6 +191,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mon.stab-flash{animation:stabFlash .65s ease-out}
 @keyframes stabFlash{0%{box-shadow:0 0 0 0 rgba(0,255,136,.55),inset 0 0 20px rgba(0,255,136,.15)}100%{box-shadow:none}}
 .go-stars.win-anim{animation:starPop .55s cubic-bezier(.34,1.4,.64,1)}
+.go-stars.perfect-stars{color:var(--y);text-shadow:0 0 12px rgba(255,204,0,.55),0 0 24px rgba(255,204,0,.25);animation:starPop .55s cubic-bezier(.34,1.4,.64,1),starGlow 1.4s ease-in-out .4s 2}
+@keyframes starGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+.go-perfect{margin:6px 0;padding:8px 12px;border:1px solid rgba(255,204,0,.55);border-radius:6px;background:linear-gradient(90deg,rgba(255,204,0,.12),rgba(0,255,136,.08));color:var(--y);font-family:var(--fd);font-size:10px;letter-spacing:3px;animation:starPop .5s ease}
+.confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+#ov-end-c{position:relative;z-index:2}
+.confetti-p{position:absolute;top:-6px;width:5px;height:9px;border-radius:1px;opacity:.9;animation:confFall 1.1s ease-out forwards}
+@keyframes confFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 @keyframes starPop{0%{transform:scale(.4);opacity:0;letter-spacing:0}100%{transform:scale(1);opacity:1;letter-spacing:4px}}
 .go-rankup{margin:6px 0;padding:7px 10px;border:1px solid rgba(255,204,0,.4);border-radius:6px;background:rgba(255,204,0,.08);color:var(--y);font-family:var(--fd);font-size:9px;letter-spacing:2px;animation:starPop .5s ease}
 .pfab{width:26px;height:26px;border-radius:50%;border:1px solid var(--b);background:var(--c);color:var(--tm);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;-webkit-user-select:none;user-select:none}
@@ -703,6 +710,11 @@ const CAMPAIGN_HINTS={
   8:{key:'icuHint8',el:'bpeep',i18n:'hint.l8rv'},
   9:{key:'icuHint9',el:'bmeds',i18n:'hint.l9sepsis'},
   10:{key:'icuHint10',el:'bmeds',i18n:'hint.l10anaphyl'},
+  11:{key:'icuHint11',el:'bdiag',i18n:'hint.l11overlap'},
+  12:{key:'icuHint12',el:'bs',i18n:'hint.l12airseps'},
+  13:{key:'icuHint13',el:'bdiag',i18n:'hint.l13perv'},
+  14:{key:'icuHint14',el:'bvt',i18n:'hint.l14copdseps'},
+  15:{key:'icuHint15',el:'bmeds',i18n:'hint.l15carded'},
 };
 
 const RANKS=[{id:'intern',xp:0},{id:'resident',xp:500},{id:'fellow',xp:1500},{id:'attending',xp:4000}];
@@ -1051,6 +1063,7 @@ class Snd {
   good(){this.tone(660,.08,.05);setTimeout(()=>this.tone(880,.1,.05),80);}
   bad(){this.tone(220,.16,.06,'sawtooth');}
   win(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.tone(f,.16,.06),i*120));}
+  perfect(){[784,988,1175,1319,1568].forEach((f,i)=>setTimeout(()=>this.tone(f,.13,.05),i*85));}
   lose(){[440,330,220].forEach((f,i)=>setTimeout(()=>this.tone(f,.3,.07,'sawtooth'),i*250));}
   nearStab(){this.tone(784,.06,.04);setTimeout(()=>this.tone(988,.08,.04),90);}
 }
@@ -1083,6 +1096,26 @@ class Game {
   }
 
   _vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+  _spawnConfetti(root){
+    if(!root)return;
+    root.querySelectorAll('.confetti-wrap').forEach(e=>e.remove());
+    const wrap=document.createElement('div');
+    wrap.className='confetti-wrap';
+    const colors=['#00ff88','#00ddff','#ffcc00','#ff8844','#ffffff'];
+    for(let i=0;i<40;i++){
+      const p=document.createElement('i');
+      p.className='confetti-p';
+      p.style.left=(Math.random()*100)+'%';
+      p.style.background=colors[i%colors.length];
+      p.style.animationDelay=(Math.random()*0.4)+'s';
+      p.style.animationDuration=(0.85+Math.random()*0.55)+'s';
+      p.style.width=(4+Math.random()*4)+'px';
+      p.style.height=(6+Math.random()*6)+'px';
+      wrap.appendChild(p);
+    }
+    root.appendChild(wrap);
+    setTimeout(()=>wrap.remove(),2400);
+  }
 
   setLang(code){
     if(this.running&&!this.over)return;
@@ -2475,7 +2508,6 @@ class Game {
     if(!p||!lv)return;
     const mins=Math.floor(this.gt/60),secs=this.gt%60;
     let reason=!win?p.arrestReason:winType==='stabilized'?t('win.stabilized'):t('win.survived');
-    if(win){this.snd.win();this._vib([40,40,40]);}else{this.snd.lose();this._vib([120,60,240]);}
 
     const tt=this.gt||1;const mapPct=Math.round((1-p.goalMapF/tt)*100);const spoPct=Math.round((1-p.goalSpoF/tt)*100);
     const lacPts=(p.lacTrend==='↓'||p.lactate<2)?15:(p.lactate<2.5?8:0);
@@ -2485,6 +2517,7 @@ class Game {
     else score=Math.max(0,Math.round(mapPct*.15+spoPct*.15));
     score=Math.max(0,Math.min(100,score));
     const stars=win?(score>=85?3:score>=60?2:1):0;
+    if(win){if(stars===3){this.snd.perfect();this._vib([25,30,25,30,50]);}else{this.snd.win();this._vib([40,40,40]);}}else{this.snd.lose();this._vib([120,60,240]);}
     const grade=score>=90?'A':score>=75?'B':score>=60?'C':score>=40?'D':'F';
     const lacPct=Math.round(lacPts/15*100);
     const spdPct=Math.max(0,Math.min(100,speedPts*10));
@@ -2527,6 +2560,7 @@ class Game {
     const rkAfter=this._rankFromXp(this.ensureMeta().xp||0);
     const rankUpHtml=rkAfter.id!==rkBefore.id?'<div class="go-rankup">▲ '+t('end.rankUp',{r:t(RANK_I18N[rkAfter.id])})+'</div>':'';
     const firstClearHtml=firstClear&&win?'<div class="go-rankup" style="border-color:rgba(0,255,136,.4);color:var(--g)">'+t('end.firstClear')+'</div>':'';
+    const perfectHtml=win&&stars===3?'<div class="go-perfect">'+t('end.perfect3')+'</div>':'';
     const mxAfter=this.getMaxUnlocked();
     let unlockHtml='';
     if(this.mode==='campaign'&&win&&mxAfter>mxBefore){
@@ -2605,9 +2639,10 @@ class Game {
       bestHtml+
       rankUpHtml+
       firstClearHtml+
+      perfectHtml+
       unlockHtml+
       coinsHtml+
-      (this.mode==='survival'?'':'<div class="go-stars'+(win?' win-anim':'')+'">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
+      (this.mode==='survival'?'':'<div class="go-stars'+(win?' win-anim':'')+(win&&stars===3?' perfect-stars':'')+'">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
       survLine+
       barsHtml+
       hintHtml+
@@ -2619,6 +2654,7 @@ class Game {
       t('end.peak',{lac:p.peakLac.toFixed(1),li:Math.round(p.peakLI)})+'</div>'+
       '<div class="go-btns">'+btns+'</div>';
     this.showOv('ov-end');
+    if(win&&stars===3)this._spawnConfetti(this.$('ov-end'));
 
     if(missionBonus>0)setTimeout(()=>this._toastMsg(t('end.missionDone',{n:missionBonus})),700);
 
