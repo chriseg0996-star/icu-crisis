@@ -1669,6 +1669,7 @@ class Game {
 
     this.updateAll();
     this.maybeStartTutorial();
+    this.maybeStartLevel2Hint();
   }
 
   buildActions(){
@@ -1803,20 +1804,31 @@ class Game {
 
   runMedFromMenu(key){this.closeModals();this.giveMed(key);}
 
-  // -- Guided tutorial (level 1, first time only) --
+  // -- Guided tutorial (level 1) + hints (level 2+) --
+  _startOverlayHint(steps,storageKey){
+    this._hintStoreKey=storageKey;
+    this._tutSteps=steps;
+    this._tutI=0;this._tutOn=true;this.paused=true;
+    this.$('tut-ov').classList.add('v');
+    this._tutShow();
+  }
+
   maybeStartTutorial(){
     let seen=null;try{seen=localStorage.getItem('icuTut');}catch(e){}
     if(seen||this.mode!=='campaign'||this.lvl.id!==1)return;
-    this._tutSteps=[
+    this._startOverlayHint([
       {el:'vc-map',k:'tut.map'},
       {el:'vc-spo2',k:'tut.spo2'},
       {el:'log',k:'tut.log'},
       {el:'bmeds',k:'tut.actions'},
       {el:'bdiag',k:'tut.diag'},
-    ];
-    this._tutI=0;this._tutOn=true;this.paused=true;
-    this.$('tut-ov').classList.add('v');
-    this._tutShow();
+    ],'icuTut');
+  }
+
+  maybeStartLevel2Hint(){
+    let seen=null;try{seen=localStorage.getItem('icuHint2');}catch(e){}
+    if(seen||this.mode!=='campaign'||this.lvl.id!==2)return;
+    this._startOverlayHint([{el:'bs',k:'hint.l2suction'}],'icuHint2');
   }
 
   _tutShow(){
@@ -1826,7 +1838,9 @@ class Game {
     if(el)el.classList.add('tut-hl');
     const box=this.$('tut-box');
     const last=this._tutI===this._tutSteps.length-1;
-    box.innerHTML='<div class="tut-t">'+t('tut.title')+' '+(this._tutI+1)+'/'+this._tutSteps.length+'</div>'+t(st.k)+
+    const isHint=this._hintStoreKey&&this._hintStoreKey!=='icuTut';
+    const title=isHint?t('hint.title'):t('tut.title')+' '+(this._tutI+1)+'/'+this._tutSteps.length;
+    box.innerHTML='<div class="tut-t">'+title+'</div>'+t(st.k)+
       '<div class="tut-btns"><button class="skip" onclick="G.endTutorial()">'+t('tut.skip')+'</button>'+
       '<button onclick="G.tutNext()">'+(last?t('tut.go'):t('tut.next'))+'</button></div>';
     const app=this.$('app').getBoundingClientRect();
@@ -1849,7 +1863,7 @@ class Game {
   tutNext(){this._tutI++;if(this._tutI>=this._tutSteps.length)this.endTutorial();else this._tutShow();}
 
   endTutorial(){
-    try{localStorage.setItem('icuTut','1');}catch(e){}
+    try{localStorage.setItem(this._hintStoreKey||'icuTut','1');}catch(e){}
     document.querySelectorAll('.tut-hl').forEach(e=>e.classList.remove('tut-hl'));
     this.$('tut-ov').classList.remove('v');
     this._tutOn=false;this.paused=false;this.lt=performance.now();this.acc=0;
