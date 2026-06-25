@@ -294,7 +294,8 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] 8 acute events (plug, pneumo, bleed, arrhythmia, sepsis flare, bronchospasm, flash edema)
 - [x] Achievement-unlocked monitor themes (amber/red) and silver frame
 - [x] Survival balance: softer late curve, grace window, milestone coins
-- [x] Daily case: seeded difficulty rotation, weekend events, streak coin bonus
+- [x] Profile: 7-day daily score log, win streak / best streak
+- [x] Campaign levels 21–30: ramping difficulty (not flat spike)
 - [x] Mobile safe-area padding (notch/home indicator)
 
 **Planned**

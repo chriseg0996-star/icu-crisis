@@ -100,6 +100,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .prof-ach{display:flex;flex-wrap:wrap;gap:4px}
 .prof-ach span{font-size:7px;padding:3px 6px;border:1px solid rgba(0,255,136,.25);border-radius:4px;color:var(--g);line-height:1.3}
 .prof-ach span.off{opacity:.32;color:var(--td);border-color:var(--b);border-style:dashed}
+.prof-daily-log{display:flex;gap:3px;margin-top:4px}
+.prof-daily-day{flex:1;min-width:0;text-align:center;padding:5px 2px;border:1px solid var(--b);border-radius:6px;background:rgba(10,16,25,.45)}
+.prof-daily-day.today{border-color:rgba(0,221,255,.35)}
+.prof-daily-day .pd{font-family:var(--fd);font-size:8px;color:var(--y);line-height:1.2}
+.prof-daily-day .pd.miss{color:var(--td);font-size:7px}
+.prof-daily-day .pd.win{color:var(--g)}
+.prof-daily-day .pdl{font-size:5px;color:var(--td);margin-top:2px}
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .shop-item{border:1px solid var(--b);border-radius:8px;padding:8px;background:var(--c);cursor:pointer;text-align:center;transition:border-color .15s;position:relative}
 .shop-item.owned{border-color:var(--gd)}
@@ -679,12 +686,12 @@ t3.forEach((p,i)=>LEVELS.push({id:i+11,tier:3,paths:p,mult:1.1,stabReq:20,events
 // Tier 4: Complex (16-20)
 const t4=[['sepsis','airway','edema'],['cardiogenic','rvfail'],['hypovolemic','sepsis'],['copd','edema'],['pe','sepsis']];
 t4.forEach((p,i)=>LEVELS.push({id:i+16,tier:4,paths:p,mult:1.2,stabReq:22,events:1,desc:'Complex cases'}));
-// Tier 5: Mixed chaos (21-25)
+// Tier 5: Mixed chaos (21-25) — ramping difficulty
 const t5=[['mixed'],['sepsis','pe','edema'],['tamponade'],['hypovolemic','copd'],['rvfail','sepsis','edema']];
-t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:1.3,stabReq:25,events:2,desc:'Diagnostic challenge'}));
-// Tier 6: Master (26-30)
+t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.22+i*0.025).toFixed(3),stabReq:22+i,events:2,desc:'Diagnostic challenge'}));
+// Tier 6: Master (26-30) — ramping, slightly softer entry than flat 1.5
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
-t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:1.5,stabReq:28,events:2,desc:'Master cases'}));
+t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.35+i*0.03).toFixed(3),stabReq:24+i,events:2,desc:'Master cases'}));
 
 // Progressive unlocks: basics (fluids, norepi, diuretic, suction, FiO₂, PEEP, VT, ABG) always available.
 // Only advanced diagnostics + specialty meds unlock as cases get complex.
@@ -798,6 +805,8 @@ const ACHIEVEMENTS=[
   {id:'tier1_clear',check:(g,s)=>{for(let i=1;i<=5;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:100},
   {id:'tier3_clear',check:(g,s)=>{for(let i=11;i<=15;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:80},
   {id:'tier5_clear',check:(g,s)=>{for(let i=21;i<=25;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:120},
+  {id:'tier6_clear',check:(g,s)=>{for(let i=26;i<=30;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:150},
+  {id:'perfect_30',check:(g,s)=>{let n=0;for(let i=1;i<=30;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=30;},reward:0,coins:250},
   {id:'master_case',check:(g,s)=>s['l30']&&s['l30'].stars>=1,reward:0,coins:200}
 ];
 
@@ -1263,6 +1272,24 @@ class Game {
     this.showOv('ov-profile');
   }
 
+  _renderDailyLog(s){
+    const log={};
+    (s.dailyLog||[]).forEach(e=>{log[e.d]=e;});
+    const today=this._dailyStr();
+    let h='';
+    for(let i=6;i>=0;i--){
+      const d=new Date(Date.now()-i*864e5);
+      const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const e=log[ds];
+      const lbl=String(d.getDate());
+      let pd;
+      if(e)pd='<div class="pd'+(e.w?' win':'')+'">'+e.s+'</div>';
+      else pd='<div class="pd miss">—</div>';
+      h+='<div class="prof-daily-day'+(ds===today?' today':'')+'">'+pd+'<div class="pdl">'+lbl+'</div></div>';
+    }
+    return h;
+  }
+
   _renderProfile(){
     const s=this.ensureMeta();
     const rank=t(RANK_I18N[this._rankFromXp(s.xp||0).id]);
@@ -1295,7 +1322,9 @@ class Game {
       '<div class="meta-row"><span>XP</span><b>'+(s.xp||0)+(nextRk?' / '+nextRk.xp:'')+' ('+xpBar+'%)</b></div>'+
       '<div class="meta-row"><span>'+t('profile.coins')+'</span><b>🪙 '+s.coins+'</b></div>'+
       '<div class="meta-row"><span>'+t('profile.dailyBest')+'</span><b>'+(bests.daily||0)+' pts</b></div>'+
+      '<div class="meta-row"><span>'+t('profile.winStreak')+'</span><b>'+(s.winStreak||0)+' · '+t('profile.best')+' '+(s.bestWinStreak||0)+'</b></div>'+
       '<div class="meta-row"><span>'+t('profile.survBest')+'</span><b>'+(bests.survival&&bests.survival.p?bests.survival.p+' '+t('profile.patients')+' ('+bests.survival.score+' pts)':'—')+'</b></div>'+
+      '<div class="prof-section"><div class="prof-label">'+t('profile.dailyLog')+'</div><div class="prof-daily-log">'+this._renderDailyLog(s)+'</div></div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.campaign')+' · '+cleared+'/30</div><div class="prof-lv-grid">'+lvGrid+'</div></div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.achievements')+' · '+achCount+'/'+ACHIEVEMENTS.length+'</div><div class="prof-ach">'+achHtml+'</div></div>'+
       '<button class="meta-close" onclick="G.hideProfile()">'+t('profile.close')+'</button>';
@@ -1404,12 +1433,22 @@ class Game {
     });
   }
 
+  _recordDailyLog(s,ds,score,win){
+    if(!s.dailyLog)s.dailyLog=[];
+    const i=s.dailyLog.findIndex(x=>x.d===ds);
+    const entry={d:ds,s:score,w:!!win};
+    if(i>=0){if(score>s.dailyLog[i].s||(score===s.dailyLog[i].s&&win&&!s.dailyLog[i].w))s.dailyLog[i]=entry;}
+    else s.dailyLog.push(entry);
+    if(s.dailyLog.length>21)s.dailyLog=s.dailyLog.slice(-21);
+  }
+
   _awardMeta(win,score,stars,speedPts){
     const s=this.ensureMeta();
     let coins=0,xp=0;
     s.gamesPlayed=(s.gamesPlayed||0)+1;
     if(win){
       s.winStreak=(s.winStreak||0)+1;
+      s.bestWinStreak=Math.max(s.bestWinStreak||0,s.winStreak);
       xp=50;
       if(this.mode==='campaign'){
         coins=10+stars*5+Math.min(10,speedPts);
@@ -1520,6 +1559,8 @@ class Game {
     if(s.lifetimeCoins==null)s.lifetimeCoins=0;
     if(s.shopPurchases==null)s.shopPurchases=0;
     if(s.winStreak==null)s.winStreak=0;
+    if(s.bestWinStreak==null)s.bestWinStreak=0;
+    if(!s.dailyLog)s.dailyLog=[];
     DEFAULT_OWNED.forEach(id=>{if(!s.owned.includes(id))s.owned.push(id);});
     this._ensureMissions(s);
     this.setSave(s);
@@ -2625,6 +2666,7 @@ class Game {
         if(!s.daily||s.daily.date!==ds||score>s.daily.score)s.daily={date:ds,score:score};
         this._dailyFirstWinToday=win&&!hadWinToday;
       }else this._dailyFirstWinToday=false;
+      this._recordDailyLog(s,ds,score,win);
       this.setSave(s);
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
