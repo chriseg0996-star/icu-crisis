@@ -19,7 +19,7 @@ ICU Crisis is a vanilla JavaScript browser game that teaches critical care reaso
 
 Unlike traditional medical simulations, ICU Crisis **never tells you the diagnosis**. You must synthesize clinical clues, order diagnostics, and manage competing physiological problems to stabilize your patients.
 
-The UI is available in **English and Spanish** (toggle in-game).
+The UI is available in **English and Spanish** only (toggle in-game). No additional languages are planned.
 
 ---
 
@@ -290,11 +290,12 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] PWA + service worker offline cache
 - [x] Bundled web fonts (no Google Fonts CDN)
 
+- [x] Campaign hints for levels 2–30 (one-time tips per level)
+- [x] 3-star win celebration (confetti, sound, banner)
+- [x] Mobile safe-area padding (notch/home indicator)
+
 **Planned**
-- [ ] Portuguese localization
 - [ ] Player avatar (full chibi character)
-- [ ] Pause menu → main menu shortcut
-- [ ] Tutorial hints for early levels (e.g. airway/suction)
 - [ ] Custom case builder (create and share cases)
 - [ ] Advanced ventilation modes (HFOV, ECMO)
 

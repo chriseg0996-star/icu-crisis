@@ -32,7 +32,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* === MAIN MENU === */
 .mm{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:100vh}
 .mm::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,221,255,.07) 0%,transparent 55%);pointer-events:none}
-.mm-top{display:none;position:absolute;top:0;left:0;right:0;justify-content:flex-end;padding:10px 12px;z-index:3;pointer-events:none}
+.mm-top{display:none;position:absolute;top:0;left:0;right:0;justify-content:flex-end;padding:max(10px,env(safe-area-inset-top)) 12px 10px;z-index:3;pointer-events:none}
 #scr-mm.active .mm-top{display:flex}
 .mm-lang{display:flex;gap:2px;background:rgba(10,16,25,.92);border:1px solid var(--b);border-radius:20px;padding:3px;pointer-events:auto;backdrop-filter:blur(6px)}
 .lang-btn{padding:5px 11px;border:none;background:transparent;color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:14px;transition:all .15s;-webkit-user-select:none;user-select:none;min-height:28px;line-height:1}
@@ -81,7 +81,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-streak-day .sd{width:20px;height:20px;border-radius:50%;border:1px solid var(--b);margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:8px}
 .mm-streak-day.on .sd{border-color:var(--g);background:rgba(0,255,136,.1);color:var(--g)}
 .mm-streak-day.today .sd{border-color:var(--cy)}
-.mm-footer{flex-shrink:0;padding:8px 16px 12px;text-align:center}
+.mm-footer{flex-shrink:0;padding:8px 16px max(12px,env(safe-area-inset-bottom));text-align:center}
 .mm-credit{font-size:8px;color:var(--td);letter-spacing:.5px}
 .mm-disclaimer{display:none}
 .meta-panel{max-width:340px;width:92%;max-height:85vh;overflow-y:auto;background:var(--p);border:1px solid var(--b);border-radius:10px;padding:16px;margin:auto}
@@ -124,7 +124,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ls-back:active{transform:scale(.96);border-color:var(--cy);color:var(--cy)}
 .ls-heading{flex:1;font-family:var(--fd);font-size:10px;letter-spacing:3px;color:var(--y);text-transform:uppercase;text-align:center}
 .ls-stars-total{font-family:var(--fd);font-size:9px;color:var(--y);letter-spacing:1px;flex-shrink:0;min-width:52px;text-align:right}
-.ls-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 14px 16px;position:relative;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ls-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 14px max(16px,env(safe-area-inset-bottom));position:relative;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .ls-continue{width:100%;padding:13px 16px;border:1px solid rgba(255,204,0,.45);border-radius:10px;background:linear-gradient(180deg,rgba(255,204,0,.12) 0%,rgba(255,204,0,.04) 100%);color:var(--y);font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;flex-shrink:0;-webkit-user-select:none;user-select:none;min-height:46px;box-shadow:0 4px 14px rgba(255,204,0,.08)}
 .ls-continue:active{transform:scale(.98)}
 .ls-continue.hide{display:none}
@@ -164,7 +164,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
 .gs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--p);border-bottom:1px solid var(--b);flex-shrink:0;gap:6px}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:max(5px,env(safe-area-inset-top)) 10px 5px;background:var(--p);border-bottom:1px solid var(--b);flex-shrink:0;gap:6px}
 .hdr-left{display:flex;align-items:center;gap:5px;min-width:0;flex:1}
 .hdr-lvl{font-family:var(--fd);font-size:9px;color:var(--cy);letter-spacing:2px;flex-shrink:0}
 .hdr-prob{display:flex;gap:4px;min-width:0;overflow:hidden}
@@ -255,7 +255,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .at.cr{background:rgba(255,51,68,.06);border:1px solid rgba(255,51,68,.15);color:var(--r)}
 .at.dm{opacity:.45}
 
-.ag{padding:5px 6px 8px;background:var(--p);border-top:1px solid var(--b);display:grid;grid-template-columns:repeat(3,1fr);gap:3px;flex-shrink:0}
+.ag{padding:5px 6px max(8px,env(safe-area-inset-bottom));background:var(--p);border-top:1px solid var(--b);display:grid;grid-template-columns:repeat(3,1fr);gap:3px;flex-shrink:0}
 .ab{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px;border:1px solid var(--b);border-radius:6px;background:var(--c);color:var(--w);font-family:var(--fm);font-size:9px;cursor:pointer;transition:background .12s,border-color .12s;-webkit-user-select:none;user-select:none;min-height:44px;max-height:44px;position:relative;overflow:hidden;text-align:center;line-height:1.15}
 .ab:active{transform:scale(.93)}
 .ab .bi{font-size:13px;margin-bottom:1px;line-height:1}.ab .bl{font-size:7px;color:var(--tm);margin-top:1px;letter-spacing:.3px}
@@ -715,6 +715,21 @@ const CAMPAIGN_HINTS={
   13:{key:'icuHint13',el:'bdiag',i18n:'hint.l13perv'},
   14:{key:'icuHint14',el:'bvt',i18n:'hint.l14copdseps'},
   15:{key:'icuHint15',el:'bmeds',i18n:'hint.l15carded'},
+  16:{key:'icuHint16',el:'bs',i18n:'hint.l16triple'},
+  17:{key:'icuHint17',el:'bmeds',i18n:'hint.l17biv'},
+  18:{key:'icuHint18',el:'bdiag',i18n:'hint.l18hyposep'},
+  19:{key:'icuHint19',el:'bvt',i18n:'hint.l19copded'},
+  20:{key:'icuHint20',el:'bmeds',i18n:'hint.l20peseps'},
+  21:{key:'icuHint21',el:'bdiag',i18n:'hint.l21mixed'},
+  22:{key:'icuHint22',el:'bdiag',i18n:'hint.l22triple'},
+  23:{key:'icuHint23',el:'bdiag',i18n:'hint.l23tamp'},
+  24:{key:'icuHint24',el:'bf',i18n:'hint.l24hypocopd'},
+  25:{key:'icuHint25',el:'bdiag',i18n:'hint.l25triple'},
+  26:{key:'icuHint26',el:'bdiag',i18n:'hint.l26master'},
+  27:{key:'icuHint27',el:'bmeds',i18n:'hint.l27triple'},
+  28:{key:'icuHint28',el:'bs',i18n:'hint.l28triple'},
+  29:{key:'icuHint29',el:'bdiag',i18n:'hint.l29triple'},
+  30:{key:'icuHint30',el:'bdiag',i18n:'hint.l30final'},
 };
 
 const RANKS=[{id:'intern',xp:0},{id:'resident',xp:500},{id:'fellow',xp:1500},{id:'attending',xp:4000}];
