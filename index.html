@@ -107,6 +107,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .prof-daily-day .pd.miss{color:var(--td);font-size:7px}
 .prof-daily-day .pd.win{color:var(--g)}
 .prof-daily-day .pdl{font-size:5px;color:var(--td);margin-top:2px}
+.prof-tier-strip{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:4px}
+.prof-tier-chip{font-family:var(--fd);font-size:6px;padding:3px 5px;border:1px solid var(--b);border-radius:4px;color:var(--tm);letter-spacing:.5px}
+.prof-tier-chip.done{border-color:rgba(0,255,136,.25);color:var(--g)}
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .shop-item{border:1px solid var(--b);border-radius:8px;padding:8px;background:var(--c);cursor:pointer;text-align:center;transition:border-color .15s;position:relative}
 .shop-item.owned{border-color:var(--gd)}
@@ -780,7 +783,8 @@ const MISSION_POOL=[
   {id:'win_campaign',check:(g,r)=>r.mode==='campaign'&&r.win,reward:15},
   {id:'three_correct',check:(g,r)=>r.win&&g.p.correctAct>=3,reward:20},
   {id:'two_star',check:(g,r)=>r.mode==='campaign'&&r.win&&r.stars>=2,reward:25},
-  {id:'score_85',check:(g,r)=>r.win&&r.score>=85,reward:30}
+  {id:'score_85',check:(g,r)=>r.win&&r.score>=85,reward:30},
+  {id:'star_up',check:(g,r)=>r.mode==='campaign'&&r.win&&r.starUp,reward:20}
 ];
 const ACHIEVEMENTS=[
   {id:'first_win',check:(g,s,r)=>r.win,reward:50,coins:50},
@@ -808,7 +812,9 @@ const ACHIEVEMENTS=[
   {id:'fellow_rank',check:(g,s)=>g._rankFromXp(s.xp||0).id==='fellow'||g._rankFromXp(s.xp||0).id==='attending',reward:0,coins:0},
   {id:'attending_rank',check:(g,s)=>g._rankFromXp(s.xp||0).id==='attending',reward:0,coins:0},
   {id:'tier1_clear',check:(g,s)=>{for(let i=1;i<=5;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:100},
+  {id:'tier2_clear',check:(g,s)=>{for(let i=6;i<=10;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:90},
   {id:'tier3_clear',check:(g,s)=>{for(let i=11;i<=15;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:80},
+  {id:'tier4_clear',check:(g,s)=>{for(let i=16;i<=20;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:100},
   {id:'tier5_clear',check:(g,s)=>{for(let i=21;i<=25;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:120},
   {id:'tier6_clear',check:(g,s)=>{for(let i=26;i<=30;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:150},
   {id:'perfect_30',check:(g,s)=>{let n=0;for(let i=1;i<=30;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=30;},reward:0,coins:250},
@@ -1186,6 +1192,7 @@ class Game {
     if(completed>0)strip+=' · '+completed+'/30';
     if(bestScore>0)strip+=' · ★'+bestScore;
     if(stkN>0)strip+=' · 🔥'+stkN;
+    if((stats.bestWinStreak||0)>=3)strip+=' · '+t('menu.bestStreak',{n:stats.bestWinStreak});
     const stripEl=this.$('mm-strip');
     if(stripEl)stripEl.innerHTML=strip;
     this._ensureMissions(stats);
@@ -1277,6 +1284,16 @@ class Game {
     this.showOv('ov-profile');
   }
 
+  _renderTierStrip(){
+    let h='';
+    LS_TIERS.forEach((tier,idx)=>{
+      let st=0,done=0;
+      for(let i=tier.l;i<=tier.r;i++){const d=this.getLvlData(i);st+=d.stars||0;if(d.stars>0)done++;}
+      h+='<span class="prof-tier-chip'+(done===5?' done':'')+'">'+LS_ROMAN[idx]+' '+st+'★</span>';
+    });
+    return h;
+  }
+
   _renderDailyLog(s){
     const log={};
     (s.dailyLog||[]).forEach(e=>{log[e.d]=e;});
@@ -1330,7 +1347,7 @@ class Game {
       '<div class="meta-row"><span>'+t('profile.winStreak')+'</span><b>'+(s.winStreak||0)+' · '+t('profile.best')+' '+(s.bestWinStreak||0)+'</b></div>'+
       '<div class="meta-row"><span>'+t('profile.survBest')+'</span><b>'+(bests.survival&&bests.survival.p?bests.survival.p+' '+t('profile.patients')+' ('+bests.survival.score+' pts)':'—')+'</b></div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.dailyLog')+'</div><div class="prof-daily-log">'+this._renderDailyLog(s)+'</div></div>'+
-      '<div class="prof-section"><div class="prof-label">'+t('profile.campaign')+' · '+cleared+'/30</div><div class="prof-lv-grid">'+lvGrid+'</div></div>'+
+      '<div class="prof-section"><div class="prof-label">'+t('profile.campaign')+' · '+cleared+'/30</div><div class="prof-tier-strip">'+this._renderTierStrip()+'</div><div class="prof-lv-grid">'+lvGrid+'</div></div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.achievements')+' · '+achCount+'/'+ACHIEVEMENTS.length+'</div><div class="prof-ach">'+achHtml+'</div></div>'+
       '<button class="meta-close" onclick="G.hideProfile()">'+t('profile.close')+'</button>';
     this.applyCosmetics();
@@ -1510,6 +1527,16 @@ class Game {
     return bonus;
   }
 
+  _toastCosmetic(id){
+    setTimeout(()=>this._toastMsg('🎨 '+t('unlock.new')+': '+t('cos.'+id)),3200);
+  }
+
+  _grantAchCosmetics(a,s){
+    const map={tier1_clear:'badge_legend',streak_30:'frame_gold',streak_7:'monitor_cyan',surv_5:'monitor_amber',surv_10:'monitor_red',perfect_10:'frame_silver',perfect_30:'frame_perfect'};
+    const id=map[a.id];
+    if(id&&!s.owned.includes(id)){s.owned.push(id);this._toastCosmetic(id);}
+  }
+
   _checkAchievements(r,result){
     const s=this.ensureMeta();
     let newCoins=0;
@@ -1520,13 +1547,7 @@ class Game {
           s.achievements.push(a.id);
           if(a.coins){s.coins+=a.coins;s.lifetimeCoins+=a.coins;newCoins+=a.coins;}
           this._toastAch(a.id);
-          if(a.id==='tier1_clear'&&!s.owned.includes('badge_legend'))s.owned.push('badge_legend');
-          if(a.id==='streak_30'&&!s.owned.includes('frame_gold'))s.owned.push('frame_gold');
-          if(a.id==='streak_7'&&!s.owned.includes('monitor_cyan'))s.owned.push('monitor_cyan');
-          if(a.id==='surv_5'&&!s.owned.includes('monitor_amber'))s.owned.push('monitor_amber');
-          if(a.id==='surv_10'&&!s.owned.includes('monitor_red'))s.owned.push('monitor_red');
-          if(a.id==='perfect_10'&&!s.owned.includes('frame_silver'))s.owned.push('frame_silver');
-          if(a.id==='perfect_30'&&!s.owned.includes('frame_perfect'))s.owned.push('frame_perfect');
+          this._grantAchCosmetics(a,s);
         }
       }catch(e){}
     });
@@ -1766,6 +1787,12 @@ class Game {
 
   nextSurvival(){this.survN++;this._survCase();}
 
+  _pathTag(paths){
+    if(paths.includes('mixed'))return t('brief.dailyComplex');
+    const n=paths.length;
+    return n<=1?t('brief.dailySingle'):n===2?t('brief.dailyDual'):t('brief.dailyComplex');
+  }
+
   _survCase(){
     const n=this.survN;
     const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail','anaphylaxis','tamponade'];
@@ -1780,7 +1807,8 @@ class Game {
     this._forcedCaseIdx=null;this._forcedEvts=null;
     this._survGrace=n>=8?75:(n>=5?45:0);
     let extra=n>1?t('brief.survMeta',{n:n,s:this.survTotal}):'';
-    if(n>=8)extra+=(extra?'\n':'')+t('brief.survHard');
+    extra+=(extra?'\n':'')+this._pathTag(this.lvl.paths);
+    if(n>=8)extra+=' · '+t('brief.survHard');
     this._brief(t('brief.survTitle',{n:n}),extra);
   }
 
@@ -1809,7 +1837,12 @@ class Game {
         t('share.streak',{n:stk})+'\n'+
         t('share.challenge')+'\n'+url;
     }else if(r.mode==='survival'){
-      txt=t('share.survTitle',{p:r.patients,s:r.total})+'\n'+url;
+      txt=t('share.survTitle',{p:r.patients,s:r.total})+'\n'+
+        t('share.survLine',{p:r.patients,s:r.total})+'\n'+
+        'MAP  '+blocks(r.mapPct)+'\n'+
+        'SpO₂ '+blocks(r.spoPct)+'\n'+
+        'Lac  '+blocks(r.lacPct||0)+'\n'+
+        t('share.challenge')+'\n'+url;
     }else{
       const starLine=r.win?'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)+' '+r.score+' pts':'💀 '+r.score+' pts';
       txt=t('share.campaignTitle',{n:r.level||'?'})+'\n'+starLine+'\n'+
@@ -1922,6 +1955,10 @@ class Game {
     this.buildActions();
     this.log(t('game.patientAccepted'),'i');
     if(this.mode==='survival'&&this._survGrace>0)this.log(t('game.survGrace'),'i');
+    if(this._practice&&this.mode==='campaign'){
+      const d=this.getLvlData(this.lvl.id);
+      if((d.score||0)<85)setTimeout(()=>{if(!this.over)this.log(t('game.practiceTarget',{n:85}),'i');},4000);
+    }
 
     // Early clues
     const clues=this.p.clues;
@@ -2700,9 +2737,9 @@ class Game {
       }
     }
 
-    const result={mode:this.mode,win:win,score:score,stars:stars,mapPct:mapPct,spoPct:spoPct,lacPct:lacPct,timePct:spdPct,speedPts:speedPts,dn:this._dailyNum(),level:lv.id,patients:win?this.survN:this.survN-1,total:this.survTotal};
-    this._firstClear=firstClear;
     const improved=firstClear||starUp||newBest;
+    const result={mode:this.mode,win:win,score:score,stars:stars,mapPct:mapPct,spoPct:spoPct,lacPct:lacPct,timePct:spdPct,speedPts:speedPts,dn:this._dailyNum(),level:lv.id,patients:win?this.survN:this.survN-1,total:this.survTotal,starUp:!!starUp,improved:!!improved};
+    this._firstClear=firstClear;
     const rkBefore=this._rankFromXp(this.ensureMeta().xp||0);
     const meta=this._awardMeta(win,score,stars,speedPts,improved);
     const rkAfter=this._rankFromXp(this.ensureMeta().xp||0);
