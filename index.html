@@ -156,6 +156,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ls-btn:active{transform:scale(.94)}
 .ls-btn .ls-num{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);line-height:1}
 .ls-btn .ls-stars{font-size:7px;color:var(--y);margin-top:3px;height:10px;line-height:1}
+.ls-btn .ls-score{font-size:5px;color:var(--tm);margin-top:1px;font-family:var(--fd);letter-spacing:.5px}
+.ls-btn.practice-replay{border-style:dashed;border-color:rgba(0,221,255,.25)}
 .ls-btn.locked{opacity:.45}
 .ls-btn.locked .ls-num{font-size:12px;color:var(--td)}
 .ls-btn.completed{border-color:var(--gd)}
@@ -233,8 +235,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mon.theme-red .ecg-strip canvas{filter:drop-shadow(0 0 3px rgba(255,51,68,.35))}
 .mon.cos-fr-silver{box-shadow:inset 0 1px 0 rgba(0,221,255,.06),0 0 0 2px #aaa,0 0 14px rgba(170,170,170,.18)}
 .mon.cos-fr-gold{box-shadow:inset 0 1px 0 rgba(0,221,255,.06),0 0 0 2px #ffcc00,0 0 16px rgba(255,204,0,.22)}
+.mon.cos-fr-perfect{box-shadow:inset 0 1px 0 rgba(0,221,255,.06),0 0 0 2px #00ff88,0 0 18px rgba(0,255,136,.28)}
 .meta-panel.cos-fr-silver{border-color:#8a9aaa;box-shadow:0 0 0 1px rgba(170,170,170,.35),0 8px 32px rgba(0,0,0,.45)}
 .meta-panel.cos-fr-gold{border-color:#aa8800;box-shadow:0 0 0 1px rgba(255,204,0,.35),0 0 20px rgba(255,204,0,.08),0 8px 32px rgba(0,0,0,.45)}
+.meta-panel.cos-fr-perfect{border-color:#00aa66;box-shadow:0 0 0 1px rgba(0,255,136,.35),0 0 20px rgba(0,255,136,.1),0 8px 32px rgba(0,0,0,.45)}
 .bv{background:rgba(10,16,25,.92);padding:10px 12px 8px;position:relative;overflow:hidden}
 .bv::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--g);opacity:.35;transition:background .4s,opacity .4s}
 .bv.w::after{background:var(--y);opacity:.65}.bv.cr::after{background:var(--r);opacity:1;animation:pb .6s infinite}
@@ -761,7 +765,8 @@ const COSMETICS=[
   {id:'monitor_red',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#ff4466',theme:'theme-red',rankReq:null,achReq:'surv_10'},
   {id:'frame_none',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'none',rankReq:null},
   {id:'frame_silver',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#aaa',rankReq:null,achReq:'perfect_10'},
-  {id:'frame_gold',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#ffcc00',rankReq:null,achReq:'streak_30'}
+  {id:'frame_gold',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#ffcc00',rankReq:null,achReq:'streak_30'},
+  {id:'frame_perfect',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#00ff88',rankReq:null,achReq:'perfect_30'}
 ];
 const DEFAULT_OWNED=['scrubs_teal','badge_none','monitor_classic','frame_none'];
 const DEFAULT_COSMETICS={outfit:'scrubs_teal',badge:'badge_none',monitor:'monitor_classic',frame:'frame_none'};
@@ -1415,10 +1420,11 @@ class Game {
     const ecg=monitor.ecg||'#00ff88';
     const mon=this.$('scr-gs')?.querySelector('.mon');
     if(mon){
-      mon.classList.remove('theme-cyan','theme-amber','theme-red','cos-fr-silver','cos-fr-gold');
+      mon.classList.remove('theme-cyan','theme-amber','theme-red','cos-fr-silver','cos-fr-gold','cos-fr-perfect');
       if(monitor.theme)mon.classList.add(monitor.theme);
       if(av.frame==='frame_silver')mon.classList.add('cos-fr-silver');
       else if(av.frame==='frame_gold')mon.classList.add('cos-fr-gold');
+      else if(av.frame==='frame_perfect')mon.classList.add('cos-fr-perfect');
     }
     this._ecgColor=ecg;
     this._resetWave();
@@ -1427,9 +1433,10 @@ class Game {
     const app=this.$('app');
     if(app)app.style.setProperty('--cos-ecg',ecg);
     document.querySelectorAll('.meta-panel').forEach(p=>{
-      p.classList.remove('cos-fr-silver','cos-fr-gold');
+      p.classList.remove('cos-fr-silver','cos-fr-gold','cos-fr-perfect');
       if(av.frame==='frame_silver')p.classList.add('cos-fr-silver');
       else if(av.frame==='frame_gold')p.classList.add('cos-fr-gold');
+      else if(av.frame==='frame_perfect')p.classList.add('cos-fr-perfect');
     });
   }
 
@@ -1442,17 +1449,20 @@ class Game {
     if(s.dailyLog.length>21)s.dailyLog=s.dailyLog.slice(-21);
   }
 
-  _awardMeta(win,score,stars,speedPts){
+  _awardMeta(win,score,stars,speedPts,improved){
     const s=this.ensureMeta();
     let coins=0,xp=0;
     s.gamesPlayed=(s.gamesPlayed||0)+1;
     if(win){
-      s.winStreak=(s.winStreak||0)+1;
-      s.bestWinStreak=Math.max(s.bestWinStreak||0,s.winStreak);
+      if(!this._practice||improved){
+        s.winStreak=(s.winStreak||0)+1;
+        s.bestWinStreak=Math.max(s.bestWinStreak||0,s.winStreak);
+      }
       xp=50;
       if(this.mode==='campaign'){
         coins=10+stars*5+Math.min(10,speedPts);
         if(this._firstClear)coins+=15;
+        else if(this._practice&&!improved)coins=Math.max(2,Math.round(coins*0.4));
         if(!s.bests.levels)s.bests.levels={};
         s.bests.levels[this.lvl.id]=Math.max(s.bests.levels[this.lvl.id]||0,score);
       }else if(this.mode==='daily'){
@@ -1473,7 +1483,8 @@ class Game {
         else if(this.survN===10)coins+=40;
       }
     }else{
-      s.winStreak=0;xp=10;
+      if(!this._practice)s.winStreak=0;
+      xp=10;
       if(this.mode==='survival'&&this.survN>1){
         const cur={p:this.survN-1,s:this.survTotal};
         if(!s.bests.survival||cur.p>s.bests.survival.p||(cur.p===s.bests.survival.p&&cur.s>s.bests.survival.score))s.bests.survival={p:cur.p,score:cur.s};
@@ -1515,6 +1526,7 @@ class Game {
           if(a.id==='surv_5'&&!s.owned.includes('monitor_amber'))s.owned.push('monitor_amber');
           if(a.id==='surv_10'&&!s.owned.includes('monitor_red'))s.owned.push('monitor_red');
           if(a.id==='perfect_10'&&!s.owned.includes('frame_silver'))s.owned.push('frame_silver');
+          if(a.id==='perfect_30'&&!s.owned.includes('frame_perfect'))s.owned.push('frame_perfect');
         }
       }catch(e){}
     });
@@ -1662,12 +1674,13 @@ class Game {
       let cls='ls-btn';
       if(locked)cls+=' locked';
       else if(d.stars>=3)cls+=' perfect';
-      else if(d.stars>0)cls+=' completed';
+      else if(d.stars>0)cls+=' completed practice-replay';
       if(next===i)cls+=' next';
       const stars=d.stars>=3?'★★★':d.stars>=2?'★★☆':d.stars>=1?'★☆☆':'';
+      const scoreLine=!locked&&d.score>0?'<div class="ls-score">'+d.score+'</div>':'';
       const num=locked?'🔒':String(i);
       const click=locked?'G._lsToastLocked('+i+')':'G.startLevel('+i+')';
-      h+='<div class="'+cls+'" onclick="'+click+'"><div class="ls-num">'+num+'</div><div class="ls-stars">'+stars+'</div></div>';
+      h+='<div class="'+cls+'" onclick="'+click+'"><div class="ls-num">'+num+'</div><div class="ls-stars">'+stars+'</div>'+scoreLine+'</div>';
     }
     h+='</div>';
     panel.innerHTML=h;
@@ -1707,7 +1720,14 @@ class Game {
   startLevel(n){
     this.mode='campaign';this._forcedCaseIdx=null;this._forcedEvts=null;
     this.lvl=LEVELS[n-1];if(!this.lvl)return;
-    this._brief(t('brief.title',{n:n}));
+    const d=this.getLvlData(n);
+    this._practice=n>1&&d.stars>0;
+    let meta='';
+    if(this._practice){
+      meta=t('brief.practice');
+      if(d.score)meta+=' · '+t('brief.bestScore',{n:d.score});
+    }
+    this._brief(t('brief.title',{n:n}),meta);
   }
 
   _brief(title,extra){
@@ -1740,7 +1760,7 @@ class Game {
 
   // -- Survival Mode --
   startSurvival(){
-    this.mode='survival';this.survN=1;this.survTotal=0;
+    this.mode='survival';this._practice=false;this.survN=1;this.survTotal=0;
     this._survCase();
   }
 
@@ -1840,7 +1860,7 @@ class Game {
   }
 
   startDaily(){
-    this.mode='daily';
+    this.mode='daily';this._practice=false;
     const rng=this._rng(this._dailySeed());
     const roll=this._rollDaily(rng);
     this.lvl={id:999,paths:roll.paths,mult:roll.mult,stabReq:roll.stabReq,events:roll.events,desc:'Daily'};
@@ -1895,6 +1915,7 @@ class Game {
     const hl=this.$('hdr-lvl');
     if(this.mode==='survival')hl.textContent=t('lvl.surv',{n:this.survN});
     else if(this.mode==='daily')hl.textContent=t('lvl.dailyNum',{n:this._dailyNum()});
+    else if(this._practice)hl.textContent=t('lvl.practice',{n:lv.id});
     else hl.textContent=t('lvl.header',{n:lv.id});
     this.$('log').innerHTML='<span class="lx" id="lx" onclick="G.toggleLog()">▼</span>';
     this.$('app').classList.remove('alarm');
@@ -2602,7 +2623,7 @@ class Game {
     const m=Math.floor(this.gt/60),s=this.gt%60;
     const tstr=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     let label=tstr;
-    if(this.mode==='campaign'&&this.lvl)label=t('pause.subCampaign',{n:this.lvl.id,t:tstr});
+    if(this.mode==='campaign'&&this.lvl)label=this._practice?t('pause.subPractice',{n:this.lvl.id,t:tstr}):t('pause.subCampaign',{n:this.lvl.id,t:tstr});
     else if(this.mode==='daily')label=t('pause.subDaily',{n:this._dailyNum(),t:tstr});
     else if(this.mode==='survival')label=t('pause.subSurvival',{n:this.survN,t:tstr});
     if(sub)sub.textContent=label;
@@ -2681,13 +2702,15 @@ class Game {
 
     const result={mode:this.mode,win:win,score:score,stars:stars,mapPct:mapPct,spoPct:spoPct,lacPct:lacPct,timePct:spdPct,speedPts:speedPts,dn:this._dailyNum(),level:lv.id,patients:win?this.survN:this.survN-1,total:this.survTotal};
     this._firstClear=firstClear;
+    const improved=firstClear||starUp||newBest;
     const rkBefore=this._rankFromXp(this.ensureMeta().xp||0);
-    const meta=this._awardMeta(win,score,stars,speedPts);
+    const meta=this._awardMeta(win,score,stars,speedPts,improved);
     const rkAfter=this._rankFromXp(this.ensureMeta().xp||0);
     const rankUpHtml=rkAfter.id!==rkBefore.id?'<div class="go-rankup">▲ '+t('end.rankUp',{r:t(RANK_I18N[rkAfter.id])})+'</div>':'';
     const firstClearHtml=firstClear&&win?'<div class="go-rankup" style="border-color:rgba(0,255,136,.4);color:var(--g)">'+t('end.firstClear')+'</div>':'';
     const starUpHtml=starUp?'<div class="go-rankup" style="border-color:rgba(255,204,0,.4);color:var(--y)">'+t('end.starUp',{stars:'★'.repeat(stars)})+'</div>':'';
     const perfectHtml=win&&stars===3?'<div class="go-perfect">'+t('end.perfect3')+'</div>':'';
+    const practiceHtml=this._practice&&win&&!improved?'<div class="go-sub" style="color:var(--tm);letter-spacing:2px">'+t('end.practice')+'</div>':'';
     const winStreak=this.ensureMeta().winStreak||0;
     const streakHtml=win&&winStreak>=3?'<div class="go-rankup" style="border-color:rgba(255,136,51,.35);color:var(--o)">🔥 '+t('end.winStreak',{n:winStreak})+'</div>':'';
     const mxAfter=this.getMaxUnlocked();
@@ -2776,6 +2799,7 @@ class Game {
       firstClearHtml+
       starUpHtml+
       perfectHtml+
+      practiceHtml+
       streakHtml+
       unlockHtml+
       coinsHtml+

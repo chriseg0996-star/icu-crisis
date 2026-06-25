@@ -295,7 +295,8 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] Achievement-unlocked monitor themes (amber/red) and silver frame
 - [x] Survival balance: softer late curve, grace window, milestone coins
 - [x] Profile: 7-day daily score log, win streak / best streak
-- [x] Campaign levels 21–30: ramping difficulty (not flat spike)
+- [x] Practice mode: replay cleared levels (40% coins unless you improve)
+- [x] Perfect frame cosmetic (30× ★★★ achievement)
 - [x] Mobile safe-area padding (notch/home indicator)
 
 **Planned**
