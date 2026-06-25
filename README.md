@@ -291,7 +291,8 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] Bundled web fonts (no Google Fonts CDN)
 
 - [x] Campaign hints for levels 2–30 (one-time tips per level)
-- [x] 3-star win celebration (confetti, sound, banner)
+- [x] 8 acute events (plug, pneumo, bleed, arrhythmia, sepsis flare, bronchospasm, flash edema)
+- [x] Win feedback (star upgrades, win streak, daily streak, survival milestones)
 - [x] Mobile safe-area padding (notch/home indicator)
 
 **Planned**

@@ -112,7 +112,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .shop-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
 .shop-tab{padding:5px 10px;border:1px solid var(--b);background:var(--c);color:var(--td);font-size:8px;letter-spacing:1px;cursor:pointer;border-radius:4px}
 .shop-tab.on{border-color:var(--cy);color:var(--cy)}
-.ach-toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-120%);z-index:200;background:var(--p);border:1px solid var(--y);border-radius:8px;padding:10px 16px;font-size:10px;color:var(--y);letter-spacing:1px;transition:transform .35s ease;pointer-events:none;max-width:90%;text-align:center}
+.ach-toast{position:fixed;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-120%);z-index:200;background:var(--p);border:1px solid var(--y);border-radius:8px;padding:10px 16px;font-size:10px;color:var(--y);letter-spacing:1px;transition:transform .35s ease;pointer-events:none;max-width:90%;text-align:center}
 .ach-toast.v{transform:translateX(-50%) translateY(0)}
 .go-coins{font-size:11px;color:var(--y);margin:6px 0;letter-spacing:1px}
 
@@ -765,7 +765,9 @@ const MISSION_POOL=[
   {id:'no_pocus',check:(g,r)=>r.win&&!(g._sessionDiags&&g._sessionDiags.pocus),reward:30},
   {id:'survival_2',check:(g,r)=>r.mode==='survival'&&r.patients>=2,reward:25},
   {id:'win_campaign',check:(g,r)=>r.mode==='campaign'&&r.win,reward:15},
-  {id:'three_correct',check:(g,r)=>r.win&&g.p.correctAct>=3,reward:20}
+  {id:'three_correct',check:(g,r)=>r.win&&g.p.correctAct>=3,reward:20},
+  {id:'two_star',check:(g,r)=>r.mode==='campaign'&&r.win&&r.stars>=2,reward:25},
+  {id:'score_85',check:(g,r)=>r.win&&r.score>=85,reward:30}
 ];
 const ACHIEVEMENTS=[
   {id:'first_win',check:(g,s,r)=>r.win,reward:50,coins:50},
@@ -776,6 +778,7 @@ const ACHIEVEMENTS=[
   {id:'surv_10',check:(g,s)=>s.survBest&&s.survBest.p>=10,reward:0,coins:100},
   {id:'perfect_l1',check:(g,s)=>s['l1']&&s['l1'].stars>=3,reward:0,coins:40},
   {id:'perfect_10',check:(g,s)=>{let n=0;for(let i=1;i<=10;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=10;},reward:0,coins:150},
+  {id:'perfect_20',check:(g,s)=>{let n=0;for(let i=1;i<=20;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=20;},reward:0,coins:120},
   {id:'win_streak_5',check:(g,s)=>s.winStreak>=5,reward:0,coins:80},
   {id:'share_1',check:(g,s)=>s.shareCount>=1,reward:0,coins:25},
   {id:'share_5',check:(g,s)=>s.shareCount>=5,reward:0,coins:60},
@@ -819,6 +822,8 @@ const EVENTS=[
   {id:'bleed',apply(p){p.bleed=Math.min(80,p.bleed+25);p.perfusion-=10;}},
   {id:'arrhythmia',apply(p){p.cardiacOutput=Math.max(12,p.cardiacOutput-18);p.perfusion=Math.max(0,p.perfusion-8);p._dHR+=28;}},
   {id:'sepsis_flare',apply(p){p.infection=Math.min(100,p.infection+22);p.vascularTone=Math.max(5,p.vascularTone-14);p.lactate=Math.min(20,p.lactate+.4);}},
+  {id:'bronchospasm',apply(p){p.co2bias=Math.min(40,p.co2bias+12);p.compliance=Math.max(15,p.compliance-10);p.autoPeep=Math.min(18,p.autoPeep+4);p._dHR+=8;}},
+  {id:'flash_edema',apply(p){p.pulmonaryEdema=Math.min(95,p.pulmonaryEdema+22);p.oxygenation=Math.max(55,p.oxygenation-12);p.compliance=Math.max(12,p.compliance-8);}},
 ];
 const UNLOCK_BTN={
   pocus:'bdiag',labs:'bdiag',echo:'bdiag',vexus:'bdiag',advlabs:'bdiag',
@@ -2540,12 +2545,16 @@ class Game {
     // Persistence & NEW BEST per mode
     let newBest=false;
     let firstClear=false;
+    let starUp=false;
+    let prevStars=0;
     let mxBefore=this.getMaxUnlocked();
     if(this.mode==='campaign'&&win){
-      firstClear=!this.getLvlData(lv.id).stars;
+      prevStars=this.getLvlData(lv.id).stars||0;
+      firstClear=!prevStars;
       const prev=this.getLvlData(lv.id).score||0;
       newBest=prev>0&&score>prev;
       this.setLvlData(lv.id,stars,score);
+      starUp=prevStars>0&&stars>prevStars;
     }else if(this.mode==='daily'){
       const s=this.ensureMeta(),ds=this._dailyStr(),ys=this._yesterStr();
       if(!s.dailyStreak||s.dailyStreak.last!==ds){
@@ -2575,7 +2584,10 @@ class Game {
     const rkAfter=this._rankFromXp(this.ensureMeta().xp||0);
     const rankUpHtml=rkAfter.id!==rkBefore.id?'<div class="go-rankup">▲ '+t('end.rankUp',{r:t(RANK_I18N[rkAfter.id])})+'</div>':'';
     const firstClearHtml=firstClear&&win?'<div class="go-rankup" style="border-color:rgba(0,255,136,.4);color:var(--g)">'+t('end.firstClear')+'</div>':'';
+    const starUpHtml=starUp?'<div class="go-rankup" style="border-color:rgba(255,204,0,.4);color:var(--y)">'+t('end.starUp',{stars:'★'.repeat(stars)})+'</div>':'';
     const perfectHtml=win&&stars===3?'<div class="go-perfect">'+t('end.perfect3')+'</div>':'';
+    const winStreak=this.ensureMeta().winStreak||0;
+    const streakHtml=win&&winStreak>=3?'<div class="go-rankup" style="border-color:rgba(255,136,51,.35);color:var(--o)">🔥 '+t('end.winStreak',{n:winStreak})+'</div>':'';
     const mxAfter=this.getMaxUnlocked();
     let unlockHtml='';
     if(this.mode==='campaign'&&win&&mxAfter>mxBefore){
@@ -2654,7 +2666,9 @@ class Game {
       bestHtml+
       rankUpHtml+
       firstClearHtml+
+      starUpHtml+
       perfectHtml+
+      streakHtml+
       unlockHtml+
       coinsHtml+
       (this.mode==='survival'?'':'<div class="go-stars'+(win?' win-anim':'')+(win&&stars===3?' perfect-stars':'')+'">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
@@ -2672,6 +2686,13 @@ class Game {
     if(win&&stars===3)this._spawnConfetti(this.$('ov-end'));
 
     if(missionBonus>0)setTimeout(()=>this._toastMsg(t('end.missionDone',{n:missionBonus})),700);
+    if(this.mode==='daily'&&win){
+      const stk=this.ensureMeta().dailyStreak?this.ensureMeta().dailyStreak.n:1;
+      setTimeout(()=>this._toastMsg(t('end.dailyStreak',{n:stk})),missionBonus>0?1400:800);
+    }
+    if(this.mode==='survival'&&win&&[3,5,10].includes(this.survN)){
+      setTimeout(()=>this._toastMsg(t('end.survMilestone',{n:this.survN})),900);
+    }
 
     // Animate: bars grow + score counts up
     requestAnimationFrame(()=>{
