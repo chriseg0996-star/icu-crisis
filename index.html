@@ -749,7 +749,7 @@ const COSMETICS=[
   {id:'badge_steth',cat:'badge',priceCoins:200,priceUSD:null,premium:false,emoji:'🩺',rankReq:null},
   {id:'badge_legend',cat:'badge',priceCoins:0,priceUSD:null,premium:false,emoji:'⭐',rankReq:null,achReq:'tier1_clear'},
   {id:'monitor_classic',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#00ff88',theme:'',rankReq:null},
-  {id:'monitor_cyan',cat:'monitor',priceCoins:150,priceUSD:null,premium:false,ecg:'#00ddff',theme:'theme-cyan',rankReq:null},
+  {id:'monitor_cyan',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#00ddff',theme:'theme-cyan',rankReq:null,achReq:'streak_7'},
   {id:'monitor_amber',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#ffcc00',theme:'theme-amber',rankReq:null,achReq:'surv_5'},
   {id:'monitor_red',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#ff4466',theme:'theme-red',rankReq:null,achReq:'surv_10'},
   {id:'frame_none',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'none',rankReq:null},
@@ -1419,7 +1419,9 @@ class Game {
       }else if(this.mode==='daily'){
         xp=80;coins=20+Math.floor(score/5);
         const stk=s.dailyStreak?s.dailyStreak.n:1;
-        if(stk>=7)coins=Math.round(coins*1.1);
+        if(stk>=7)coins=Math.round(coins*1.12);
+        if(stk>=14)coins=Math.round(coins*1.18);
+        if(stk>=30)coins=Math.round(coins*1.25);
         s.dailyWins=(s.dailyWins||0)+1;
         s.bests.daily=Math.max(s.bests.daily||0,score);
         const ds=this._dailyStr();
@@ -1470,6 +1472,7 @@ class Game {
           this._toastAch(a.id);
           if(a.id==='tier1_clear'&&!s.owned.includes('badge_legend'))s.owned.push('badge_legend');
           if(a.id==='streak_30'&&!s.owned.includes('frame_gold'))s.owned.push('frame_gold');
+          if(a.id==='streak_7'&&!s.owned.includes('monitor_cyan'))s.owned.push('monitor_cyan');
           if(a.id==='surv_5'&&!s.owned.includes('monitor_amber'))s.owned.push('monitor_amber');
           if(a.id==='surv_10'&&!s.owned.includes('monitor_red'))s.owned.push('monitor_red');
           if(a.id==='perfect_10'&&!s.owned.includes('frame_silver'))s.owned.push('frame_silver');
@@ -1761,21 +1764,56 @@ class Game {
   }
   _rng(seed){let a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296;};}
 
+  _rollDaily(rng){
+    const dn=this._dailyNum();
+    const dow=new Date().getDay();
+    const weekend=dow===0||dow===6;
+    const tier=dn%7;
+    const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail','anaphylaxis','tamponade'];
+    const dual=[['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema'],['hypovolemic','sepsis'],['anaphylaxis','edema'],['copd','edema'],['pe','sepsis'],['cardiogenic','rvfail']];
+    const triple=[['sepsis','airway','edema'],['cardiogenic','rvfail'],['hypovolemic','sepsis'],['copd','edema'],['pe','sepsis'],['rvfail','sepsis','edema'],['cardiogenic','pe','sepsis'],['copd','airway','edema']];
+    let pool;
+    if(tier<=1)pool=singles.map(p=>[p]).concat(dual.slice(0,6));
+    else if(tier<=3)pool=dual.concat(singles.map(p=>[p]));
+    else if(tier<=5)pool=dual.concat(triple).concat([['mixed']]);
+    else pool=triple.concat([['mixed']]).concat(dual.slice(0,4));
+    const paths=pool[Math.floor(rng()*pool.length)].slice();
+    const n=paths.length;
+    let mult=1.0+(n-1)*0.11+(weekend?0.07:0)+(tier>=5?0.05:0);
+    let stabReq=17+n*3+(weekend?2:0);
+    const events=(weekend||n>=3)?2:1;
+    mult=Math.min(1.35,mult);
+    stabReq=Math.min(26,stabReq);
+    const pr=getPathEntry(paths[0],PATH);
+    const caseIdx=pr&&pr.cases.length?Math.floor(rng()*pr.cases.length):0;
+    const evts=[];
+    if(events>=1)evts.push({time:95+Math.floor(rng()*85),evtIdx:Math.floor(rng()*EVENTS.length)});
+    if(events>=2){
+      let e2=Math.floor(rng()*EVENTS.length);
+      if(evts[0]&&evts[0].evtIdx===e2)e2=(e2+3)%EVENTS.length;
+      evts.push({time:250+Math.floor(rng()*110),evtIdx:e2});
+    }
+    const tag=n===1?t('brief.dailySingle'):n===2?t('brief.dailyDual'):t('brief.dailyComplex');
+    const intensity=weekend?t('brief.dailyWeekend'):tier>=5?t('brief.dailyHard'):'';
+    return {paths,mult,stabReq,events,caseIdx,evts,tag,intensity};
+  }
+
   startDaily(){
     this.mode='daily';
     const rng=this._rng(this._dailySeed());
-    const pool=[['sepsis'],['cardiogenic'],['pe'],['rvfail'],['copd'],['edema'],['hypovolemic'],['anaphylaxis'],['tamponade'],['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema'],['hypovolemic','sepsis'],['anaphylaxis','edema'],['sepsis','airway','edema'],['mixed']];
-    const paths=pool[Math.floor(rng()*pool.length)];
-    this.lvl={id:999,paths:paths,mult:1.0+Math.floor(rng()*4)*0.1,stabReq:20,events:1,desc:'Daily'};
-    const pr=getPathEntry(paths[0],PATH);
-    this._forcedCaseIdx=Math.floor(rng()*pr.cases.length);
-    this._forcedEvts=[{time:110+Math.floor(rng()*70),evtIdx:Math.floor(rng()*EVENTS.length)}];
+    const roll=this._rollDaily(rng);
+    this.lvl={id:999,paths:roll.paths,mult:roll.mult,stabReq:roll.stabReq,events:roll.events,desc:'Daily'};
+    this._forcedCaseIdx=roll.caseIdx;
+    this._forcedEvts=roll.evts;
+    this._dailyTag=roll.tag;
+    this._dailyIntensity=roll.intensity;
     const s=this.ensureMeta();
     const ds=this._dailyStr();
     const stk=s.dailyStreak;
     const stkN=(stk&&stk.n>0&&(stk.last===ds||stk.last===this._yesterStr()))?stk.n:0;
     const done=s.daily&&s.daily.date===ds;
-    let meta=t('brief.dailyNum',{n:this._dailyNum()});
+    let meta=t('brief.dailyNum',{n:this._dailyNum()})+' · '+roll.tag;
+    if(roll.intensity)meta+=' · '+roll.intensity;
     if(stkN>0)meta+=' · '+t('brief.dailyStreak',{n:stkN});
     if(done)meta+=' · '+t('brief.dailyBestToday',{n:s.daily.score});
     this._brief(t('brief.dailyTitle',{d:ds}),meta);
@@ -1815,7 +1853,7 @@ class Game {
     this._beatAcc=0;
     const hl=this.$('hdr-lvl');
     if(this.mode==='survival')hl.textContent=t('lvl.surv',{n:this.survN});
-    else if(this.mode==='daily')hl.textContent=t('lvl.daily');
+    else if(this.mode==='daily')hl.textContent=t('lvl.dailyNum',{n:this._dailyNum()});
     else hl.textContent=t('lvl.header',{n:lv.id});
     this.$('log').innerHTML='<span class="lx" id="lx" onclick="G.toggleLog()">▼</span>';
     this.$('app').classList.remove('alarm');
@@ -2524,7 +2562,7 @@ class Game {
     const tstr=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     let label=tstr;
     if(this.mode==='campaign'&&this.lvl)label=t('pause.subCampaign',{n:this.lvl.id,t:tstr});
-    else if(this.mode==='daily')label=t('pause.subDaily',{t:tstr});
+    else if(this.mode==='daily')label=t('pause.subDaily',{n:this._dailyNum(),t:tstr});
     else if(this.mode==='survival')label=t('pause.subSurvival',{n:this.survN,t:tstr});
     if(sub)sub.textContent=label;
   }
@@ -2577,6 +2615,7 @@ class Game {
       starUp=prevStars>0&&stars>prevStars;
     }else if(this.mode==='daily'){
       const s=this.ensureMeta(),ds=this._dailyStr(),ys=this._yesterStr();
+      const hadWinToday=s.daily&&s.daily.date===ds&&s.daily.score>0;
       if(!s.dailyStreak||s.dailyStreak.last!==ds){
         s.dailyStreak={last:ds,n:(s.dailyStreak&&s.dailyStreak.last===ys)?s.dailyStreak.n+1:1};
       }
@@ -2584,7 +2623,8 @@ class Game {
         const prev=(s.daily&&s.daily.date===ds)?s.daily.score:0;
         newBest=prev>0&&score>prev;
         if(!s.daily||s.daily.date!==ds||score>s.daily.score)s.daily={date:ds,score:score};
-      }
+        this._dailyFirstWinToday=win&&!hadWinToday;
+      }else this._dailyFirstWinToday=false;
       this.setSave(s);
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
@@ -2656,8 +2696,14 @@ class Game {
     let title=win?t('end.win'):t('end.lose');
     if(this.mode==='survival')title=win?t('end.survWin',{n:this.survN}):t('end.survOver');
     let survLine='';
+    let dailyLine='';
     if(this.mode==='survival'){
       survLine='<div class="go-sub" style="color:var(--cy)">'+(win?'':t('end.survSummary',{p:this.survN-1})+' | ')+t('end.survTotal',{s:this.survTotal})+'</div>';
+    }else if(this.mode==='daily'){
+      const ds=this._dailyStr();
+      const sd=this.ensureMeta().daily;
+      const best=sd&&sd.date===ds?sd.score:score;
+      dailyLine='<div class="go-sub" style="color:var(--y)">'+t('end.dailyLine',{n:this._dailyNum(),best:best})+(this._dailyTag?' · '+this._dailyTag:'')+'</div>';
     }
 
     // Result snapshot for sharing
@@ -2693,6 +2739,7 @@ class Game {
       coinsHtml+
       (this.mode==='survival'?'':'<div class="go-stars'+(win?' win-anim':'')+(win&&stars===3?' perfect-stars':'')+'">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
       survLine+
+      dailyLine+
       barsHtml+
       hintHtml+
       dbHtml+
@@ -2706,7 +2753,7 @@ class Game {
     if(win&&stars===3)this._spawnConfetti(this.$('ov-end'));
 
     if(missionBonus>0)setTimeout(()=>this._toastMsg(t('end.missionDone',{n:missionBonus})),700);
-    if(this.mode==='daily'&&win){
+    if(this.mode==='daily'&&win&&this._dailyFirstWinToday){
       const stk=this.ensureMeta().dailyStreak?this.ensureMeta().dailyStreak.n:1;
       setTimeout(()=>this._toastMsg(t('end.dailyStreak',{n:stk})),missionBonus>0?1400:800);
     }

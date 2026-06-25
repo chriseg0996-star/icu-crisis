@@ -1,5 +1,5 @@
 // ICU Crisis service worker — network-first with cache fallback
-const CACHE='icu-crisis-v18';
+const CACHE='icu-crisis-v19';
 const ASSETS=[
   './','./index.html','./i18n.js','./fonts.css','./manifest.json','./icon-192.png','./icon-512.png',
   './fonts/orbitron-400.ttf','./fonts/orbitron-700.ttf','./fonts/orbitron-900.ttf','./fonts/share-tech-mono-400.ttf'

@@ -294,7 +294,7 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] 8 acute events (plug, pneumo, bleed, arrhythmia, sepsis flare, bronchospasm, flash edema)
 - [x] Achievement-unlocked monitor themes (amber/red) and silver frame
 - [x] Survival balance: softer late curve, grace window, milestone coins
-- [x] Tier completion toasts (levels 5, 10, 15, 20, 25, 30)
+- [x] Daily case: seeded difficulty rotation, weekend events, streak coin bonus
 - [x] Mobile safe-area padding (notch/home indicator)
 
 **Planned**
