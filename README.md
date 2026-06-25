@@ -292,7 +292,9 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 
 - [x] Campaign hints for levels 2–30 (one-time tips per level)
 - [x] 8 acute events (plug, pneumo, bleed, arrhythmia, sepsis flare, bronchospasm, flash edema)
-- [x] Win feedback (star upgrades, win streak, daily streak, survival milestones)
+- [x] Achievement-unlocked monitor themes (amber/red) and silver frame
+- [x] Survival balance: softer late curve, grace window, milestone coins
+- [x] Tier completion toasts (levels 5, 10, 15, 20, 25, 30)
 - [x] Mobile safe-area padding (notch/home indicator)
 
 **Planned**

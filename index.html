@@ -750,10 +750,10 @@ const COSMETICS=[
   {id:'badge_legend',cat:'badge',priceCoins:0,priceUSD:null,premium:false,emoji:'⭐',rankReq:null,achReq:'tier1_clear'},
   {id:'monitor_classic',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#00ff88',theme:'',rankReq:null},
   {id:'monitor_cyan',cat:'monitor',priceCoins:150,priceUSD:null,premium:false,ecg:'#00ddff',theme:'theme-cyan',rankReq:null},
-  {id:'monitor_amber',cat:'monitor',priceCoins:200,priceUSD:null,premium:false,ecg:'#ffcc00',theme:'theme-amber',rankReq:null},
-  {id:'monitor_red',cat:'monitor',priceCoins:250,priceUSD:null,premium:false,ecg:'#ff4466',theme:'theme-red',rankReq:null},
+  {id:'monitor_amber',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#ffcc00',theme:'theme-amber',rankReq:null,achReq:'surv_5'},
+  {id:'monitor_red',cat:'monitor',priceCoins:0,priceUSD:null,premium:false,ecg:'#ff4466',theme:'theme-red',rankReq:null,achReq:'surv_10'},
   {id:'frame_none',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'none',rankReq:null},
-  {id:'frame_silver',cat:'frame',priceCoins:300,priceUSD:null,premium:false,stroke:'#aaa',rankReq:null},
+  {id:'frame_silver',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#aaa',rankReq:null,achReq:'perfect_10'},
   {id:'frame_gold',cat:'frame',priceCoins:0,priceUSD:null,premium:false,stroke:'#ffcc00',rankReq:null,achReq:'streak_30'}
 ];
 const DEFAULT_OWNED=['scrubs_teal','badge_none','monitor_classic','frame_none'];
@@ -764,6 +764,7 @@ const MISSION_POOL=[
   {id:'score_80',check:(g,r)=>r.win&&r.score>=80,reward:20},
   {id:'no_pocus',check:(g,r)=>r.win&&!(g._sessionDiags&&g._sessionDiags.pocus),reward:30},
   {id:'survival_2',check:(g,r)=>r.mode==='survival'&&r.patients>=2,reward:25},
+  {id:'survival_5',check:(g,r)=>r.mode==='survival'&&r.patients>=5,reward:35},
   {id:'win_campaign',check:(g,r)=>r.mode==='campaign'&&r.win,reward:15},
   {id:'three_correct',check:(g,r)=>r.win&&g.p.correctAct>=3,reward:20},
   {id:'two_star',check:(g,r)=>r.mode==='campaign'&&r.win&&r.stars>=2,reward:25},
@@ -795,6 +796,8 @@ const ACHIEVEMENTS=[
   {id:'fellow_rank',check:(g,s)=>g._rankFromXp(s.xp||0).id==='fellow'||g._rankFromXp(s.xp||0).id==='attending',reward:0,coins:0},
   {id:'attending_rank',check:(g,s)=>g._rankFromXp(s.xp||0).id==='attending',reward:0,coins:0},
   {id:'tier1_clear',check:(g,s)=>{for(let i=1;i<=5;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:100},
+  {id:'tier3_clear',check:(g,s)=>{for(let i=11;i<=15;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:80},
+  {id:'tier5_clear',check:(g,s)=>{for(let i=21;i<=25;i++)if(!s['l'+i]||s['l'+i].stars<1)return false;return true;},reward:0,coins:120},
   {id:'master_case',check:(g,s)=>s['l30']&&s['l30'].stars>=1,reward:0,coins:200}
 ];
 
@@ -1097,7 +1100,7 @@ class Game {
     this.at={};this.abgPend=false;this._cd={};this.evts=[];this.fEvts=[];
     this._stabM1=false;this._stabM2=false;this._stabNear=false;this._abgUntil=0;this._abgN=0;
     this.lt=0;this.acc=0;
-    this.mode='campaign';this.survN=0;this.survTotal=0;
+    this.mode='campaign';this.survN=0;this.survTotal=0;this._survGrace=0;
     this._forcedCaseIdx=null;this._forcedEvts=null;
     this.snd=new Snd();
     this.$ = id => document.getElementById(id);
@@ -1323,7 +1326,7 @@ class Game {
       const achOk=!c.achReq||s.achievements.includes(c.achReq);
       const locked=!rankOk||!achOk;
       let price='';
-      if(c.achReq&&!achOk)price=t('shop.achLock');
+      if(c.achReq&&!achOk)price=t('shop.achNeed',{a:t('ach.'+c.achReq)});
       else if(c.priceCoins===0&&owned)price=t('shop.free');
       else if(owned)price=t('shop.owned');
       else price='🪙 '+c.priceCoins;
@@ -1422,7 +1425,11 @@ class Game {
         const ds=this._dailyStr();
         if(!s.dailyHistory.includes(ds))s.dailyHistory.push(ds);
       }else if(this.mode==='survival'){
-        xp=30;coins=5*this.survN;
+        xp=30+Math.min(20,this.survN*2);
+        coins=5*this.survN;
+        if(this.survN===5)coins+=15;
+        else if(this.survN===8)coins+=25;
+        else if(this.survN===10)coins+=40;
       }
     }else{
       s.winStreak=0;xp=10;
@@ -1463,6 +1470,9 @@ class Game {
           this._toastAch(a.id);
           if(a.id==='tier1_clear'&&!s.owned.includes('badge_legend'))s.owned.push('badge_legend');
           if(a.id==='streak_30'&&!s.owned.includes('frame_gold'))s.owned.push('frame_gold');
+          if(a.id==='surv_5'&&!s.owned.includes('monitor_amber'))s.owned.push('monitor_amber');
+          if(a.id==='surv_10'&&!s.owned.includes('monitor_red'))s.owned.push('monitor_red');
+          if(a.id==='perfect_10'&&!s.owned.includes('frame_silver'))s.owned.push('frame_silver');
         }
       }catch(e){}
     });
@@ -1699,9 +1709,14 @@ class Game {
     const pool=singles.slice();const paths=[];
     for(let i=0;i<count;i++){const idx=Math.floor(Math.random()*pool.length);paths.push(pool.splice(idx,1)[0]);}
     const usesMixed=n>=8&&Math.random()<0.3;
-    this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult:Math.min(1.6,0.7+n*0.1),stabReq:Math.min(28,12+n*2),events:n>=3?(n>=6?2:1):0,desc:'Survival'};
+    const mult=Math.min(1.45,0.7+n*0.075);
+    const stabReq=Math.min(26,12+Math.floor(n*1.5));
+    const events=n>=3?(n>=7?2:1):0;
+    this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult,stabReq,events,desc:'Survival'};
     this._forcedCaseIdx=null;this._forcedEvts=null;
-    const extra=n>1?t('brief.survMeta',{n:n,s:this.survTotal}):'';
+    this._survGrace=n>=8?75:(n>=5?45:0);
+    let extra=n>1?t('brief.survMeta',{n:n,s:this.survTotal}):'';
+    if(n>=8)extra+=(extra?'\n':'')+t('brief.survHard');
     this._brief(t('brief.survTitle',{n:n}),extra);
   }
 
@@ -1806,6 +1821,7 @@ class Game {
     this.$('app').classList.remove('alarm');
     this.buildActions();
     this.log(t('game.patientAccepted'),'i');
+    if(this.mode==='survival'&&this._survGrace>0)this.log(t('game.survGrace'),'i');
 
     // Early clues
     const clues=this.p.clues;
@@ -2167,6 +2183,10 @@ class Game {
   tick(){
     if(this.over)return;
     this.gt++;
+    if(this.lvl){
+      if(this.mode==='survival'&&this._survGrace>0&&this.gt<this._survGrace)this.p.mult=this.lvl.mult*0.88;
+      else this.p.mult=this.lvl.mult;
+    }
     this.p.tick(1,this.gt);
     this.updateAll();
     this.$('app').classList.toggle('alarm',this.p.MAP<50||this.p.SpO2<80);
@@ -2690,8 +2710,12 @@ class Game {
       const stk=this.ensureMeta().dailyStreak?this.ensureMeta().dailyStreak.n:1;
       setTimeout(()=>this._toastMsg(t('end.dailyStreak',{n:stk})),missionBonus>0?1400:800);
     }
-    if(this.mode==='survival'&&win&&[3,5,10].includes(this.survN)){
+    if(this.mode==='survival'&&win&&[3,5,8,10].includes(this.survN)){
       setTimeout(()=>this._toastMsg(t('end.survMilestone',{n:this.survN})),900);
+    }
+    if(this.mode==='campaign'&&win&&firstClear&&[5,10,15,20,25,30].includes(lv.id)){
+      const tier=LS_TIERS.find(ti=>ti.r===lv.id);
+      if(tier)setTimeout(()=>this._toastMsg('🏁 '+t('end.tierClear',{tier:t(tier.i18n)})),1200);
     }
 
     // Animate: bars grow + score counts up
