@@ -362,6 +362,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .modal .modal-grid button.wide{margin-top:0}
 .ab.lk{opacity:.35;pointer-events:none}
 .ab.lk .bl{color:var(--td)}
+.ab.unlock-pulse{animation:unlockPulse 1.15s ease-in-out 2;border-color:var(--g)!important;box-shadow:0 0 14px rgba(0,255,136,.35)!important}
+.modal button.unlock-pulse{animation:unlockPulse 1.15s ease-in-out 2}
+@keyframes unlockPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .pbb-unl{margin:8px 0 2px;padding:7px 10px;border:1px solid rgba(0,255,136,.35);border-radius:5px;background:rgba(0,255,136,.05);color:var(--g);font-size:9px;line-height:1.5;letter-spacing:.5px}
 </style>
 </head>
@@ -782,7 +785,14 @@ const EVENTS=[
   {id:'pneumo',apply(p){p.oxygenation-=20;p.compliance=Math.max(15,p.compliance-15);p.cardiacOutput-=15;p._hasPneumo=true;p._pneumoT=0;}},
   {id:'vaso',apply(p){p.vascularTone=Math.max(5,p.vascularTone-30);}},
   {id:'bleed',apply(p){p.bleed=Math.min(80,p.bleed+25);p.perfusion-=10;}},
+  {id:'arrhythmia',apply(p){p.cardiacOutput=Math.max(12,p.cardiacOutput-18);p.perfusion=Math.max(0,p.perfusion-8);p._dHR+=28;}},
+  {id:'sepsis_flare',apply(p){p.infection=Math.min(100,p.infection+22);p.vascularTone=Math.max(5,p.vascularTone-14);p.lactate=Math.min(20,p.lactate+.4);}},
 ];
+const UNLOCK_BTN={
+  pocus:'bdiag',labs:'bdiag',echo:'bdiag',vexus:'bdiag',advlabs:'bdiag',
+  abx:'bmeds',bronch:'bmeds',transfusion:'bmeds',dobu:'bmeds',anticoag:'bmeds',vaso:'bmeds',epi:'bmeds',pericardio:'bmeds',
+  abg:'ba',peep:'bpeep',vt:'bvt'
+};
 
 // ================================================================
 //  PATIENT MODEL v5
@@ -1748,6 +1758,27 @@ class Game {
     this.updateAll();
     this.maybeStartTutorial();
     this.maybeStartCampaignHints();
+    this._pulseNewUnlocks();
+  }
+
+  _pulseNewUnlocks(){
+    if(this.mode!=='campaign'||!this.lvl)return;
+    const lv=this.lvl.id;
+    if(this.getMaxUnlocked()>lv)return;
+    const keys=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===lv);
+    if(!keys.length)return;
+    const ids=new Set();
+    keys.forEach(k=>{const id=UNLOCK_BTN[k];if(id)ids.add(id);});
+    setTimeout(()=>{
+      ids.forEach(id=>{
+        const el=this.$(id);
+        if(el&&!el.classList.contains('lk')){
+          el.classList.add('unlock-pulse');
+          setTimeout(()=>el.classList.remove('unlock-pulse'),2600);
+        }
+      });
+      this._toastMsg('🔓 '+t('unlock.new')+': '+keys.map(k=>t('unlock.'+k)).join(' · '));
+    },500);
   }
 
   buildActions(){
@@ -1856,6 +1887,7 @@ class Game {
     if(m.classList.contains('v')){this.closeModals();return;}
     this.closeModals();
     this._openModal('modal-diag','bdiag');
+    this._pulseModalUnlocks('db');
   }
 
   showMedsMenu(){
@@ -1864,6 +1896,20 @@ class Game {
     if(m.classList.contains('v')){this.closeModals();return;}
     this.closeModals();
     this._openModal('modal-meds','bmeds');
+    this._pulseModalUnlocks('mb');
+  }
+
+  _pulseModalUnlocks(prefix){
+    if(this.mode!=='campaign'||!this.lvl||this.getMaxUnlocked()>this.lvl.id)return;
+    const map=prefix==='db'?{pocus:'db-pocus',labs:'db-labs',echo:'db-echo',vexus:'db-vexus'}:{abx:'mb-abx',bronch:'mb-bronch',transfusion:'mb-transfusion',dobu:'mb-dobu',anticoag:'mb-anticoag',vaso:'mb-vaso',epi:'mb-epi',pericardio:'mb-pericardio'};
+    Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===this.lvl.id).forEach(k=>{
+      const id=map[k];if(!id)return;
+      const el=this.$(id);
+      if(el&&!el.classList.contains('lk')){
+        el.classList.add('unlock-pulse');
+        setTimeout(()=>el.classList.remove('unlock-pulse'),2000);
+      }
+    });
   }
 
   showVtModal(){

@@ -386,6 +386,10 @@ en:{
   'event.vaso.clue':'Wide pulse pressure. Flash cap refill.',
   'event.bleed.msg':'⚠ Sudden tachycardia! Pressure dropping!',
   'event.bleed.clue':'Drain output increasing. Check Hb.',
+  'event.arrhythmia.msg':'⚠ Sudden tachycardia! MAP falling!',
+  'event.arrhythmia.clue':'Narrow pulse pressure. Check perfusion.',
+  'event.sepsis_flare.msg':'⚠ Fever spike! Vasodilation worsening!',
+  'event.sepsis_flare.clue':'Warm peripheries. Lactate climbing again.',
   'l1.clue1':'Bilateral crackles on exam.',
   'l1.clue2':'CXR: bilateral infiltrates.',
   'l1.clue3':'Hypoxemia — consider diuresis.'
@@ -737,6 +741,10 @@ es:{
   'event.vaso.clue':'Presión de pulso amplia. Llenado capilar flash.',
   'event.bleed.msg':'⚠ ¡Taquicardia súbita! ¡Presión cayendo!',
   'event.bleed.clue':'Drenaje en aumento. Revisar Hb.',
+  'event.arrhythmia.msg':'⚠ ¡Taquicardia súbita! ¡PAM en caída!',
+  'event.arrhythmia.clue':'Presión de pulso estrecha. Revisa perfusión.',
+  'event.sepsis_flare.msg':'⚠ ¡Pico febril! ¡Vasodilatación empeorando!',
+  'event.sepsis_flare.clue':'Extremidades calientes. Lactato subiendo otra vez.',
   'l1.clue1':'Crepitantes bilaterales al examen.',
   'l1.clue2':'Rx: infiltrados bilaterales.',
   'l1.clue3':'Hipoxemia — considerar diuresis.'
