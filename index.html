@@ -708,10 +708,21 @@ t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.22+i*0.025).toFix
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
 t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.32+i*0.025).toFixed(3),stabReq:23+i,events:2,desc:'Master cases'}));
 
-// Progressive unlocks: basics (fluids, norepi, diuretic, suction, FiO₂, PEEP, VT, ABG) always available.
-// Only advanced diagnostics + specialty meds unlock as cases get complex.
+// Progressive unlocks — aligned with first campaign level that needs each tool.
+// PATH_NEEDS (below) also grants essentials when a case requires them early.
 const UNLOCKS={
-  pocus:4,labs:6,bronch:6,abx:7,transfusion:9,echo:10,epi:11,dobu:12,anticoag:14,vexus:16,vaso:18,advlabs:22,pericardio:24
+  abx:3,pocus:4,transfusion:4,bronch:5,labs:6,dobu:6,anticoag:7,echo:8,epi:10,vaso:14,vexus:16,advlabs:22,pericardio:23
+};
+// Essential treatments per pathology — always available when that case is active
+const PATH_NEEDS={
+  sepsis:['abx'],
+  hypovolemic:['transfusion'],
+  copd:['bronch'],
+  cardiogenic:['dobu'],
+  pe:['anticoag'],
+  anaphylaxis:['epi'],
+  tamponade:['pericardio'],
+  mixed:['abx','bronch','dobu','anticoag','epi','transfusion','pericardio']
 };
 const LS_TIERS=[
   {l:1,r:5,i18n:'tier.foundations'},
@@ -724,7 +735,7 @@ const LS_TIERS=[
 const LS_ROMAN=['I','II','III','IV','V','VI'];
 const CAMPAIGN_HINTS={
   2:{key:'icuHint2',el:'bs',i18n:'hint.l2suction'},
-  3:{key:'icuHint3',el:'bf',i18n:'hint.l3sepsis'},
+  3:{key:'icuHint3',el:'bmeds',i18n:'hint.l3sepsis'},
   4:{key:'icuHint4',el:'bf',i18n:'hint.l4hypo'},
   5:{key:'icuHint5',el:'bvt',i18n:'hint.l5copd'},
   6:{key:'icuHint6',el:'bmeds',i18n:'hint.l6cardio'},
@@ -2103,7 +2114,18 @@ class Game {
   _unl(key){
     if(!UNLOCKS[key])return true;
     if(this.mode!=='campaign')return true;
-    return Math.max(this.lvl?this.lvl.id:1,this.getMaxUnlocked())>=UNLOCKS[key];
+    const prog=Math.max(this.lvl?this.lvl.id:1,this.getMaxUnlocked());
+    if(prog>=UNLOCKS[key])return true;
+    return this._pathNeedsTool(key);
+  }
+
+  _pathNeedsTool(key){
+    if(!this.lvl||!this.lvl.paths)return false;
+    for(const p of this.lvl.paths){
+      const needs=PATH_NEEDS[p];
+      if(needs&&needs.includes(key))return true;
+    }
+    return false;
   }
 
   updateLockUI(){
