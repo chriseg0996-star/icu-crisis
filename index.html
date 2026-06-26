@@ -29,9 +29,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .screen.active{display:flex}
 .screen:not(.active){display:none!important;content-visibility:hidden}
 @keyframes gsIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes gsOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(8px)}}
+@keyframes menuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
 #scr-gs.active>.hdr,#scr-gs.active>.gs-body,#scr-gs.active>.ag{animation:gsIn .32s cubic-bezier(.22,1,.36,1) both}
 #scr-gs.active>.gs-body{animation-delay:.05s}
 #scr-gs.active>.ag{animation-delay:.1s}
+#scr-gs.gs-out{animation:gsOut .22s ease forwards;pointer-events:none}
+#scr-mm.menu-enter,#scr-ls.menu-enter{animation:menuIn .3s cubic-bezier(.22,1,.36,1) both}
 #ov-end.v #ov-end-c{animation:gsIn .38s cubic-bezier(.22,1,.36,1) both}
 
 /* === MAIN MENU === */
@@ -194,7 +198,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   .log{padding:2px 6px 4px}
 }
 @media (prefers-reduced-motion:reduce){
-  #app.alarm .gs,.bv.cr::after,.stab-wrap.near .stab-fill,.go-stars,.confetti-p,.ls-btn.next,.pb.x,.lm.d,.vv-pop,#scr-gs.active>*,#ov-end.v #ov-end-c{animation:none!important}
+  #app.alarm .gs,.bv.cr::after,.stab-wrap.near .stab-fill,.go-stars,.confetti-p,.ls-btn.next,.pb.x,.lm.d,.vv-pop,#scr-gs.active>*,#scr-gs.gs-out,#scr-mm.menu-enter,#scr-ls.menu-enter,#ov-end.v #ov-end-c{animation:none!important}
   .bv .vv,.stab-fill,.ab,.modal,.modal-backdrop{transition:none}
 }
 
@@ -249,7 +253,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ptag.sec{opacity:.55;font-weight:400;font-size:5px}
 
 /* Vitals monitor — fixed layout, no jump when tags update */
-.mon{flex-shrink:0;margin:6px 8px 4px;border:1px solid var(--b);border-radius:10px;background:linear-gradient(180deg,#060b12 0%,#030608 100%);overflow:hidden;box-shadow:inset 0 1px 0 rgba(0,221,255,.06),0 2px 12px rgba(0,0,0,.35);contain:layout style paint}
+.mon{flex-shrink:0;margin:6px 8px 4px;border:1px solid var(--b);border-radius:10px;background:linear-gradient(180deg,#060b12 0%,#030608 100%);overflow:hidden;box-shadow:inset 0 1px 0 rgba(0,221,255,.06),0 2px 12px rgba(0,0,0,.35);contain:layout style paint;position:relative}
+.mon::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.045) 2px,rgba(0,0,0,.045) 3px),repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,255,136,.008) 3px,rgba(0,255,136,.008) 4px)}
 .mon-tags{display:flex;gap:3px;flex-wrap:nowrap;align-items:center;height:22px;padding:0 8px;border-top:1px solid rgba(26,42,58,.5);overflow-x:auto;overflow-y:hidden;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .mon-tags::-webkit-scrollbar{display:none}
 .mon-tags:empty{visibility:hidden}
@@ -1858,7 +1863,22 @@ class Game {
   }
 
   showScreen(id){
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const prev=document.querySelector('.screen.active');
+    const leavingGame=prev&&prev.id==='scr-gs'&&id!=='scr-gs';
+    if(leavingGame){
+      prev.classList.add('gs-out');
+      clearTimeout(this._screenT);
+      this._screenT=setTimeout(()=>{
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','gs-out','menu-enter'));
+        const el=this.$(id);
+        if(el){
+          el.classList.add('active');
+          if(id==='scr-mm'||id==='scr-ls')el.classList.add('menu-enter');
+        }
+      },220);
+      return;
+    }
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','gs-out','menu-enter'));
     const el=this.$(id);
     if(el)el.classList.add('active');
   }
@@ -3147,7 +3167,7 @@ class Game {
 
     // Component bars
     const bar=(label,pct)=>{const cls=pct>=85?'':pct>=50?' mid':' low';return '<div class="go-bar"><span>'+label+'</span><div class="go-bar-t"><div class="go-bar-f'+cls+'" data-w="'+pct+'"></div></div><b>'+pct+'%</b></div>';};
-    const barsHtml='<div class="go-bars">'+bar('MAP',mapPct)+bar('SpO₂',spoPct)+bar('Lac',lacPct)+(win?bar('⏱',spdPct):'')+'</div>';
+    const barsHtml='<div class="go-bars">'+bar(t('end.barMap'),mapPct)+bar(t('end.barSpo2'),spoPct)+bar(t('end.barLac'),lacPct)+(win?bar(t('end.barSpd'),spdPct):'')+'</div>';
 
     // 3-star hint
     let hintHtml='';
