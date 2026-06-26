@@ -213,6 +213,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 @keyframes stabFlash{0%{box-shadow:0 0 0 0 rgba(0,255,136,.55),inset 0 0 20px rgba(0,255,136,.15)}100%{box-shadow:none}}
 .go-stars.win-anim{animation:starPop .55s cubic-bezier(.34,1.4,.64,1)}
 .go-stars.perfect-stars{color:var(--y);text-shadow:0 0 12px rgba(255,204,0,.55),0 0 24px rgba(255,204,0,.25);animation:starPop .55s cubic-bezier(.34,1.4,.64,1),starGlow 1.4s ease-in-out .4s 2}
+.go-stars.star-up-3{color:var(--y);text-shadow:0 0 10px rgba(255,204,0,.45);animation:starPop .55s cubic-bezier(.34,1.4,.64,1),starGlow 1.2s ease-in-out .3s 1}
+.go-stars.star-up-stars{color:var(--cy);text-shadow:0 0 8px rgba(0,221,255,.35);animation:starPop .55s cubic-bezier(.34,1.4,.64,1)}
+.go-stars .star-new{display:inline-block;color:var(--y);animation:starNewPop .7s cubic-bezier(.34,1.4,.64,1)}
+@keyframes starNewPop{0%{transform:scale(0) rotate(-40deg);opacity:0}60%{transform:scale(1.35) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
 @keyframes starGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
 .go-perfect{margin:6px 0;padding:8px 12px;border:1px solid rgba(255,204,0,.55);border-radius:6px;background:linear-gradient(90deg,rgba(255,204,0,.12),rgba(0,255,136,.08));color:var(--y);font-family:var(--fd);font-size:10px;letter-spacing:3px;animation:starPop .5s ease}
 .confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
@@ -709,10 +713,10 @@ const t4=[['sepsis','airway','edema'],['cardiogenic','rvfail'],['hypovolemic','s
 t4.forEach((p,i)=>LEVELS.push({id:i+16,tier:4,paths:p,mult:1.2,stabReq:22,events:1,desc:'Complex cases'}));
 // Tier 5: Mixed chaos (21-25) — ramping difficulty
 const t5=[['mixed'],['sepsis','pe','edema'],['tamponade'],['hypovolemic','copd'],['rvfail','sepsis','edema']];
-t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.22+i*0.025).toFixed(3),stabReq:22+i,events:2,desc:'Diagnostic challenge'}));
-// Tier 6: Master (26-30) — ramping, slightly softer entry than flat 1.5
+t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.20+i*0.022).toFixed(3),stabReq:21+i,events:2,desc:'Diagnostic challenge'}));
+// Tier 6: Master (26-30) — ramping
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
-t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.32+i*0.025).toFixed(3),stabReq:23+i,events:2,desc:'Master cases'}));
+t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.28+i*0.022).toFixed(3),stabReq:22+i,events:2,desc:'Master cases'}));
 
 // --- Progressive unlocks (auto-aligned to campaign) ---
 // Tier 1–2 basics always on: fluids, NE, diuretic, suction, FiO₂, PEEP, VT, ABG.
@@ -1172,13 +1176,14 @@ class Game {
   }
 
   _vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
-  _spawnConfetti(root){
+  _spawnConfetti(root,n){
     if(!root)return;
+    const count=n==null?40:n;
     root.querySelectorAll('.confetti-wrap').forEach(e=>e.remove());
     const wrap=document.createElement('div');
     wrap.className='confetti-wrap';
     const colors=['#00ff88','#00ddff','#ffcc00','#ff8844','#ffffff'];
-    for(let i=0;i<40;i++){
+    for(let i=0;i<count;i++){
       const p=document.createElement('i');
       p.className='confetti-p';
       p.style.left=(Math.random()*100)+'%';
@@ -1902,7 +1907,7 @@ class Game {
     const events=n>=3?(n>=7?2:1):0;
     this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult,stabReq,events,desc:'Survival'};
     this._forcedCaseIdx=null;this._forcedEvts=null;
-    this._survGrace=n>=8?75:(n>=5?45:0);
+    this._survGrace=n>=10?90:(n>=8?75:(n>=5?45:0));
     let extra='';
     if(n>1)extra=t('brief.survMeta',{n:n,s:this.survTotal});
     if(n>=8)extra+=(extra?' · ':'')+t('brief.survHard');
@@ -2838,7 +2843,6 @@ class Game {
     else score=Math.max(0,Math.round(mapPct*.15+spoPct*.15));
     score=Math.max(0,Math.min(100,score));
     const stars=win?(score>=85?3:score>=60?2:1):0;
-    if(win){if(stars===3){this.snd.perfect();this._vib([25,30,25,30,50]);}else{this.snd.win();this._vib([40,40,40]);}}else{this.snd.lose();this._vib([120,60,240]);}
     const grade=score>=90?'A':score>=75?'B':score>=60?'C':score>=40?'D':'F';
     const lacPct=Math.round(lacPts/15*100);
     const spdPct=Math.max(0,Math.min(100,speedPts*10));
@@ -2883,6 +2887,12 @@ class Game {
     }
 
     const improved=firstClear||starUp||newBest;
+    if(win){
+      if(this.mode==='campaign'&&starUp&&stars===3){this.snd.perfect();this._vib([20,28,20,28,45]);}
+      else if(this.mode==='campaign'&&starUp&&stars===2){this.snd.win();this._vib([18,22,35]);}
+      else if(stars===3){this.snd.perfect();this._vib([25,30,25,30,50]);}
+      else{this.snd.win();this._vib([40,40,40]);}
+    }else{this.snd.lose();this._vib([120,60,240]);}
     const result={mode:this.mode,win:win,score:score,stars:stars,mapPct:mapPct,spoPct:spoPct,lacPct:lacPct,timePct:spdPct,speedPts:speedPts,dn:this._dailyNum(),level:lv.id,patients:win?this.survN:this.survN-1,total:this.survTotal,starUp:!!starUp,improved:!!improved};
     this._firstClear=firstClear;
     const rkBefore=this._rankFromXp(this.ensureMeta().xp||0);
@@ -2890,8 +2900,8 @@ class Game {
     const rkAfter=this._rankFromXp(this.ensureMeta().xp||0);
     const rankUpHtml=rkAfter.id!==rkBefore.id?'<div class="go-rankup">▲ '+t('end.rankUp',{r:t(RANK_I18N[rkAfter.id])})+'</div>':'';
     const firstClearHtml=firstClear&&win?'<div class="go-rankup" style="border-color:rgba(0,255,136,.4);color:var(--g)">'+t('end.firstClear')+'</div>':'';
-    const starUpHtml=starUp?'<div class="go-rankup" style="border-color:rgba(255,204,0,.4);color:var(--y)">'+t('end.starUp',{stars:'★'.repeat(stars)})+'</div>':'';
-    const perfectHtml=win&&stars===3?'<div class="go-perfect">'+t('end.perfect3')+'</div>':'';
+    const starUpHtml=starUp&&stars<3?'<div class="go-rankup" style="border-color:rgba(255,204,0,.4);color:var(--y)">'+t('end.starUp',{stars:'★'.repeat(stars)})+'</div>':'';
+    const perfectHtml=win&&stars===3?'<div class="go-perfect">'+(starUp&&prevStars>0?t('end.starUp3'):t('end.perfect3'))+'</div>':'';
     const practiceHtml=this._practice&&win&&!improved?'<div class="go-sub" style="color:var(--tm);letter-spacing:2px">'+t('end.practice')+'</div>':'';
     const winStreak=this.ensureMeta().winStreak||0;
     const streakHtml=win&&winStreak>=3?'<div class="go-rankup" style="border-color:rgba(255,136,51,.35);color:var(--o)">🔥 '+t('end.winStreak',{n:winStreak})+'</div>':'';
@@ -2982,6 +2992,19 @@ class Game {
 
     const c=this.$('ov-end-c');
     if(!c)return;
+    let goStarCls='go-stars';
+    if(win){
+      goStarCls+=' win-anim';
+      if(stars===3)goStarCls+=starUp&&prevStars>0?' star-up-3':' perfect-stars';
+      else if(starUp)goStarCls+=' star-up-stars';
+    }
+    let starsHtml='';
+    for(let i=0;i<3;i++){
+      const filled=i<stars;
+      const newly=starUp&&i>=prevStars&&i<stars;
+      if(newly)starsHtml+='<span class="star-new">'+(filled?'★':'☆')+'</span>';
+      else starsHtml+=(filled?'★':'☆');
+    }
     c.innerHTML='<div class="go-t '+(win?'win':'lose')+'">'+title+'</div>'+
       '<div class="go-sub">'+reason+'</div>'+
       bestHtml+
@@ -2993,7 +3016,7 @@ class Game {
       streakHtml+
       unlockHtml+
       coinsHtml+
-      (this.mode==='survival'?'':'<div class="go-stars'+(win?' win-anim':'')+(win&&stars===3?' perfect-stars':'')+'">'+(stars>=1?'★':'☆')+(stars>=2?'★':'☆')+(stars>=3?'★':'☆')+'</div>')+
+      (this.mode==='survival'?'':'<div class="'+goStarCls+'">'+starsHtml+'</div>')+
       survLine+
       dailyLine+
       barsHtml+
@@ -3006,9 +3029,11 @@ class Game {
       t('end.peak',{lac:p.peakLac.toFixed(1),li:Math.round(p.peakLI)})+'</div>'+
       '<div class="go-btns">'+btns+'</div>';
     this.showOv('ov-end');
-    if(win&&stars===3)this._spawnConfetti(this.$('ov-end'));
+    if(win&&stars===3)this._spawnConfetti(this.$('ov-end'),starUp&&prevStars>0?26:40);
+    else if(win&&starUp&&stars===2)this._spawnConfetti(this.$('ov-end'),14);
 
     if(missionBonus>0)setTimeout(()=>this._toastMsg(t('end.missionDone',{n:missionBonus})),700);
+    if(starUp&&stars===2)setTimeout(()=>this._toastMsg(t('end.starUp2')),missionBonus>0?1200:700);
     if(this.mode==='daily'&&win&&this._dailyFirstWinToday){
       const stk=this.ensureMeta().dailyStreak?this.ensureMeta().dailyStreak.n:1;
       setTimeout(()=>this._toastMsg(t('end.dailyStreak',{n:stk})),missionBonus>0?1400:800);
