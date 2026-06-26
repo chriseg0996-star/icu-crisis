@@ -726,8 +726,11 @@ t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.28+i*0.022).toFix
 
 // --- Progressive unlocks (auto-aligned to campaign) ---
 // Tier 1–2 basics always on: fluids, NE, diuretic, suction, FiO₂, PEEP, VT, ABG.
+// Campaign unlock schedule (announced on victory screen of level N−1):
+//   L2→abx | L3→transfusion+pocus | L4→bronch | L5→dobu+labs | L6→anticoag
+//   L7→echo | L9→epi | L13→vaso | L15→vexus | L21→advlabs | L22→pericardio
+// PATH_ESSENTIAL bypass: tools required by active pathology stay usable even below UNLOCKS.
 const PATH_FIRST=(()=>{const m={};LEVELS.forEach(l=>l.paths.forEach(p=>{if(!m[p]||l.id<m[p])m[p]=l.id;}));return m;})();
-// Meds required to reasonably clear a pathology (never locked when that case is active)
 const PATH_ESSENTIAL={
   sepsis:['abx'],
   hypovolemic:['transfusion'],
@@ -738,7 +741,15 @@ const PATH_ESSENTIAL={
   tamponade:['pericardio'],
   mixed:['abx','bronch','dobu','anticoag','epi','transfusion','pericardio']
 };
-const _toolFirstLvl=tool=>{let min=99;Object.keys(PATH_ESSENTIAL).forEach(p=>{if(PATH_ESSENTIAL[p].includes(tool)&&PATH_FIRST[p]<min)min=PATH_FIRST[p];});return min===99?99:min;};
+const _toolFirstLvl=tool=>{
+  let min=99;
+  for(const p of Object.keys(PATH_ESSENTIAL)){
+    if(p==='mixed')continue;
+    const needs=PATH_ESSENTIAL[p];
+    if(needs.includes(tool)&&PATH_FIRST[p]<min)min=PATH_FIRST[p];
+  }
+  return min===99?99:min;
+};
 const UNLOCKS={
   abx:_toolFirstLvl('abx'),transfusion:_toolFirstLvl('transfusion'),bronch:_toolFirstLvl('bronch'),
   dobu:_toolFirstLvl('dobu'),anticoag:_toolFirstLvl('anticoag'),epi:_toolFirstLvl('epi'),
@@ -746,6 +757,7 @@ const UNLOCKS={
   pocus:PATH_FIRST.hypovolemic||4,labs:PATH_FIRST.cardiogenic||6,echo:PATH_FIRST.rvfail||8,
   vaso:14,vexus:16,advlabs:22
 };
+const _newUnlockKeysOnAdvance=(mxBefore,mxAfter)=>Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===mxAfter&&mxBefore<UNLOCKS[k]);
 const LS_TIERS=[
   {l:1,r:5,i18n:'tier.foundations'},
   {l:6,r:10,i18n:'tier.intermediate'},
@@ -1880,10 +1892,18 @@ class Game {
     else this.showMainMenu();
   }
 
+  _campaignHasTool(key){
+    return !UNLOCKS[key]||this.getMaxUnlocked()>=UNLOCKS[key];
+  }
+
+  _pathUnlockKeys(){
+    return Object.keys(UNLOCKS).filter(k=>!this._campaignHasTool(k)&&this._pathNeedsTool(k));
+  }
+
   _unlockHtml(lv){
     if(this.mode!=='campaign')return'';
-    const ks=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===lv.id);
-    if(!ks.length||this.getMaxUnlocked()>lv.id)return'';
+    const ks=_newUnlockKeysOnAdvance(this.getMaxUnlocked(),lv.id);
+    if(!ks.length)return'';
     return '<div class="pbb-unl">🔓 '+t('unlock.new')+': '+ks.map(k=>t('unlock.'+k)).join(' · ')+'</div>';
   }
 
@@ -2127,9 +2147,7 @@ class Game {
 
   _pulseNewUnlocks(){
     if(this.mode!=='campaign'||!this.lvl)return;
-    const lv=this.lvl.id;
-    if(this.getMaxUnlocked()>lv)return;
-    const keys=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===lv);
+    const keys=this._pathUnlockKeys();
     if(!keys.length)return;
     const ids=new Set();
     keys.forEach(k=>{const id=UNLOCK_BTN[k];if(id)ids.add(id);});
@@ -2176,8 +2194,7 @@ class Game {
     if(!UNLOCKS[key])return true;
     if(this._pathNeedsTool(key))return true;
     if(this.mode!=='campaign')return true;
-    const prog=Math.max(this.lvl?this.lvl.id:1,this.getMaxUnlocked());
-    return prog>=UNLOCKS[key];
+    return this._campaignHasTool(key);
   }
 
   _pathNeedsTool(key){
@@ -2275,9 +2292,10 @@ class Game {
   }
 
   _pulseModalUnlocks(prefix){
-    if(this.mode!=='campaign'||!this.lvl||this.getMaxUnlocked()>this.lvl.id)return;
+    if(this.mode!=='campaign'||!this.lvl)return;
+    const keys=this._pathUnlockKeys();
     const map=prefix==='db'?{pocus:'db-pocus',labs:'db-labs',echo:'db-echo',vexus:'db-vexus'}:{abx:'mb-abx',bronch:'mb-bronch',transfusion:'mb-transfusion',dobu:'mb-dobu',anticoag:'mb-anticoag',vaso:'mb-vaso',epi:'mb-epi',pericardio:'mb-pericardio'};
-    Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===this.lvl.id).forEach(k=>{
+    keys.forEach(k=>{
       const id=map[k];if(!id)return;
       const el=this.$(id);
       if(el&&!el.classList.contains('lk')){
@@ -3033,7 +3051,7 @@ class Game {
     const mxAfter=this.getMaxUnlocked();
     let unlockHtml='';
     if(this.mode==='campaign'&&win&&mxAfter>mxBefore){
-      const keys=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===mxAfter);
+      const keys=_newUnlockKeysOnAdvance(mxBefore,mxAfter);
       if(keys.length)unlockHtml='<div class="go-unlock">🔓 '+t('unlock.new')+': '+keys.map(k=>t('unlock.'+k)).join(' · ')+'</div>';
     }
     const weeklyBonus=(this.mode==='daily'&&win)?(this._weeklyBonusPending||0):0;
