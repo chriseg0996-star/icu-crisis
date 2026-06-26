@@ -154,6 +154,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ls-tab{flex:1;min-width:42px;padding:8px 4px;border:1px solid var(--b);border-radius:8px;background:var(--c);color:var(--td);font-family:var(--fd);font-size:9px;letter-spacing:1px;cursor:pointer;text-align:center;-webkit-user-select:none;user-select:none;transition:border-color .15s,background .15s}
 .ls-tab.on{border-color:var(--cy);color:var(--cy);background:rgba(0,221,255,.06)}
 .ls-tab.locked{opacity:.4}
+.ls-tab.tier-pulse{animation:lsTierPulse 1.2s ease-in-out 3;border-color:var(--g);color:var(--g)}
+@keyframes lsTierPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px 2px rgba(0,255,136,.35)}}
 .ls-tab:active{transform:scale(.96)}
 .ls-hint{font-size:9px;color:var(--cy);text-align:center;padding:10px 12px;border:1px solid rgba(0,221,255,.35);border-radius:8px;background:rgba(0,221,255,.07);line-height:1.45;flex-shrink:0;letter-spacing:.3px}
 .ls-hint.hide{display:none}
@@ -876,6 +878,8 @@ const EVENTS=[
   {id:'sepsis_flare',apply(p){p.infection=Math.min(100,p.infection+22);p.vascularTone=Math.max(5,p.vascularTone-14);p.lactate=Math.min(20,p.lactate+.4);}},
   {id:'bronchospasm',apply(p){p.co2bias=Math.min(40,p.co2bias+12);p.compliance=Math.max(15,p.compliance-10);p.autoPeep=Math.min(18,p.autoPeep+4);p._dHR+=8;}},
   {id:'flash_edema',apply(p){p.pulmonaryEdema=Math.min(95,p.pulmonaryEdema+22);p.oxygenation=Math.max(55,p.oxygenation-12);p.compliance=Math.max(12,p.compliance-8);}},
+  {id:'hyperkalemia',apply(p){p.cardiacOutput=Math.max(10,p.cardiacOutput-14);p._dHR+=12;p.perfusion=Math.max(0,p.perfusion-6);p.lactate=Math.min(20,p.lactate+.25);}},
+  {id:'air_leak',apply(p){p.oxygenation=Math.max(52,p.oxygenation-16);p.compliance=Math.max(14,p.compliance-7);p.secretions=Math.min(88,p.secretions+10);}},
 ];
 const UNLOCK_BTN={
   pocus:'bdiag',labs:'bdiag',echo:'bdiag',vexus:'bdiag',advlabs:'bdiag',
@@ -1725,6 +1729,15 @@ class Game {
     this._lsHideHint();
     this._renderLSTabs();
     this._renderLSPanel(this._lsTab==null?0:this._lsTab);
+    if(this._lsPulseTier!=null){
+      const idx=this._lsPulseTier;
+      this._lsPulseTier=null;
+      setTimeout(()=>{
+        const tabs=this.$('ls-tabs');
+        const btn=tabs&&tabs.children[idx];
+        if(btn){btn.classList.add('tier-pulse');setTimeout(()=>btn.classList.remove('tier-pulse'),3600);}
+      },400);
+    }
   }
 
   selectLSTier(idx){
@@ -1829,8 +1842,10 @@ class Game {
     const cs=(lv.id===1)?getLevel1Brief():pr.cases[this._forcedCaseIdx!=null?this._forcedCaseIdx:Math.floor(Math.random()*pr.cases.length)];
 
     const bb=this.$('pbb');
+    const pathLine=this._pathNames(lv.paths);
+    const meta=[pathLine,extra].filter(Boolean).join(' · ');
     bb.innerHTML='<div class="pbb-h">'+title+'</div>'+
-      (extra?'<div class="pbb-meta">'+extra+'</div>':'')+
+      (meta?'<div class="pbb-meta">'+meta+'</div>':'')+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.patient')+'</div><div class="pbb-t">'+cs.pt+'<br><span style="color:var(--tm);font-size:9px">'+cs.hx+'</span></div></div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.status')+'</div><div class="pbb-v">'+cs.vitals.map(v=>'<div class="pbb-vi '+(v.c||'')+'">'+v.t+'</div>').join('')+'</div></div>'+
       '<div class="pbb-s"><div class="pbb-l">'+t('brief.exam')+'</div><div class="pbb-ex">'+cs.exam+'</div></div>'+
@@ -1870,6 +1885,11 @@ class Game {
     return n<=1?t('brief.dailySingle'):n===2?t('brief.dailyDual'):t('brief.dailyComplex');
   }
 
+  _pathNames(paths){
+    if(!paths||!paths.length)return '';
+    return paths.map(k=>t('path.'+k)).join(' + ');
+  }
+
   _survCase(){
     const n=this.survN;
     const singles=['edema','airway','sepsis','hypovolemic','copd','cardiogenic','pe','rvfail','anaphylaxis','tamponade'];
@@ -1883,9 +1903,9 @@ class Game {
     this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult,stabReq,events,desc:'Survival'};
     this._forcedCaseIdx=null;this._forcedEvts=null;
     this._survGrace=n>=8?75:(n>=5?45:0);
-    let extra=n>1?t('brief.survMeta',{n:n,s:this.survTotal}):'';
-    extra+=(extra?'\n':'')+this._pathTag(this.lvl.paths);
-    if(n>=8)extra+=' · '+t('brief.survHard');
+    let extra='';
+    if(n>1)extra=t('brief.survMeta',{n:n,s:this.survTotal});
+    if(n>=8)extra+=(extra?' · ':'')+t('brief.survHard');
     this._brief(t('brief.survTitle',{n:n}),extra);
   }
 
@@ -1935,12 +1955,14 @@ class Game {
     let txt;
     if(r.mode==='daily'){
       const stk=s.dailyStreak?s.dailyStreak.n:1;
+      const yEntry=(s.dailyLog||[]).find(x=>x.d===this._yesterStr());
       txt=t('share.dailyTitle',{n:r.dn})+' #'+r.dn+'\n'+
         (r.win?'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)+' '+r.score+' pts':'💀 '+r.score+' pts')+'\n'+
         'MAP  '+blocks(r.mapPct)+'\n'+
         'SpO₂ '+blocks(r.spoPct)+'\n'+
         'Lac  '+blocks(r.lacPct||0)+'\n'+
         '⏱   '+blocks(r.timePct||0)+'\n'+
+        (yEntry?t('share.yesterday',{n:yEntry.s})+'\n':'')+
         t('share.streak',{n:stk})+'\n'+
         t('share.challenge')+'\n'+url;
     }else if(r.mode==='survival'){
@@ -2013,7 +2035,7 @@ class Game {
     const stk=s.dailyStreak;
     const stkN=(stk&&stk.n>0&&(stk.last===ds||stk.last===this._yesterStr()))?stk.n:0;
     const done=s.daily&&s.daily.date===ds;
-    let meta=t('brief.dailyNum',{n:this._dailyNum()})+' · '+roll.tag;
+    let meta=t('brief.dailyNum',{n:this._dailyNum()})+' · '+this._pathNames(roll.paths);
     if(roll.intensity)meta+=' · '+roll.intensity;
     if(stkN>0)meta+=' · '+t('brief.dailyStreak',{n:stkN});
     const allBest=s.bests.daily||0;
@@ -2997,7 +3019,10 @@ class Game {
     }
     if(this.mode==='campaign'&&win&&firstClear&&[5,10,15,20,25,30].includes(lv.id)){
       const tier=LS_TIERS.find(ti=>ti.r===lv.id);
-      if(tier)setTimeout(()=>this._toastMsg('🏁 '+t('end.tierClear',{tier:t(tier.i18n)})),1200);
+      if(tier){
+        this._lsPulseTier=LS_TIERS.indexOf(tier);
+        setTimeout(()=>this._toastMsg('🏁 '+t('end.tierClear',{tier:t(tier.i18n)})),1200);
+      }
     }
 
     // Animate: bars grow + score counts up
