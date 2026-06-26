@@ -844,8 +844,8 @@ const ACHIEVEMENTS=[
   {id:'first_daily',check:(g,s,r)=>r.mode==='daily'&&r.win,reward:0,coins:40},
   {id:'streak_7',check:(g,s)=>s.dailyStreak&&s.dailyStreak.n>=7,reward:0,coins:75},
   {id:'streak_30',check:(g,s)=>s.dailyStreak&&s.dailyStreak.n>=30,reward:0,coins:200},
-  {id:'surv_5',check:(g,s)=>s.survBest&&s.survBest.p>=5,reward:0,coins:60},
-  {id:'surv_10',check:(g,s)=>s.survBest&&s.survBest.p>=10,reward:0,coins:100},
+  {id:'surv_5',check:(g,s)=>s.bests&&s.bests.survival&&s.bests.survival.p>=5,reward:0,coins:60},
+  {id:'surv_10',check:(g,s)=>s.bests&&s.bests.survival&&s.bests.survival.p>=10,reward:0,coins:100},
   {id:'perfect_l1',check:(g,s)=>s['l1']&&s['l1'].stars>=3,reward:0,coins:40},
   {id:'perfect_10',check:(g,s)=>{let n=0;for(let i=1;i<=10;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=10;},reward:0,coins:150},
   {id:'perfect_20',check:(g,s)=>{let n=0;for(let i=1;i<=20;i++)if(s['l'+i]&&s['l'+i].stars>=3)n++;return n>=20;},reward:0,coins:120},
@@ -1684,6 +1684,12 @@ class Game {
     if(!s.achievements)s.achievements=[];
     if(!s.bests)s.bests={daily:0,survival:{p:0,score:0},levels:{}};
     if(s.bests.survival&&s.bests.survival.patients!=null&&!s.bests.survival.p){s.bests.survival.p=s.bests.survival.patients;}
+    if(s.survBest){
+      const leg=s.survBest,cur=s.bests.survival||{p:0,score:0};
+      const lp=leg.p||0,ls=leg.s!=null?leg.s:(leg.score||0);
+      if(lp>cur.p||(lp===cur.p&&ls>cur.score))s.bests.survival={p:lp,score:ls};
+      delete s.survBest;
+    }
     if(!s.dailyHistory)s.dailyHistory=[];
     if(s.gamesPlayed==null)s.gamesPlayed=0;
     if(s.dailyWins==null)s.dailyWins=0;
@@ -3006,10 +3012,10 @@ class Game {
     }else if(this.mode==='daily'){
       const s=this.ensureMeta(),ds=this._dailyStr(),ys=this._yesterStr();
       const hadWinToday=s.daily&&s.daily.date===ds&&s.daily.score>0;
-      if(!s.dailyStreak||s.dailyStreak.last!==ds){
-        s.dailyStreak={last:ds,n:(s.dailyStreak&&s.dailyStreak.last===ys)?s.dailyStreak.n+1:1};
-      }
       if(win){
+        if(!s.dailyStreak||s.dailyStreak.last!==ds){
+          s.dailyStreak={last:ds,n:(s.dailyStreak&&s.dailyStreak.last===ys)?s.dailyStreak.n+1:1};
+        }
         const prev=(s.daily&&s.daily.date===ds)?s.daily.score:0;
         newBest=prev>0&&score>prev;
         if(!s.daily||s.daily.date!==ds||score>s.daily.score)s.daily={date:ds,score:score};
@@ -3021,10 +3027,11 @@ class Game {
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
       else{
-        const s=this.ensureMeta();const cur={p:this.survN-1,s:this.survTotal};
-        if(!s.survBest||cur.p>s.survBest.p||(cur.p===s.survBest.p&&cur.s>s.survBest.s)){
-          if(cur.p>0)newBest=!!s.survBest;
-          s.survBest=cur;this.setSave(s);
+        const s=this.ensureMeta();const cur={p:this.survN-1,score:this.survTotal};
+        const prev=s.bests.survival||{p:0,score:0};
+        if(cur.p>prev.p||(cur.p===prev.p&&cur.score>prev.score)){
+          if(cur.p>0)newBest=prev.p>0;
+          s.bests.survival=cur;this.setSave(s);
         }
       }
     }
