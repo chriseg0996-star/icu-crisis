@@ -310,7 +310,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ov-dim{background:rgba(3,6,8,.9)}
 .ov-solid{background:var(--bg)}
 
-.pbb{max-width:380px;width:100%;text-align:left}
+.pbb{max-width:380px;width:100%;text-align:left;margin-top:44px}
+.pbb-back{position:absolute;top:max(10px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:2}
 .pbb-h{font-family:var(--fd);font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cy);text-transform:uppercase;margin-bottom:8px;text-align:center}
 .pbb-s{margin-bottom:6px}.pbb-l{font-size:7px;letter-spacing:2px;color:var(--td);text-transform:uppercase;margin-bottom:2px}
 .pbb-t{font-size:10px;color:var(--w);line-height:1.4}
@@ -515,7 +516,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 </div>
 
 <!-- === OVERLAYS === -->
-<div class="ov ov-solid" id="ov-brief"><div class="pbb" id="pbb"></div></div>
+<div class="ov ov-solid" id="ov-brief">
+  <button type="button" class="ls-back pbb-back" onclick="G.cancelBrief()"><span data-i18n="brief.back">← Back</span></button>
+  <div class="pbb" id="pbb"></div>
+</div>
 <div class="ov ov-dim" id="ov-pause">
   <div class="pause-menu" id="pause-menu">
     <div class="pause-card">
@@ -708,13 +712,11 @@ t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.22+i*0.025).toFix
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
 t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.32+i*0.025).toFixed(3),stabReq:23+i,events:2,desc:'Master cases'}));
 
-// Progressive unlocks — aligned with first campaign level that needs each tool.
-// PATH_NEEDS (below) also grants essentials when a case requires them early.
-const UNLOCKS={
-  abx:3,pocus:4,transfusion:4,bronch:5,labs:6,dobu:6,anticoag:7,echo:8,epi:10,vaso:14,vexus:16,advlabs:22,pericardio:23
-};
-// Essential treatments per pathology — always available when that case is active
-const PATH_NEEDS={
+// --- Progressive unlocks (auto-aligned to campaign) ---
+// Tier 1–2 basics always on: fluids, NE, diuretic, suction, FiO₂, PEEP, VT, ABG.
+const PATH_FIRST=(()=>{const m={};LEVELS.forEach(l=>l.paths.forEach(p=>{if(!m[p]||l.id<m[p])m[p]=l.id;}));return m;})();
+// Meds required to reasonably clear a pathology (never locked when that case is active)
+const PATH_ESSENTIAL={
   sepsis:['abx'],
   hypovolemic:['transfusion'],
   copd:['bronch'],
@@ -723,6 +725,14 @@ const PATH_NEEDS={
   anaphylaxis:['epi'],
   tamponade:['pericardio'],
   mixed:['abx','bronch','dobu','anticoag','epi','transfusion','pericardio']
+};
+const _toolFirstLvl=tool=>{let min=99;Object.keys(PATH_ESSENTIAL).forEach(p=>{if(PATH_ESSENTIAL[p].includes(tool)&&PATH_FIRST[p]<min)min=PATH_FIRST[p];});return min===99?99:min;};
+const UNLOCKS={
+  abx:_toolFirstLvl('abx'),transfusion:_toolFirstLvl('transfusion'),bronch:_toolFirstLvl('bronch'),
+  dobu:_toolFirstLvl('dobu'),anticoag:_toolFirstLvl('anticoag'),epi:_toolFirstLvl('epi'),
+  pericardio:_toolFirstLvl('pericardio'),
+  pocus:PATH_FIRST.hypovolemic||4,labs:PATH_FIRST.cardiogenic||6,echo:PATH_FIRST.rvfail||8,
+  vaso:14,vexus:16,advlabs:22
 };
 const LS_TIERS=[
   {l:1,r:5,i18n:'tier.foundations'},
@@ -1830,6 +1840,15 @@ class Game {
     this.showOv('ov-brief');
   }
 
+  cancelBrief(){
+    this.hideOv('ov-brief');
+    this.running=false;
+    this.over=false;
+    this.closeModals();
+    if(this.mode==='campaign')this.showLevelSelect();
+    else this.showMainMenu();
+  }
+
   _unlockHtml(lv){
     if(this.mode!=='campaign')return'';
     const ks=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===lv.id);
@@ -2113,16 +2132,16 @@ class Game {
 
   _unl(key){
     if(!UNLOCKS[key])return true;
+    if(this._pathNeedsTool(key))return true;
     if(this.mode!=='campaign')return true;
     const prog=Math.max(this.lvl?this.lvl.id:1,this.getMaxUnlocked());
-    if(prog>=UNLOCKS[key])return true;
-    return this._pathNeedsTool(key);
+    return prog>=UNLOCKS[key];
   }
 
   _pathNeedsTool(key){
     if(!this.lvl||!this.lvl.paths)return false;
     for(const p of this.lvl.paths){
-      const needs=PATH_NEEDS[p];
+      const needs=PATH_ESSENTIAL[p];
       if(needs&&needs.includes(key))return true;
     }
     return false;
