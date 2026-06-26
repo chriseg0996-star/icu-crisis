@@ -76,6 +76,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .mm-mission:last-child{border:none;padding-bottom:0}
 .mm-mission.done{color:var(--g)}
 .mm-mission .mr{color:var(--y);flex-shrink:0;font-size:7px}
+.mm-weekly{width:100%;padding:9px 12px;border:1px solid rgba(255,204,0,.22);border-radius:10px;background:rgba(255,204,0,.04)}
+.mm-weekly-title{font-size:7px;letter-spacing:2px;color:var(--y);margin-bottom:5px;text-transform:uppercase}
+.mm-weekly-prog{font-size:8px;color:var(--tm);display:flex;justify-content:space-between;gap:8px;line-height:1.35}
+.mm-weekly-prog.done{color:var(--g)}
+.mm-weekly-bar{height:3px;border-radius:2px;background:rgba(26,42,58,.6);margin-top:5px;overflow:hidden}
+.mm-weekly-bar-f{height:100%;background:linear-gradient(90deg,var(--y),var(--g));border-radius:2px;transition:width .3s}
+.prof-daily-sum{font-size:7px;color:var(--td);margin-top:5px;letter-spacing:.5px}
 .mm-streak-cal{display:flex;gap:3px;justify-content:center;padding:8px 10px;border:1px solid var(--b);border-radius:10px;background:rgba(10,16,25,.35)}
 .mm-streak-day{flex:1;max-width:34px;text-align:center;font-size:6px;color:var(--td)}
 .mm-streak-day .sd{width:20px;height:20px;border-radius:50%;border:1px solid var(--b);margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:8px}
@@ -100,7 +107,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .prof-ach{display:flex;flex-wrap:wrap;gap:4px}
 .prof-ach span{font-size:7px;padding:3px 6px;border:1px solid rgba(0,255,136,.25);border-radius:4px;color:var(--g);line-height:1.3}
 .prof-ach span.off{opacity:.32;color:var(--td);border-color:var(--b);border-style:dashed}
-.prof-daily-log{display:flex;gap:3px;margin-top:4px}
+.prof-daily-log{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
 .prof-daily-day{flex:1;min-width:0;text-align:center;padding:5px 2px;border:1px solid var(--b);border-radius:6px;background:rgba(10,16,25,.45)}
 .prof-daily-day.today{border-color:rgba(0,221,255,.35)}
 .prof-daily-day .pd{font-family:var(--fd);font-size:8px;color:var(--y);line-height:1.2}
@@ -435,6 +442,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <span class="ar">▼</span>
     </button>
     <div class="mm-extra" id="mm-extra">
+      <div class="mm-weekly" id="mm-weekly"></div>
       <div class="mm-missions" id="mm-missions"></div>
       <div class="mm-streak-cal" id="mm-streak-cal"></div>
     </div>
@@ -698,7 +706,7 @@ const t5=[['mixed'],['sepsis','pe','edema'],['tamponade'],['hypovolemic','copd']
 t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.22+i*0.025).toFixed(3),stabReq:22+i,events:2,desc:'Diagnostic challenge'}));
 // Tier 6: Master (26-30) — ramping, slightly softer entry than flat 1.5
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
-t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.35+i*0.03).toFixed(3),stabReq:24+i,events:2,desc:'Master cases'}));
+t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.32+i*0.025).toFixed(3),stabReq:23+i,events:2,desc:'Master cases'}));
 
 // Progressive unlocks: basics (fluids, norepi, diuretic, suction, FiO₂, PEEP, VT, ABG) always available.
 // Only advanced diagnostics + specialty meds unlock as cases get complex.
@@ -1198,8 +1206,10 @@ class Game {
     this._ensureMissions(stats);
     const doneM=(stats.missions.items||[]).filter(m=>m.done).length;
     const totM=stats.missions.items.length;
+    const wk=this._ensureWeekly(stats);
     const sumEl=this.$('mm-extra-summary');
-    if(sumEl)sumEl.textContent=t('menu.extraSummary',{d:doneM,n:totM,s:stkN});
+    if(sumEl)sumEl.textContent=t('menu.extraSummary',{d:doneM,n:totM,s:stkN,w:wk.wins||0,g:3});
+    this._renderWeekly(stats);
     this._renderMissions(stats);
     this._renderStreakCal(stats);
     this._renderModeMeta(stats);
@@ -1213,6 +1223,17 @@ class Game {
     if(!panel||!btn)return;
     const open=panel.classList.toggle('open');
     btn.classList.toggle('open',open);
+  }
+
+  _renderWeekly(s){
+    const el=this.$('mm-weekly');if(!el)return;
+    const w=this._ensureWeekly(s);
+    const goal=3,done=!!w.claimed;
+    const wins=w.wins||0;
+    const pct=Math.min(100,Math.round(wins/goal*100));
+    el.innerHTML='<div class="mm-weekly-title">'+t('menu.weekly')+'</div>'+
+      '<div class="mm-weekly-prog'+(done?' done':'')+'"><span>'+(done?t('menu.weeklyDone',{n:50}):t('menu.weeklyProg',{n:wins,goal:goal}))+'</span></div>'+
+      '<div class="mm-weekly-bar"><div class="mm-weekly-bar-f" style="width:'+pct+'%"></div></div>';
   }
 
   _renderMissions(s){
@@ -1294,15 +1315,34 @@ class Game {
     return h;
   }
 
+  _dateStrOff(days){
+    const d=new Date(Date.now()+days*864e5);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  _dailyWeekStats(s){
+    const log={};
+    (s.dailyLog||[]).forEach(e=>{log[e.d]=e;});
+    const scores=[];let wins=0;
+    for(let i=6;i>=0;i--){
+      const ds=this._dateStrOff(-i);
+      const e=log[ds];
+      if(e){scores.push(e.s);if(e.w)wins++;}
+    }
+    const best=scores.length?Math.max(...scores):0;
+    const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+    return {best,avg,wins,played:scores.length};
+  }
+
   _renderDailyLog(s){
     const log={};
     (s.dailyLog||[]).forEach(e=>{log[e.d]=e;});
     const today=this._dailyStr();
     let h='';
     for(let i=6;i>=0;i--){
-      const d=new Date(Date.now()-i*864e5);
-      const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const ds=this._dateStrOff(-i);
       const e=log[ds];
+      const d=new Date(ds+'T12:00:00');
       const lbl=String(d.getDate());
       let pd;
       if(e)pd='<div class="pd'+(e.w?' win':'')+'">'+e.s+'</div>';
@@ -1310,6 +1350,12 @@ class Game {
       h+='<div class="prof-daily-day'+(ds===today?' today':'')+'">'+pd+'<div class="pdl">'+lbl+'</div></div>';
     }
     return h;
+  }
+
+  _renderDailyLogSum(s){
+    const st=this._dailyWeekStats(s);
+    if(st.played<1)return '';
+    return '<div class="prof-daily-sum">'+t('profile.dailyWeek',{avg:st.avg,best:st.best,wins:st.wins})+'</div>';
   }
 
   _renderProfile(){
@@ -1346,7 +1392,7 @@ class Game {
       '<div class="meta-row"><span>'+t('profile.dailyBest')+'</span><b>'+(bests.daily||0)+' pts</b></div>'+
       '<div class="meta-row"><span>'+t('profile.winStreak')+'</span><b>'+(s.winStreak||0)+' · '+t('profile.best')+' '+(s.bestWinStreak||0)+'</b></div>'+
       '<div class="meta-row"><span>'+t('profile.survBest')+'</span><b>'+(bests.survival&&bests.survival.p?bests.survival.p+' '+t('profile.patients')+' ('+bests.survival.score+' pts)':'—')+'</b></div>'+
-      '<div class="prof-section"><div class="prof-label">'+t('profile.dailyLog')+'</div><div class="prof-daily-log">'+this._renderDailyLog(s)+'</div></div>'+
+      '<div class="prof-section"><div class="prof-label">'+t('profile.dailyLog')+'</div><div class="prof-daily-log">'+this._renderDailyLog(s)+'</div>'+this._renderDailyLogSum(s)+'</div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.campaign')+' · '+cleared+'/30</div><div class="prof-tier-strip">'+this._renderTierStrip()+'</div><div class="prof-lv-grid">'+lvGrid+'</div></div>'+
       '<div class="prof-section"><div class="prof-label">'+t('profile.achievements')+' · '+achCount+'/'+ACHIEVEMENTS.length+'</div><div class="prof-ach">'+achHtml+'</div></div>'+
       '<button class="meta-close" onclick="G.hideProfile()">'+t('profile.close')+'</button>';
@@ -1594,6 +1640,7 @@ class Game {
     if(s.winStreak==null)s.winStreak=0;
     if(s.bestWinStreak==null)s.bestWinStreak=0;
     if(!s.dailyLog)s.dailyLog=[];
+    this._ensureWeekly(s);
     DEFAULT_OWNED.forEach(id=>{if(!s.owned.includes(id))s.owned.push(id);});
     this._ensureMissions(s);
     this.setSave(s);
@@ -1800,8 +1847,8 @@ class Game {
     const pool=singles.slice();const paths=[];
     for(let i=0;i<count;i++){const idx=Math.floor(Math.random()*pool.length);paths.push(pool.splice(idx,1)[0]);}
     const usesMixed=n>=8&&Math.random()<0.3;
-    const mult=Math.min(1.45,0.7+n*0.075);
-    const stabReq=Math.min(26,12+Math.floor(n*1.5));
+    const mult=Math.min(1.42,0.7+n*0.07);
+    const stabReq=Math.min(25,12+Math.floor(n*1.45));
     const events=n>=3?(n>=7?2:1):0;
     this.lvl={id:100+n,paths:usesMixed?['mixed']:paths,mult,stabReq,events,desc:'Survival'};
     this._forcedCaseIdx=null;this._forcedEvts=null;
@@ -1814,8 +1861,38 @@ class Game {
 
   // -- Daily Case --
   _dailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
-  _dailyStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-  _yesterStr(){const d=new Date(Date.now()-864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _dailyStr(){return this._dateStrOff(0);}
+  _yesterStr(){return this._dateStrOff(-1);}
+  _weekStr(){
+    const d=new Date();
+    const date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+    const dayNum=date.getUTCDay()||7;
+    date.setUTCDate(date.getUTCDate()+4-dayNum);
+    const yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    const weekNo=Math.ceil((((date-yearStart)/86400000)+1)/7);
+    return date.getUTCFullYear()+'-W'+String(weekNo).padStart(2,'0');
+  }
+  _ensureWeekly(s){
+    const wk=this._weekStr();
+    if(!s.weekly||s.weekly.week!==wk)s.weekly={week:wk,days:[],wins:0,claimed:false};
+    if(!s.weekly.days)s.weekly.days=[];
+    s.weekly.wins=s.weekly.days.length;
+    return s.weekly;
+  }
+  _onWeeklyDailyWin(s,ds){
+    const w=this._ensureWeekly(s);
+    if(w.claimed)return 0;
+    if(w.days.includes(ds))return 0;
+    w.days.push(ds);
+    w.wins=w.days.length;
+    if(w.wins>=3){
+      w.claimed=true;
+      s.coins+=50;
+      s.lifetimeCoins+=50;
+      return 50;
+    }
+    return 0;
+  }
   _dailyNum(){const d=new Date();const t0=new Date(2026,5,1);return Math.max(1,Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-t0)/864e5)+1);}
 
   shareResult(){
@@ -1909,6 +1986,10 @@ class Game {
     let meta=t('brief.dailyNum',{n:this._dailyNum()})+' · '+roll.tag;
     if(roll.intensity)meta+=' · '+roll.intensity;
     if(stkN>0)meta+=' · '+t('brief.dailyStreak',{n:stkN});
+    const allBest=s.bests.daily||0;
+    if(allBest>0)meta+=' · '+t('brief.dailyRecord',{n:allBest});
+    const wkSt=this._dailyWeekStats(s);
+    if(wkSt.best>0)meta+=' · '+t('brief.dailyWeekBest',{n:wkSt.best});
     if(done)meta+=' · '+t('brief.dailyBestToday',{n:s.daily.score});
     this._brief(t('brief.dailyTitle',{d:ds}),meta);
   }
@@ -2725,6 +2806,7 @@ class Game {
         this._dailyFirstWinToday=win&&!hadWinToday;
       }else this._dailyFirstWinToday=false;
       this._recordDailyLog(s,ds,score,win);
+      if(win)this._weeklyBonusPending=this._onWeeklyDailyWin(s,ds);
       this.setSave(s);
     }else if(this.mode==='survival'){
       if(win)this.survTotal+=score;
@@ -2756,9 +2838,11 @@ class Game {
       const keys=Object.keys(UNLOCKS).filter(k=>UNLOCKS[k]===mxAfter);
       if(keys.length)unlockHtml='<div class="go-unlock">🔓 '+t('unlock.new')+': '+keys.map(k=>t('unlock.'+k)).join(' · ')+'</div>';
     }
+    const weeklyBonus=(this.mode==='daily'&&win)?(this._weeklyBonusPending||0):0;
+    this._weeklyBonusPending=0;
     const missionBonus=this._checkMissions(result);
     const achBonus=this._checkAchievements(result,result);
-    const totalCoins=meta.coins+missionBonus+achBonus;
+    const totalCoins=meta.coins+missionBonus+achBonus+weeklyBonus;
     const coinsHtml=totalCoins>0?'<div class="go-coins">+'+totalCoins+' 🪙 ICU Coins'+(meta.xp>0?' · +'+meta.xp+' XP':'')+(missionBonus>0?' · '+t('end.missionBonus'):'')+'</div>':'';
 
     const names=p.pathKeys.map(k=>{const x=getPathEntry(k,PATH);return x?x.name:k;}).join(' + ');
@@ -2805,7 +2889,13 @@ class Game {
       const ds=this._dailyStr();
       const sd=this.ensureMeta().daily;
       const best=sd&&sd.date===ds?sd.score:score;
-      dailyLine='<div class="go-sub" style="color:var(--y)">'+t('end.dailyLine',{n:this._dailyNum(),best:best})+(this._dailyTag?' · '+this._dailyTag:'')+'</div>';
+      const yEntry=(this.ensureMeta().dailyLog||[]).find(x=>x.d===this._yesterStr());
+      let vsY='';
+      if(yEntry&&yEntry.s>0){
+        const delta=score-yEntry.s;
+        vsY=' · '+t('end.dailyVsYesterday',{delta:(delta>=0?'+':'')+delta});
+      }
+      dailyLine='<div class="go-sub" style="color:var(--y)">'+t('end.dailyLine',{n:this._dailyNum(),best:best})+(this._dailyTag?' · '+this._dailyTag:'')+vsY+'</div>';
     }
 
     // Result snapshot for sharing
@@ -2860,6 +2950,7 @@ class Game {
       const stk=this.ensureMeta().dailyStreak?this.ensureMeta().dailyStreak.n:1;
       setTimeout(()=>this._toastMsg(t('end.dailyStreak',{n:stk})),missionBonus>0?1400:800);
     }
+    if(weeklyBonus>0)setTimeout(()=>this._toastMsg(t('end.weeklyBonus',{n:weeklyBonus})),missionBonus>0?2000:1200);
     if(this.mode==='survival'&&win&&[3,5,8,10].includes(this.survN)){
       setTimeout(()=>this._toastMsg(t('end.survMilestone',{n:this.survN})),900);
     }

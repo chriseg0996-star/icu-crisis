@@ -298,6 +298,9 @@ Use, modify, and distribute freely. Attribution appreciated but not required.
 - [x] Practice mode: replay cleared levels (40% coins unless you improve)
 - [x] Perfect frame cosmetic (30× ★★★ achievement)
 - [x] Mobile safe-area padding (notch/home indicator)
+- [x] Weekly challenge (3 daily wins/week → +50 🪙)
+- [x] Profile 7-day daily stats + vs-yesterday on end screen
+- [x] Late-game balance pass (tier VI + survival 8+)
 
 **Planned**
 - [ ] Player avatar (full chibi character)
