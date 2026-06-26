@@ -287,7 +287,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .bv .vu{font-size:8px;color:var(--td);margin-left:2px}
 
 .log{flex:1;min-height:0;height:0;overflow:hidden;padding:4px 8px 6px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;background:var(--bg);position:relative;border-top:1px solid var(--b);contain:layout style;transition:background .28s ease,padding .28s ease}
-.log.exp{max-height:none;overflow-y:auto;justify-content:flex-start;background:rgba(3,6,8,.96);padding:6px 8px 8px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.log.exp{max-height:none;overflow-y:auto;justify-content:flex-start;background:rgba(3,6,8,.96);padding:6px 8px 8px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(0,221,255,.35) rgba(3,6,8,.92)}
+.log.exp::-webkit-scrollbar{width:5px}
+.log.exp::-webkit-scrollbar-track{background:rgba(3,6,8,.92);border-radius:3px}
+.log.exp::-webkit-scrollbar-thumb{background:rgba(0,221,255,.32);border-radius:3px}
+.log.exp::-webkit-scrollbar-thumb:hover{background:rgba(0,221,255,.5)}
 .lx{position:absolute;top:4px;right:8px;font-size:8px;color:var(--td);cursor:pointer;z-index:2;padding:5px 7px;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;background:rgba(3,6,8,.88);border-radius:4px;border:1px solid var(--b);transition:transform .28s ease,border-color .15s,color .15s,background .15s;touch-action:manipulation;font-family:var(--fm);line-height:1;-webkit-appearance:none;appearance:none}
 .lx:active{border-color:var(--cy);color:var(--cy)}
 .log.exp .lx{transform:rotate(180deg);border-color:rgba(0,221,255,.35);color:var(--cy)}
@@ -654,14 +658,14 @@ edema:{name:'Pulmonary Edema',desc:'Cardiogenic/non-cardiogenic pulmonary edema.
     {pt:'55M, POD1 colectomy, emergent intubation',hx:'4L crystalloid intraop. Temp 37.4°C',vitals:[{t:'MAP 68',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 102',c:'ok'},{t:'Lac 1.6',c:'ok'}],exam:'▸ Crackles bibasilar, dullness at bases\n▸ Peripheral edema +2\n▸ CXR: bilateral hazy opacities',concern:'Rising O₂ requirements\nLarge positive fluid balance from OR'}]},
 airway:{name:'Airway Obstruction',desc:'Progressive secretion obstruction.\nClues: rising peak pressures, gurgling, acute SpO₂ drops.\nOptimal: suctioning. FiO₂/PEEP are temporizing.',
   init:{edema:0,sec:15,inf:10,vasc:78,perf:76,co2bias:0,rvStrain:0,autoPeep:0,bleed:0},
-  rates:{edema:.01,sec:1.2,inf:.14,vasc:.005},
+  rates:{edema:.01,sec:1.0,inf:.14,vasc:.005},
   clues:['Rhonchi on auscultation.','Vent high-pressure alarms.','Mucoid discharge at ETT.'],
   cases:[
     {pt:'71M, intubated after witnessed aspiration',hx:'GCS 7. Copious material suctioned at intubation',vitals:[{t:'MAP 72',c:'ok'},{t:'SpO₂ 94%',c:'ok'},{t:'HR 95',c:'ok'},{t:'Lac 1.2',c:'ok'}],exam:'▸ Coarse breath sounds, rhonchi\n▸ Audible gurgling from ETT\n▸ Vent: intermittent high-pressure alarms',concern:'Recurrent vent alarms\nDifficulty maintaining tidal volumes'},
     {pt:'58F, intubated 6h ago for obtundation',hx:'Thick purulent material on intubation. PMH: diabetes',vitals:[{t:'MAP 74',c:'ok'},{t:'SpO₂ 95%',c:'ok'},{t:'HR 92',c:'ok'},{t:'Lac 1.1',c:'ok'}],exam:'▸ Transmitted upper airway sounds\n▸ Saw-tooth flow waveform\n▸ Peak pressures elevated intermittently',concern:'Intermittent difficulty ventilating\nRT reports resistance in airway'}]},
 sepsis:{name:'Septic Shock',desc:'Distributive shock from infection.\nClues: tachycardia, wide pulse pressure, rising lactate, MAP collapse.\nOptimal: fluids + vasopressors early.',
   init:{edema:0,sec:0,inf:20,vasc:60,perf:65,co2bias:0,rvStrain:0,autoPeep:0,bleed:0},
-  rates:{edema:.02,sec:.4,inf:.24,vasc:.012},
+  rates:{edema:.02,sec:.4,inf:.20,vasc:.010},
   clues:['Warm extremities despite low MAP.','Temp 38.5°C.','Blood cultures: gram-negative rods.'],
   cases:[
     {pt:'62M, transferred from ward for persistent hypotension',hx:'1L NS on floor with no response. Temp 39.1°C. Antibiotics 1h ago',vitals:[{t:'MAP 62',c:'w'},{t:'SpO₂ 96%',c:'ok'},{t:'HR 112',c:'w'},{t:'Lac 2.2',c:'w'}],exam:'▸ Warm extremities, bounding pulses\n▸ Flash capillary refill\n▸ Wide pulse pressure (98/42)\n▸ Mottled knees. Lungs clear',concern:'MAP not responding to initial volume\nLactate rising on repeat'},
@@ -708,7 +712,7 @@ rvfail:{name:'RV Failure / Volume Overload',desc:'Right heart failure with venou
     {pt:'48F, ARDS day 5, new hemodynamic instability',hx:'Proned twice. PEEP 14 for refractory hypoxemia',vitals:[{t:'MAP 61',c:'w'},{t:'SpO₂ 91%',c:'w'},{t:'HR 110',c:'w'},{t:'Lac 2.5',c:'w'}],exam:'▸ JVP elevated\n▸ New TR murmur\n▸ CVP rising while MAP falls\n▸ Echo: septal flattening',concern:'Acute cor pulmonale on high PEEP\nRV failing under pressure'}]},
 mixed:{name:'Mixed Pathology',desc:'Multiple concurrent problems overlapping.\nNo single treatment dominates.',
   init:{edema:12,sec:8,inf:15,vasc:68,perf:70,co2bias:0,rvStrain:0,autoPeep:0,bleed:0},
-  rates:{edema:.04,sec:.7,inf:.18,vasc:.008},
+  rates:{edema:.04,sec:.65,inf:.16,vasc:.007},
   clues:['Complex presentation.','CXR: bilateral haze + airway debris.','Lactate mildly elevated.'],
   cases:[
     {pt:'73M, intubated for worsening hypoxia',hx:'Admitted 3d ago for pneumonia. Multiple fluid boluses. Febrile again',vitals:[{t:'MAP 66',c:'w'},{t:'SpO₂ 93%',c:'ok'},{t:'HR 104',c:'ok'},{t:'Lac 2.1',c:'w'}],exam:'▸ Crackles + scattered rhonchi\n▸ Some secretions in ETT\n▸ Borderline warm peripheries\n▸ CXR: bilateral haze',concern:'Multiple overlapping findings\nUnclear dominant pathology'},
@@ -742,19 +746,19 @@ t1.forEach((p,i)=>LEVELS.push({id:i+1,tier:1,paths:p,mult:i===0?0.5:0.75,stabReq
 LEVELS[0]={id:1,tier:1,paths:['edema'],mult:0.5,stabReq:12,events:0,desc:'Tutorial: pulmonary edema'};
 // Tier 2: Single harder (6-10)
 const t2=[['cardiogenic'],['pe'],['rvfail'],['sepsis'],['anaphylaxis']];
-t2.forEach((p,i)=>LEVELS.push({id:i+6,tier:2,paths:p,mult:0.95,stabReq:16,events:1,desc:'Single, faster'}));
+t2.forEach((p,i)=>LEVELS.push({id:i+6,tier:2,paths:p,mult:0.88,stabReq:15,events:1,desc:'Single, faster'}));
 // Tier 3: Two overlapping (11-15)
 const t3=[['sepsis','edema'],['airway','sepsis'],['pe','rvfail'],['copd','sepsis'],['cardiogenic','edema']];
-t3.forEach((p,i)=>LEVELS.push({id:i+11,tier:3,paths:p,mult:1.1,stabReq:20,events:1,desc:'Two pathologies'}));
+t3.forEach((p,i)=>LEVELS.push({id:i+11,tier:3,paths:p,mult:1.0,stabReq:17,events:1,desc:'Two pathologies'}));
 // Tier 4: Complex (16-20)
 const t4=[['sepsis','airway','edema'],['cardiogenic','rvfail'],['hypovolemic','sepsis'],['copd','edema'],['pe','sepsis']];
-t4.forEach((p,i)=>LEVELS.push({id:i+16,tier:4,paths:p,mult:1.2,stabReq:22,events:1,desc:'Complex cases'}));
+t4.forEach((p,i)=>LEVELS.push({id:i+16,tier:4,paths:p,mult:1.1,stabReq:19,events:1,desc:'Complex cases'}));
 // Tier 5: Mixed chaos (21-25) — ramping difficulty
 const t5=[['mixed'],['sepsis','pe','edema'],['tamponade'],['hypovolemic','copd'],['rvfail','sepsis','edema']];
-t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.20+i*0.022).toFixed(3),stabReq:21+i,events:2,desc:'Diagnostic challenge'}));
+t5.forEach((p,i)=>LEVELS.push({id:i+21,tier:5,paths:p,mult:+(1.14+i*0.018).toFixed(3),stabReq:19+i,events:2,desc:'Diagnostic challenge'}));
 // Tier 6: Master (26-30) — ramping
 const t6=[['mixed'],['cardiogenic','pe','sepsis'],['copd','airway','edema'],['hypovolemic','rvfail','sepsis'],['mixed']];
-t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.28+i*0.022).toFixed(3),stabReq:22+i,events:2,desc:'Master cases'}));
+t6.forEach((p,i)=>LEVELS.push({id:i+26,tier:6,paths:p,mult:+(1.20+i*0.018).toFixed(3),stabReq:20+i,events:2,desc:'Master cases'}));
 
 // --- Progressive unlocks (auto-aligned to campaign) ---
 // Tier 1–2 basics always on: fluids, NE, diuretic, suction, FiO₂, PEEP, VT, ABG.
@@ -924,16 +928,16 @@ const DIAG_TOOLS={
 //  ACUTE EVENTS
 // ================================================================
 const EVENTS=[
-  {id:'plug',apply(p){p.secretions=Math.min(95,p.secretions+40);p._evtSec=true;}},
-  {id:'pneumo',apply(p){p.oxygenation-=20;p.compliance=Math.max(15,p.compliance-15);p.cardiacOutput-=15;p._hasPneumo=true;p._pneumoT=0;}},
-  {id:'vaso',apply(p){p.vascularTone=Math.max(5,p.vascularTone-30);}},
-  {id:'bleed',apply(p){p.bleed=Math.min(80,p.bleed+25);p.perfusion-=10;}},
-  {id:'arrhythmia',apply(p){p.cardiacOutput=Math.max(12,p.cardiacOutput-18);p.perfusion=Math.max(0,p.perfusion-8);p._dHR+=28;}},
-  {id:'sepsis_flare',apply(p){p.infection=Math.min(100,p.infection+22);p.vascularTone=Math.max(5,p.vascularTone-14);p.lactate=Math.min(20,p.lactate+.4);}},
-  {id:'bronchospasm',apply(p){p.co2bias=Math.min(40,p.co2bias+12);p.compliance=Math.max(15,p.compliance-10);p.autoPeep=Math.min(18,p.autoPeep+4);p._dHR+=8;}},
-  {id:'flash_edema',apply(p){p.pulmonaryEdema=Math.min(95,p.pulmonaryEdema+22);p.oxygenation=Math.max(55,p.oxygenation-12);p.compliance=Math.max(12,p.compliance-8);}},
-  {id:'hyperkalemia',apply(p){p.cardiacOutput=Math.max(10,p.cardiacOutput-14);p._dHR+=12;p.perfusion=Math.max(0,p.perfusion-6);p.lactate=Math.min(20,p.lactate+.25);}},
-  {id:'air_leak',apply(p){p.oxygenation=Math.max(52,p.oxygenation-16);p.compliance=Math.max(14,p.compliance-7);p.secretions=Math.min(88,p.secretions+10);}},
+  {id:'plug',apply(p){p.secretions=Math.min(95,p.secretions+32);p._evtSec=true;}},
+  {id:'pneumo',apply(p){p.oxygenation-=16;p.compliance=Math.max(15,p.compliance-12);p.cardiacOutput-=12;p._hasPneumo=true;p._pneumoT=0;}},
+  {id:'vaso',apply(p){p.vascularTone=Math.max(8,p.vascularTone-22);}},
+  {id:'bleed',apply(p){p.bleed=Math.min(80,p.bleed+20);p.perfusion-=8;}},
+  {id:'arrhythmia',apply(p){p.cardiacOutput=Math.max(12,p.cardiacOutput-14);p.perfusion=Math.max(0,p.perfusion-6);p._dHR+=22;}},
+  {id:'sepsis_flare',apply(p){p.infection=Math.min(100,p.infection+18);p.vascularTone=Math.max(8,p.vascularTone-11);p.lactate=Math.min(20,p.lactate+.35);}},
+  {id:'bronchospasm',apply(p){p.co2bias=Math.min(40,p.co2bias+10);p.compliance=Math.max(15,p.compliance-8);p.autoPeep=Math.min(18,p.autoPeep+3);p._dHR+=6;}},
+  {id:'flash_edema',apply(p){p.pulmonaryEdema=Math.min(95,p.pulmonaryEdema+18);p.oxygenation=Math.max(58,p.oxygenation-10);p.compliance=Math.max(12,p.compliance-6);}},
+  {id:'hyperkalemia',apply(p){p.cardiacOutput=Math.max(10,p.cardiacOutput-11);p._dHR+=10;p.perfusion=Math.max(0,p.perfusion-5);p.lactate=Math.min(20,p.lactate+.2);}},
+  {id:'air_leak',apply(p){p.oxygenation=Math.max(55,p.oxygenation-13);p.compliance=Math.max(14,p.compliance-6);p.secretions=Math.min(88,p.secretions+8);}},
 ];
 const UNLOCK_BTN={
   pocus:'bdiag',labs:'bdiag',echo:'bdiag',vexus:'bdiag',advlabs:'bdiag',
@@ -992,6 +996,65 @@ class Patient {
     this.bronchT=0;this.anticoagOn=false;this._bronchGiven=false;
     this.dobuOn=false;this._dobuFx=0;this.vasoOn=false;this.epiT=0;this._epiGiven=false;
     this.transfusions=0;this.drained=false;this._advLabs=false;
+    this._tier=1;this._pathN=pathKeys.length;this._rateScale=1;this._campaignMult=mult;this._tierEase=1;
+  }
+
+  _syncDisplayVitals(){
+    this._dHR=this.rawHR;this._dMAP=this.rawMAP;this._dSpO2=this.rawSpO2;this._dRR=this.rawRR;
+  }
+
+  _stabNC(){
+    const pk=this.pathKeys;
+    const edMax=(pk.includes('edema')||pk.includes('cardiogenic'))?52:pk.includes('mixed')?48:45;
+    const secMax=pk.includes('airway')?55:(pk.includes('mixed')?48:46);
+    const vascMin=(pk.includes('sepsis')||pk.includes('anaphylaxis'))?22:27;
+    return this.vascularTone>vascMin&&this.secretions<secMax&&this.pulmonaryEdema<edMax;
+  }
+
+  _stabGtMin(){if(this._tutorial)return 10;const t=[0,42,58,70,78,84,88];return t[Math.min(6,this._tier||1)]||88;}
+  _stabLacMax(){if(this._tier<=1)return 3.0;if(this._tier===2)return 2.8;return this._pathN>=3?2.4:2.5;}
+
+  tuneCampaign(lv){
+    this._tier=lv.tier||1;this._pathN=lv.paths.length;
+    const pk=lv.paths;
+    const TIER_EASE=[0,0.88,0.93,0.97,1.0,1.04,1.07];
+    const pathEase=pk.length>2?0.86:pk.length===2?0.92:1;
+    this._rateScale=pathEase;
+    this._campaignMult=lv.mult||1;
+    this._tierEase=TIER_EASE[Math.min(6,this._tier)]||1;
+    this.mult=this._campaignMult*this._tierEase;
+    if(pk.includes('pe')||pk.includes('rvfail'))this.oxygenation=Math.min(this.oxygenation,82);
+    else if(pk.includes('cardiogenic')||pk.includes('tamponade'))this.oxygenation=Math.min(this.oxygenation,87);
+    else if(pk.includes('edema'))this.oxygenation=Math.max(this.oxygenation,89);
+    else if(pk.includes('airway'))this.oxygenation=Math.max(this.oxygenation,90);
+    else if(pk.includes('sepsis')&&!pk.includes('edema')){this.oxygenation=Math.max(this.oxygenation,91);this.infection=Math.min(this.infection,this._tier===1?15:18);this.lactate=Math.min(this.lactate,this._tier<=2?2.0:2.4);}
+    else if(pk.includes('copd'))this.oxygenation=Math.max(this.oxygenation,88);
+    else if(pk.includes('hypovolemic')){this.perfusion=Math.max(this.perfusion,56);this.lactate=Math.min(this.lactate,3.5);}
+    else if(pk.includes('anaphylaxis')){this.vascularTone=Math.max(this.vascularTone,this._tier<=2?44:40);this.oxygenation=Math.max(this.oxygenation,88);}
+    if(pk.length===1&&this._tier===1){
+      if(pk[0]==='airway'){this.secretions=Math.min(this.secretions,16);this.nextSecEvt=55+Math.floor(Math.random()*20);}
+      if(pk[0]==='hypovolemic'){this.bleed=Math.max(this.bleed,28);this.vascularTone=Math.min(this.vascularTone,75);}
+      if(pk[0]==='copd'){this.autoPeep=Math.min(this.autoPeep,7);this.co2bias=Math.min(this.co2bias,10);}
+      if(pk[0]==='edema'){this.pulmonaryEdema=Math.min(this.pulmonaryEdema,32);}
+    }
+    if(pk.length===1&&this._tier===2){
+      if(pk[0]==='pe'){this.rvStrain=Math.min(this.rvStrain,38);this.oxygenation=Math.min(this.oxygenation,80);}
+      if(pk[0]==='cardiogenic'){this.pulmonaryEdema=Math.min(this.pulmonaryEdema,28);this.lactate=Math.min(this.lactate,3.2);}
+      if(pk[0]==='rvfail'){this.pulmonaryEdema=Math.min(this.pulmonaryEdema,18);this.rvStrain=Math.min(this.rvStrain,32);}
+      if(pk[0]==='tamponade'){this.rvStrain=Math.min(this.rvStrain,22);}
+    }
+    if(pk.length>=2){
+      this.infection=Math.min(this.infection,20+pk.length*2);
+      this.pulmonaryEdema=Math.min(this.pulmonaryEdema,22+pk.length*4);
+      this.secretions=Math.min(this.secretions,18+pk.length*3);
+      if(pk.includes('sepsis'))this.lactate=Math.min(this.lactate,2.6);
+    }
+    if(pk.includes('mixed')){this.infection=Math.min(this.infection,18);this.pulmonaryEdema=Math.min(this.pulmonaryEdema,24);}
+    this.lacHist=[this.lactate];this.peakLac=this.lactate;
+    this.compliance=55-this.lungInjury*.3-this.pulmonaryEdema*.15;
+    if(this._hasPneumo)this.compliance-=12;
+    this.compliance=Math.max(15,Math.min(60,this.compliance));
+    this._syncDisplayVitals();
   }
 
   initLevel1(){
@@ -1024,7 +1087,7 @@ class Patient {
   get lacTrend(){const h=this.lacHist;if(h.length<3)return'?';const r=h.slice(-3);return r[2]<r[0]-.2?'↓':r[2]>r[0]+.2?'↑':'→';}
 
   tick(dt,gt){
-    const M=this.mult,R=this.rates;
+    const M=this.mult*(this._rateScale||1),R=this.rates;
     this.infection=Math.min(100,this.infection+(R.inf+Math.random()*(.08*(this._tutorial?0:1)))*M);
     this.phaseT+=dt;
     if(!this._tutorial){
@@ -1035,7 +1098,7 @@ class Patient {
 
     // Vascular tone
     this.vascularTone-=this.infection*R.vasc*(this.phase>=3?1.6:1);
-    if(this.norepiOn){if(this._neJust){this.vascularTone=Math.min(100,this.vascularTone+5);this._neJust=false;}this.vascularTone=Math.min(100,this.vascularTone+.8);this.norepiDur+=dt;this.norepiCum+=dt;if(this.norepiCum>120)this.perfusion-=((this.norepiCum-120)/400)*.06;}
+    if(this.norepiOn){if(this._neJust){this.vascularTone=Math.min(100,this.vascularTone+5);this._neJust=false;}const neR=this.pathKeys.includes('sepsis')&&!this.pathKeys.includes('edema')?1.05:0.8;this.vascularTone=Math.min(100,this.vascularTone+neR);this.norepiDur+=dt;this.norepiCum+=dt;if(this.norepiCum>120)this.perfusion-=((this.norepiCum-120)/400)*.06;}
     this.vascularTone=Math.max(0,Math.min(100,this.vascularTone));
 
     // Boosts
@@ -1086,10 +1149,10 @@ class Patient {
     this.secretions=Math.max(0,Math.min(100,this.secretions));
 
     // Edema
-    if(this.totalFluids>1500)this.pulmonaryEdema=Math.min(80,this.pulmonaryEdema+((this.totalFluids-1500)/1000)*.05);
+    if(this.totalFluids>1500){const edR=(this.pathKeys.includes('sepsis')&&!this.pathKeys.includes('edema'))?.02:.05;this.pulmonaryEdema=Math.min(80,this.pulmonaryEdema+((this.totalFluids-1500)/1000)*edR);}
     this.pulmonaryEdema+=R.edema*(this.phase>=2?1.3:1)*M;
     if(this.infection>40)this.pulmonaryEdema+=.01*(this.infection/100);
-    if(this.diureticActive){this.diureticTimer-=dt;const dr=this._tutorial?0.5:0.35;this.pulmonaryEdema=Math.max(0,this.pulmonaryEdema-dr);this.totalFluids=Math.max(0,this.totalFluids-8);if(this.diureticTimer<=0)this.diureticActive=false;}
+    if(this.diureticActive){this.diureticTimer-=dt;const edPk=this.pathKeys.includes('edema')||this.pathKeys.includes('cardiogenic');const dr=this._tutorial?0.5:(edPk?0.44:0.35);this.pulmonaryEdema=Math.max(0,this.pulmonaryEdema-dr);this.totalFluids=Math.max(0,this.totalFluids-8);if(this.diureticTimer<=0)this.diureticActive=false;}
     this.pulmonaryEdema=Math.max(0,Math.min(100,this.pulmonaryEdema));
 
     // Auto-PEEP (COPD)
@@ -1104,7 +1167,7 @@ class Patient {
 
     // Medications
     if(this.abxGiven&&!this.abxApplied){this.abxT-=dt;if(this.abxT<=0&&this._abxWorks){this.abxApplied=true;this.rates.inf*=0.15;}}
-    if(this.abxApplied)this.infection=Math.max(0,this.infection-.12);
+    if(this.abxApplied)this.infection=Math.max(0,this.infection-(this._tier<=2?0.17:0.13));
     if(this.bronchT>0){this.bronchT-=dt;this.autoPeep=Math.max(0,this.autoPeep-.06);this.co2bias=Math.max(0,this.co2bias-.05);}
     if(this.anticoagOn)this.rvStrain=Math.max(0,this.rvStrain-.05);
     if(this.dobuOn){this._dobuFx=Math.min(16,this._dobuFx+.4);this.vascularTone=Math.max(15,this.vascularTone-.03);}
@@ -1135,11 +1198,11 @@ class Patient {
 
     // Stabilization
     const gm=this.MAP>=65&&this.SpO2>=92&&this.HR<130;
-    const ls=this.lactate<2.5;
-    const nc=this.vascularTone>30&&this.secretions<40&&this.pulmonaryEdema<40;
-    const gtMin=this._tutorial?10:90;
+    const ls=this.lactate<this._stabLacMax();
+    const nc=this._stabNC();
+    const gtMin=this._stabGtMin();
     if(gm&&ls&&nc&&gt>gtMin){this.stableT+=dt;if(this.stableT>=5&&!this.stabAnnounced)this.stabAnnounced=true;}
-    else{if(this.stabAnnounced)this.stabAnnounced=false;this.stableT=Math.max(0,this.stableT-dt*2);}
+    else{if(this.stabAnnounced)this.stabAnnounced=false;this.stableT=Math.max(0,this.stableT-dt*1.25);}
 
     // Arrest
     if(this.MAP<50)this.lowMAPT+=dt;else this.lowMAPT=Math.max(0,this.lowMAPT-dt*.5);
@@ -1148,10 +1211,10 @@ class Patient {
     if(this.lowSPT>=8){this.arrest=true;this.arrestReason=t('arrest.spo2');}
   }
 
-  giveFluids(){this._mapAtF=this.MAP;this.totalFluids+=500;this.fluidBoluses++;this.perfusion=Math.min(100,this.perfusion+4);this.cardiacOutput=Math.min(100,this.cardiacOutput+3);const resp=this.vascularTone>30;this._mapB.push({a:resp?6:2,r:12,d:(resp?6:2)/12});this._perfB.push({a:8,r:10,d:.8});return resp;}
-  doSuction(){if(this.secretions>15){const c=Math.min(this.secretions,25+Math.random()*15);this.secretions=Math.max(0,this.secretions-c);this.goodSuctions++;this._oxyB.push({a:4,r:15,d:4/15});return true;}this.badSuctions++;this.secretions+=2;return false;}
-  giveDiuretic(){this.diureticActive=true;this.diureticTimer=45;this.diureticsGiven++;if(this._tutorial){this.perfusion=Math.max(0,this.perfusion-1);this.cardiacOutput=Math.max(10,this.cardiacOutput-1);this._oxyB.push({a:5,r:15,d:5/15});this._dSpO2=Math.min(100,this._dSpO2+5);}else{this.perfusion=Math.max(0,this.perfusion-3);this.cardiacOutput=Math.max(10,this.cardiacOutput-3);}}
-  giveTransfusion(){this.transfusions++;this.totalFluids+=300;this.bleed=Math.max(0,this.bleed-20);this.perfusion=Math.min(100,this.perfusion+8);this._mapB.push({a:7,r:18,d:7/18});this._perfB.push({a:10,r:20,d:.5});}
+  giveFluids(){this._mapAtF=this.MAP;this.totalFluids+=500;this.fluidBoluses++;this.perfusion=Math.min(100,this.perfusion+4);this.cardiacOutput=Math.min(100,this.cardiacOutput+3);const pk=this.pathKeys;const sepsis=pk.includes('sepsis')&&!pk.includes('edema');const hypo=pk.includes('hypovolemic');const anaphyl=pk.includes('anaphylaxis');const fluidOverload=pk.includes('cardiogenic')||pk.includes('rvfail')||(pk.includes('edema')&&this.pulmonaryEdema>35);let resp,boost;if(hypo){resp=this.bleed>8||this.vascularTone>22;boost=resp?9:5;}else if(anaphyl){resp=this.vascularTone>12;boost=resp?7:5;}else if(sepsis){resp=this.vascularTone>18;boost=resp?7:4;}else if(fluidOverload){resp=this.vascularTone>42;boost=resp?4:1;}else{resp=this.vascularTone>30;boost=resp?6:2;}this._mapB.push({a:boost,r:12,d:boost/12});this._perfB.push({a:8,r:10,d:.8});return resp;}
+  doSuction(){const airway=this.pathKeys.includes('airway');if(this.secretions>15){const c=Math.min(this.secretions,(airway?32:25)+Math.random()*(airway?16:15));this.secretions=Math.max(0,this.secretions-c);this.goodSuctions++;this._oxyB.push({a:airway?5:4,r:15,d:(airway?5:4)/15});return true;}this.badSuctions++;this.secretions+=2;return false;}
+  giveDiuretic(){this.diureticActive=true;this.diureticTimer=45;this.diureticsGiven++;const edPk=this.pathKeys.includes('edema')||this.pathKeys.includes('cardiogenic');if(this._tutorial){this.perfusion=Math.max(0,this.perfusion-1);this.cardiacOutput=Math.max(10,this.cardiacOutput-1);this._oxyB.push({a:5,r:15,d:5/15});this._dSpO2=Math.min(100,this._dSpO2+5);}else{const pen=edPk?2:3;this.perfusion=Math.max(0,this.perfusion-pen);this.cardiacOutput=Math.max(10,this.cardiacOutput-pen);}}
+  giveTransfusion(){this.transfusions++;this.totalFluids+=300;this.bleed=Math.max(0,this.bleed-(this.pathKeys.includes('hypovolemic')?28:20));this.perfusion=Math.min(100,this.perfusion+8);this._mapB.push({a:7,r:18,d:7/18});this._perfB.push({a:10,r:20,d:.5});}
   giveEpi(){this.epiT=20;this._epiGiven=true;}
   doPericardio(){if(this.pathKeys.includes('tamponade')){this.drained=true;this.rvStrain=Math.max(0,this.rvStrain-15);this.perfusion=Math.min(100,this.perfusion+8);this._mapB.push({a:10,r:20,d:.5});return true;}this.bleed=Math.min(95,this.bleed+18);this.cardiacOutput=Math.max(10,this.cardiacOutput-8);return false;}
   getABG(){const lE=Math.max(.3,1-this.lungInjury/120),eo=this.oxygenation*lE*(this.compliance/50);const pao2=Math.max(30,Math.min(500,Math.round(35+eo*.55+(this.fio2-21)*.75+(this.peep-5)*1.2-this.secretions*.25-this.pulmonaryEdema*.2)));const ph=Math.max(6.9,Math.min(7.55,Math.round((7.25+this.perfusion*.002-this.infection*.001-this.lactate*.008)*100)/100));const paco2=Math.max(15,Math.min(80,Math.round(45-(this.RR-14)*.8+(this.tidalVolume-6)*1.5+this.co2bias+this.autoPeep*.8)));const pf=Math.round(pao2/(this.fio2/100));
@@ -2179,6 +2242,7 @@ class Game {
 
     this.p.reset(lv.paths,lv.mult);
     if(lv.id===1)this.p.initLevel1();
+    else this.p.tuneCampaign(lv);
     this.p._advLabs=this._unl('advlabs');
 
     // Schedule events — forced (daily) or random
@@ -2186,9 +2250,7 @@ class Game {
     if(this._forcedEvts&&lv.events>=1){
       this.evts=this._forcedEvts.map(f=>({time:f.time,evt:EVENTS[f.evtIdx],fired:false}));
     }else{
-      if(lv.events>=1){const t1=100+Math.floor(Math.random()*80);const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];this.evts.push({time:t1,evt:e,fired:false});}
-      if(lv.events>=2){const t2=280+Math.floor(Math.random()*100);const pool=EVENTS.filter(e=>!this.evts.some(x=>x.evt.id===e.id));const e2=pool[Math.floor(Math.random()*pool.length)]||EVENTS[0];this.evts.push({time:t2,evt:e2,fired:false});}
-      if(lv.events<1)this.evts=[];
+      this._scheduleCampaignEvents(lv);
     }
 
     // UI
@@ -2227,6 +2289,36 @@ class Game {
     this.maybeStartTutorial();
     this.maybeStartCampaignHints();
     this._pulseNewUnlocks();
+  }
+
+  _eventPool(lv){
+    const skip=new Set();
+    const pk=lv.paths||[];
+    if(pk.includes('edema')||pk.includes('cardiogenic'))skip.add('flash_edema');
+    if(pk.includes('anaphylaxis')||pk.includes('sepsis'))skip.add('vaso');
+    if(pk.includes('hypovolemic')||pk.includes('tamponade'))skip.add('bleed');
+    if(pk.includes('copd'))skip.add('bronchospasm');
+    if(pk.includes('airway'))skip.add('plug');
+    const pool=EVENTS.filter(e=>!skip.has(e.id));
+    return pool.length?pool:EVENTS;
+  }
+
+  _scheduleCampaignEvents(lv){
+    if(!lv.events)return;
+    const pool=this._eventPool(lv);
+    const tier=lv.tier||1;
+    const base=tier<=1?9999:tier===2?165:tier===3?140:tier===4?120:108;
+    if(lv.events>=1&&base<9000){
+      const e=pool[Math.floor(Math.random()*pool.length)];
+      this.evts.push({time:base+Math.floor(Math.random()*45),evt:e,fired:false});
+    }
+    if(lv.events>=2){
+      const t2=base+145+Math.floor(Math.random()*55);
+      const used=this.evts.map(x=>x.evt.id);
+      const pool2=pool.filter(e=>!used.includes(e.id));
+      const e2=pool2[Math.floor(Math.random()*pool2.length)]||pool[0];
+      this.evts.push({time:t2,evt:e2,fired:false});
+    }
   }
 
   _pulseNewUnlocks(){
@@ -2399,7 +2491,7 @@ class Game {
     this._openModal('modal-vt','bvt');
   }
 
-  adjustVt(dir){if(dir>0&&this.p.tidalVolume>=10)return;if(dir<0&&this.p.tidalVolume<=4)return;this.p.tidalVolume=Math.max(4,Math.min(10,this.p.tidalVolume+dir));this.$('modal-vt-val').textContent=this.p.tidalVolume;}
+  adjustVt(dir){if(dir>0&&this.p.tidalVolume>=10)return;if(dir<0&&this.p.tidalVolume<=4)return;this.p.tidalVolume=Math.max(4,Math.min(10,this.p.tidalVolume+dir));this.$('modal-vt-val').textContent=this.p.tidalVolume;this._syncVentBtns();}
 
   confirmVt(){if(this.p.tidalVolume!==this._modalVtStart){this.log(t('game.vtSet',{n:this.p.tidalVolume})+(this.p.tidalVolume>8?t('game.vtTox'):''),this.p.tidalVolume>8?'w':'i');}this.closeModals();}
 
@@ -2494,9 +2586,9 @@ class Game {
     this._openModal('modal-peep','bpeep');
   }
 
-  adjustFio2(dir){if(dir>0&&this.p.fio2>=100)return;if(dir<0&&this.p.fio2<=21)return;this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.$('modal-fio2-val').textContent=this.p.fio2+'%';}
+  adjustFio2(dir){if(dir>0&&this.p.fio2>=100)return;if(dir<0&&this.p.fio2<=21)return;this.p.fio2=Math.max(21,Math.min(100,this.p.fio2+dir*10));this.$('modal-fio2-val').textContent=this.p.fio2+'%';this._syncVentBtns();}
 
-  adjustPeep(dir){if(dir>0&&this.p.peep>=18)return;if(dir<0&&this.p.peep<=4)return;this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.$('modal-peep-val').textContent=this.p.peep;}
+  adjustPeep(dir){if(dir>0&&this.p.peep>=18)return;if(dir<0&&this.p.peep<=4)return;this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.$('modal-peep-val').textContent=this.p.peep;this._syncVentBtns();}
 
   confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}this.closeModals();}
 
@@ -2616,8 +2708,9 @@ class Game {
     if(this.over)return;
     this.gt++;
     if(this.lvl){
-      if(this.mode==='survival'&&this._survGrace>0&&this.gt<this._survGrace)this.p.mult=this.lvl.mult*0.88;
-      else this.p.mult=this.lvl.mult;
+      let m=this.p._campaignMult!=null?this.p._campaignMult:this.lvl.mult;
+      if(this.mode==='survival'&&this._survGrace>0&&this.gt<this._survGrace)m*=0.88;
+      this.p.mult=m*(this.p._tierEase||1);
     }
     this.p.tick(1,this.gt);
     const alarm=this.p.MAP<50||this.p.SpO2<80;
@@ -2652,7 +2745,7 @@ class Game {
       vMap:this.$('v-map'),vSpo2:this.$('v-spo2'),vHr:this.$('v-hr'),vRr:this.$('v-rr'),
       vcMap:this.$('vc-map'),vcSpo2:this.$('vc-spo2'),vcHr:this.$('vc-hr'),vcRr:this.$('vc-rr'),
       prob1:this.$('prob1'),prob2:this.$('prob2'),hdrPhase:this.$('hdr-phase'),hdrTimer:this.$('hdr-timer'),
-      ast:this.$('ast'),bn:this.$('bn'),bfio2sub:this.$('bfio2-sub'),bpeepsub:this.$('bpeep-sub'),bvtsub:this.$('bvt-sub'),
+      ast:this.$('ast'),bn:this.$('bn'),bmeds:this.$('bmeds'),bfio2sub:this.$('bfio2-sub'),bpeepsub:this.$('bpeep-sub'),bvtsub:this.$('bvt-sub'),
       stabWrap:this.$('stab-wrap'),stabFill:this.$('stab-fill'),stabLblL:this.$('stab-lbl-l'),stabLblR:this.$('stab-lbl-r'),
       hdrSurv:this.$('hdr-surv'),app:this.$('app')
     };
@@ -2660,6 +2753,23 @@ class Game {
   }
 
   _setText(el,v){if(el&&el.textContent!==String(v))el.textContent=v;}
+  _syncVentBtns(){
+    const p=this.p,h=this._hud;
+    if(!p||!h)return;
+    if(h.bfio2sub)this._setText(h.bfio2sub,p.fio2+'%');
+    if(h.bpeepsub)this._setText(h.bpeepsub,String(p.peep));
+    if(h.bvtsub)this._setText(h.bvtsub,String(p.tidalVolume));
+  }
+  _syncPressorUI(){
+    const p=this.p,h=this._hud;
+    if(!p||!h)return;
+    if(h.bn){
+      h.bn.classList.toggle('to',p.norepiOn);
+      const sub=h.bn.querySelector('.bl');
+      if(sub)this._setText(sub,p.norepiOn?t('action.norepiOn'):t('action.norepiSub'));
+    }
+    if(h.bmeds)h.bmeds.classList.toggle('to',p.dobuOn||p.vasoOn);
+  }
   _setVital(el,v){
     if(!el)return;
     const s=String(v);
@@ -2753,10 +2863,8 @@ class Game {
     const pri=['cr','hi','on','dm'];
     tags.sort((a,b)=>pri.indexOf(a.c)-pri.indexOf(b.c));
     this._renderAst(tags);
-    if(h.bn)h.bn.classList.toggle('to',p.norepiOn);
-    if(h.bfio2sub)this._setText(h.bfio2sub,p.fio2+'%');
-    if(h.bpeepsub)this._setText(h.bpeepsub,String(p.peep));
-    if(h.bvtsub)this._setText(h.bvtsub,String(p.tidalVolume));
+    this._syncPressorUI();
+    this._syncVentBtns();
     const sw=h.stabWrap,sf=h.stabFill,sll=h.stabLblL,slr=h.stabLblR;
     if(sw&&this.running&&!this.over&&this.lvl){
       const req=this.lvl.stabReq||20;
@@ -2873,7 +2981,8 @@ class Game {
     this.log(t('game.fluidBolus',{n:p.totalFluids}),'i');setTimeout(()=>{if(this.over)return;if(r)this.log(t('game.preloadOk'),'s');else this.log(t('game.preloadMin'),'w');},2000);this._setCD('f','bf','cf',8);}
   toggleNE(){if(this._bl())return;const p=this.p;p.norepiOn=!p.norepiOn;if(p.norepiOn){p._neJust=true;p._mapAtN=p.MAP;p._mapB.push({a:5,r:8,d:5/8});
     if(p.vascularTone<50&&p.MAP<65){p.correctAct++;this._judge('bn',true);}else this._toast('bn','+MAP','pos');
-    this.log(t('game.neStart'),'i');setTimeout(()=>{if(!this.over&&p.norepiOn){const d=p.MAP-p._mapAtN;this.log(d>=5?t('game.neRespond',{n:d}):t('game.neTrend'),'s');}},4000);}else{this.log(t('game.neStop'),'i');}}
+    this.log(t('game.neStart'),'i');setTimeout(()=>{if(!this.over&&p.norepiOn){const d=p.MAP-p._mapAtN;this.log(d>=5?t('game.neRespond',{n:d}):t('game.neTrend'),'s');}},4000);}else{this.log(t('game.neStop'),'i');}
+    this._syncPressorUI();}
   doSuction(){if(this._bl()||this._cd.s)return;const p=this.p;const r=p.doSuction();
     if(r&&p.pathKeys.includes('airway')){p.correctAct++;this._judge('bs',true);}
     else this._toast('bs',r?'+O₂':' - ',r?'pos':'neu');
@@ -2892,7 +3001,7 @@ class Game {
     if(key==='diuretic'){this.doDiuretic();return;}
     if(key==='abx'){
       if(p.abxGiven){this.log(t('game.abxAlready'),'');return;}
-      p.abxGiven=true;p.abxT=60;
+      p.abxGiven=true;p.abxT=p._tier<=2?40:(p.mult<=0.95?50:60);
       p._abxWorks=p.pathKeys.includes('sepsis')||p.pathKeys.includes('mixed')||p.infection>30;
       this.log(t('game.abxGiven'),'i');
       this._lock('m_abx','mb-abx','mc-abx');
@@ -2931,7 +3040,7 @@ class Game {
         if(p.pathKeys.includes('cardiogenic')||p.cardiacOutput<45){p.correctAct++;this._judge('bmeds',true);setTimeout(()=>{if(!this.over&&p.dobuOn)this.log(t('game.dobuOk'),'s');},10000);}
         else if(p.vascularTone<45){p.wrongAct++;this._judge('bmeds',false);setTimeout(()=>{if(!this.over)this.log(t('game.dobuVasodil'),'w');},6000);}
       }else this.log(t('game.dobuOff'),'i');
-      return;
+      this._syncPressorUI();return;
     }
     if(key==='vaso'){
       p.vasoOn=!p.vasoOn;
@@ -2939,7 +3048,7 @@ class Game {
         this.log(t('game.vasoOn'),'i');
         if(p.norepiOn&&p.MAP<60){p.correctAct++;this._judge('bmeds',true);}
       }else this.log(t('game.vasoOff'),'i');
-      return;
+      this._syncPressorUI();return;
     }
     if(key==='epi'){
       if(p.epiT>0)return;
