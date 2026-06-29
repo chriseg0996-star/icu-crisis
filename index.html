@@ -2263,6 +2263,8 @@ class Game {
     this.$('log').innerHTML='<button type="button" class="lx" id="lx" onclick="G.toggleLog()" aria-expanded="false" aria-label="'+t('action.logExpand')+'">▼</button>';
     this.$('app').classList.remove('alarm');
     this.buildActions();
+    this._cacheVentHud();
+    this._syncVentBtns();
     this._scheduleLoop();
     this.log(t('game.patientAccepted'),'i');
     if(this.mode==='survival'&&this._survGrace>0)this.log(t('game.survGrace'),'i');
@@ -2364,6 +2366,7 @@ class Game {
     h+=abL('pocus','ad','🔬',t('action.diagnostics'),null,'G.showDiagMenu()','bdiag');
     g.innerHTML=h;
     this.updateLockUI();
+    this._cacheVentHud();
   }
 
   _unl(key){
@@ -2493,7 +2496,7 @@ class Game {
 
   adjustVt(dir){if(dir>0&&this.p.tidalVolume>=10)return;if(dir<0&&this.p.tidalVolume<=4)return;this.p.tidalVolume=Math.max(4,Math.min(10,this.p.tidalVolume+dir));this.$('modal-vt-val').textContent=this.p.tidalVolume;this._syncVentBtns();}
 
-  confirmVt(){if(this.p.tidalVolume!==this._modalVtStart){this.log(t('game.vtSet',{n:this.p.tidalVolume})+(this.p.tidalVolume>8?t('game.vtTox'):''),this.p.tidalVolume>8?'w':'i');}this.closeModals();}
+  confirmVt(){if(this.p.tidalVolume!==this._modalVtStart){this.log(t('game.vtSet',{n:this.p.tidalVolume})+(this.p.tidalVolume>8?t('game.vtTox'):''),this.p.tidalVolume>8?'w':'i');}this._syncVentBtns();this.closeModals();}
 
   runMedFromMenu(key){this.closeModals();this.giveMed(key);}
 
@@ -2590,31 +2593,58 @@ class Game {
 
   adjustPeep(dir){if(dir>0&&this.p.peep>=18)return;if(dir<0&&this.p.peep<=4)return;this.p.peep=Math.max(4,Math.min(18,this.p.peep+dir*2));this.$('modal-peep-val').textContent=this.p.peep;this._syncVentBtns();}
 
-  confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}this.closeModals();}
+  confirmFio2(){if(this.p.fio2!==this._modalFio2Start){this.log(t('game.fio2Set',{n:this.p.fio2})+(this.p.fio2>60?t('game.fio2Tox'):''),this.p.fio2>80?'w':'i');}this._syncVentBtns();this.closeModals();}
 
-  confirmPeep(){if(this.p.peep!==this._modalPeepStart){this.log(t('game.peepSet',{n:this.p.peep})+(this.p.peep>12?t('game.peepWatch'):''),'i');if(this.p._hasPneumo&&this.p.peep<=8){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log(t('game.chestDecomp'),'s');}}this.closeModals();}
+  confirmPeep(){if(this.p.peep!==this._modalPeepStart){this.log(t('game.peepSet',{n:this.p.peep})+(this.p.peep>12?t('game.peepWatch'):''),'i');if(this.p._hasPneumo&&this.p.peep<=8){this.p._hasPneumo=false;this.p.compliance+=10;this.p.cardiacOutput+=10;this.log(t('game.chestDecomp'),'s');}}this._syncVentBtns();this.closeModals();}
 
   runDiagFromMenu(key){this.closeModals();this.runDiag(key);}
 
   // -- ECG waveform --
   _resetWave(){this._wCtx=null;this._wX=0;this._wD=null;this._wGrid=null;this._wInited=false;this._waveAcc=0;}
 
+  _ecgMode(p){
+    if(!p)return 'normal';
+    if(p.arrest||p.MAP<38)return 'asystole';
+    if(p.lowMAPT>5||(p.MAP<45&&p.lowMAPT>2))return p.HR>80?'vfib':'agonal';
+    if(p.MAP<50||p.lowMAPT>3)return 'agonal';
+    if(p.MAP<58||p.lactate>3.5)return 'ischemia';
+    if(p.HR>125||(p.MAP<65&&p.HR>105))return 'tachy';
+    if(p.HR<55&&p.MAP<65)return 'brady';
+    return 'normal';
+  }
+
   _ecgSample(phase,p){
+    const mode=this._ecgMode(p);
+    const beat=0.94+0.06*Math.sin((this._wX||0)*0.09);
+    if(mode==='asystole')return (Math.random()-0.5)*0.018;
+    if(mode==='vfib')return (Math.random()-0.5)*0.72;
+    if(mode==='agonal'){
+      if(phase<0.04)return 0.22*Math.sin(phase/0.04*Math.PI)*beat;
+      return (Math.random()-0.5)*0.05;
+    }
+    let amp=0.85*beat;
+    if(mode==='ischemia')amp*=0.78;
+    if(mode==='brady')amp*=0.88;
+    if(mode==='tachy')amp*=0.92;
+    if(p&&p.SpO2<85)amp*=0.82;
+    if(p&&p.MAP<55)amp*=0.88;
     if(phase<0.12||phase>=0.58)return 0;
-    if(phase>=0.12&&phase<0.20){const q=(phase-0.12)/0.08;return 0.12*Math.sin(q*Math.PI);}
+    if(phase>=0.12&&phase<0.20){const q=(phase-0.12)/0.08;return 0.12*amp*Math.sin(q*Math.PI);}
     if(phase>=0.20&&phase<0.28)return 0;
     const hr=p?p.HR:80;
-    const qrsW=hr>120?0.10:0.14;
+    const qrsW=mode==='tachy'||hr>120?0.08:mode==='brady'?0.16:0.13;
     const qrs0=0.28;
     if(phase>=qrs0&&phase<qrs0+qrsW){
       const q=(phase-qrs0)/qrsW;
-      let amp=0.85;
-      if(p&&p.SpO2<85)amp*=0.85;
-      if(q<0.15)return -0.10*Math.sin(q/0.15*Math.PI);
+      if(q<0.15)return -0.10*amp*Math.sin(q/0.15*Math.PI);
       if(q<0.45)return amp*Math.sin((q-0.15)/0.30*Math.PI);
-      return -0.20*Math.sin((q-0.45)/0.55*Math.PI);
+      return -0.22*amp*Math.sin((q-0.45)/0.55*Math.PI);
     }
-    if(phase>=0.40&&phase<0.58){const q=(phase-0.40)/0.18;return 0.35*Math.sin(q*Math.PI);}
+    if(phase>=0.40&&phase<0.58){
+      const q=(phase-0.40)/0.18;
+      const tAmp=mode==='ischemia'?0.22:0.35;
+      return tAmp*amp*Math.sin(q*Math.PI);
+    }
     return 0;
   }
 
@@ -2622,6 +2652,8 @@ class Game {
     const c=this.$('wave');
     if(!c||!this.p)return;
     dt=dt||1/60;
+    const p=this.p;
+    const mode=this._ecgMode(p);
     if(!this._wCtx){
       const r=c.parentElement.getBoundingClientRect();
       const dpr=Math.min(1.5,window.devicePixelRatio||1);
@@ -2635,29 +2667,32 @@ class Game {
       const gc=document.createElement('canvas');
       gc.width=w;gc.height=h;
       const gx=gc.getContext('2d');
+      const mid=Math.round(h*0.5);
       gx.fillStyle='#020508';
       gx.fillRect(0,0,w,h);
       gx.strokeStyle='rgba(0,255,136,.05)';
       gx.lineWidth=0.5;
       for(let gy=0;gy<h;gy+=24){gx.beginPath();gx.moveTo(0,gy);gx.lineTo(w,gy);gx.stroke();}
+      gx.strokeStyle='rgba(0,255,136,.08)';
+      gx.beginPath();gx.moveTo(0,mid);gx.lineTo(w,mid);gx.stroke();
       this._wGrid=gc;
       this._wInited=false;
     }
-    const ctx=this._wCtx,w=c.width,h=c.height,mid=h*0.5;
-    const hr=Math.max(40,Math.min(200,this.p.HR));
+    const ctx=this._wCtx,w=c.width,h=c.height,mid=Math.round(h*0.5);
+    const hr=mode==='asystole'?12:mode==='vfib'?140:mode==='agonal'?35:Math.max(40,Math.min(200,p.HR));
     if(this._waveAcc==null)this._waveAcc=0;
     this._waveAcc+=3*hr*dt;
     const steps=Math.max(0,Math.floor(this._waveAcc));
     this._waveAcc-=steps;
-    const col=this._ecgColor||'#00ff88';
+    const col=(mode==='asystole'||mode==='vfib'||mode==='agonal')?'#ff3355':(mode==='ischemia'?'#ffcc44':(this._ecgColor||'#00ff88'));
     let beep=false;
     for(let i=0;i<steps;i++){
       const prevPhase=((this._wX-1)%180)/180;
       const phase=(this._wX%180)/180;
-      const y=this._ecgSample(phase,this.p);
+      const y=this._ecgSample(phase,p);
       for(let x=0;x<w-1;x++)this._wD[x]=this._wD[x+1];
       this._wD[w-1]=y;
-      if(prevPhase<0.34&&phase>=0.34)beep=true;
+      if(mode!=='asystole'&&mode!=='vfib'&&mode!=='agonal'&&prevPhase<0.34&&phase>=0.34)beep=true;
       this._wX++;
     }
     if(!this._wInited){
@@ -2669,24 +2704,25 @@ class Game {
     ctx.drawImage(c,scroll,0,w-scroll,h,0,0,w-scroll,h);
     ctx.drawImage(this._wGrid,w-scroll,0,scroll,h,w-scroll,0,scroll,h);
     ctx.strokeStyle=col;
-    ctx.lineWidth=2;
+    ctx.lineWidth=mode==='vfib'?1.5:2;
     ctx.lineJoin='round';
     ctx.lineCap='round';
     ctx.beginPath();
-    const x0=w-scroll-1;
-    for(let x=x0;x<w;x++){
-      const py=mid-this._wD[x]*(h*0.38);
-      if(x===x0)ctx.moveTo(x,py);else ctx.lineTo(x,py);
-    }
+    const x0=Math.max(0,w-scroll-1);
+    const yAt=x=>mid-this._wD[x]*(h*0.38);
+    ctx.moveTo(x0,yAt(x0));
+    for(let x=x0+1;x<w;x++)ctx.lineTo(x,yAt(x));
     ctx.stroke();
-    const py=mid-this._wD[w-1]*(h*0.38);
-    ctx.fillStyle=col;
-    ctx.globalAlpha=.85;
-    ctx.beginPath();
-    ctx.arc(w-1,py,2.2,0,Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha=1;
-    if(beep)this.snd.beep(this.p.SpO2);
+    if(mode!=='vfib'){
+      const py=yAt(w-1);
+      ctx.fillStyle=col;
+      ctx.globalAlpha=mode==='asystole'?0.5:0.85;
+      ctx.beginPath();
+      ctx.arc(w-1,py,mode==='asystole'?1.5:2.2,0,Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha=1;
+    }
+    if(beep)this.snd.beep(p.SpO2);
   }
 
   // -- Core Loop --
@@ -2757,13 +2793,25 @@ class Game {
     this._hudSnap={};
   }
 
+  _cacheVentHud(){
+    if(!this._hud)this._hud={};
+    this._hud.bn=this.$('bn');
+    this._hud.bmeds=this.$('bmeds');
+    this._hud.bfio2sub=this.$('bfio2-sub');
+    this._hud.bpeepsub=this.$('bpeep-sub');
+    this._hud.bvtsub=this.$('bvt-sub');
+  }
+
   _setText(el,v){if(el&&el.textContent!==String(v))el.textContent=v;}
   _syncVentBtns(){
-    const p=this.p,h=this._hud;
-    if(!p||!h)return;
-    if(h.bfio2sub)this._setText(h.bfio2sub,p.fio2+'%');
-    if(h.bpeepsub)this._setText(h.bpeepsub,String(p.peep));
-    if(h.bvtsub)this._setText(h.bvtsub,String(p.tidalVolume));
+    const p=this.p;
+    if(!p)return;
+    if(!this._hud?.bfio2sub)this._cacheVentHud();
+    const h=this._hud;
+    if(!h)return;
+    this._setText(h.bfio2sub||this.$('bfio2-sub'),p.fio2+'%');
+    this._setText(h.bpeepsub||this.$('bpeep-sub'),String(p.peep));
+    this._setText(h.bvtsub||this.$('bvt-sub'),String(p.tidalVolume));
   }
   _syncPressorUI(){
     const p=this.p,h=this._hud;
